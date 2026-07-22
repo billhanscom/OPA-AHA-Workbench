@@ -98,8 +98,9 @@
     root.style.setProperty("--phosphor-faint", palette.faint);
     root.style.setProperty("--screen", palette.screen);
     root.style.setProperty("--screen-deep", palette.deep);
+    root.style.setProperty("--page-background", palette.deep);
     document.body.style.background = palette.deep;
-    els.screenFrame.style.background = palette.deep;
+    els.screenFrame.style.background = "transparent";
     els.phosphorControl.value = key;
     if (save) {
       try { localStorage.setItem("opa-first-age-display-phosphor", key); } catch (error) {}
@@ -117,36 +118,42 @@
     const decimal = numeric / 100;
 
     if (name === "brightness") {
-      // A deliberately dramatic phosphor-emission control. Low settings deeply
-      // dim the glyphs; high settings add core intensity and a broad halo while
-      // leaving the black background black.
+      // Brightness changes both phosphor emission and the visible screen black.
       const below = Math.min(numeric, 100) / 100;
       const above = Math.max(0, numeric - 100) / 100;
       const contentOpacity = numeric <= 100 ? 0.10 + Math.pow(below, 1.35) * 0.90 : 1;
       root.style.setProperty("--content-opacity", String(contentOpacity));
-      root.style.setProperty("--brightness-boost-alpha", String(above * 0.70));
-      root.style.setProperty("--brightness-halo-radius", `${0.4 + above * 7.6}px`);
-      root.style.setProperty("--brightness-halo-alpha", String(0.08 + above * 0.62));
+      root.style.setProperty("--brightness-boost-alpha", String(above * 0.46));
+      root.style.setProperty("--brightness-halo-radius", `${0.4 + above * 6.2}px`);
+      root.style.setProperty("--brightness-halo-alpha", String(0.06 + above * 0.46));
+      root.style.setProperty("--page-brighten-alpha", String(above * 0.16));
+      root.style.setProperty("--page-dim-alpha", String((1 - below) * 0.72));
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      // Restore the earlier behavior: contrast acts on the completed display
-      // image. It never raises the black level to gray.
-      root.style.setProperty("--display-contrast", String(numeric / 100));
+      // Low contrast restores the earlier warm phosphor wash; high contrast
+      // deepens the black level. Both the frame and surrounding page respond.
+      const low = Math.max(0, 100 - numeric) / 50;
+      const high = Math.max(0, numeric - 100) / 80;
+      root.style.setProperty("--display-contrast", String(0.88 + (numeric / 100) * 0.12));
+      root.style.setProperty("--contrast-warm-alpha", String(low * 0.22));
+      root.style.setProperty("--contrast-dark-alpha", String(high * 0.34));
       els.contrastControl.value = String(numeric);
       els.contrastValue.value = `${numeric}%`;
     } else if (name === "bloom") {
-      root.style.setProperty("--composite-bloom-radius", `${0.5 + (numeric / 100) * 7.5}px`);
-      root.style.setProperty("--composite-bloom-alpha", String((numeric / 100) * .46));
+      root.style.setProperty("--composite-bloom-radius", `${0.25 + (numeric / 100) * 2.6}px`);
+      root.style.setProperty("--composite-bloom-alpha", String((numeric / 100) * .16));
       // Thin rules need a little independent energy to read like the same phosphor
       // intensity as the much denser block-character logo.
-      root.style.setProperty("--border-bloom-radius", `${0.5 + (numeric / 100) * 4.5}px`);
-      root.style.setProperty("--border-bloom-alpha", String((numeric / 100) * .62));
-      root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .30));
+      root.style.setProperty("--border-bloom-radius", `${0.4 + (numeric / 100) * 3.2}px`);
+      root.style.setProperty("--border-bloom-alpha", String((numeric / 100) * .36));
+      root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .62));
       // Thin text strokes need a local phosphor halo in addition to the broad
       // composite bloom. Keep it tighter than the logo halo so glyphs remain legible.
-      root.style.setProperty("--small-text-bloom-radius", `${0.35 + (numeric / 100) * 3.1}px`);
-      root.style.setProperty("--small-text-bloom-alpha", String((numeric / 100) * .42));
+      root.style.setProperty("--small-text-bloom-radius", `${0.45 + (numeric / 100) * 4.2}px`);
+      root.style.setProperty("--small-text-bloom-alpha", String((numeric / 100) * .66));
+      root.style.setProperty("--logo-bloom-radius", `${0.2 + (numeric / 100) * 1.45}px`);
+      root.style.setProperty("--logo-bloom-alpha", String((numeric / 100) * .16));
       els.bloomControl.value = String(numeric);
       els.bloomValue.value = `${numeric}%`;
     } else if (name === "scanlines") {
@@ -482,6 +489,9 @@
   els.redrawControl.addEventListener("input", event => applyDisplaySetting("redraw", event.target.value));
   document.querySelectorAll(".value-option").forEach(button => button.addEventListener("click", () => setRuleset(button.dataset.ruleset)));
   els.filter.addEventListener("input", event => filterIngredients(event.target.value));
+  document.querySelectorAll("[data-preview-tool]").forEach(button => {
+    button.addEventListener("click", event => event.preventDefault());
+  });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !els.displaySettings.hidden) toggleDisplaySettings(false);
     else if (event.key === "Escape" && !els.drawer.hidden) els.drawer.hidden = true;

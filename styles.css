@@ -600,3 +600,100 @@ body {
      silently squeezing or reflowing the terminal. */
   body { min-width: calc(var(--terminal-width) + (var(--frame-gutter) * 2)); }
 }
+
+/* v12 requested refinements ------------------------------------------------ */
+:root {
+  --page-background: #0c0a06;
+  --page-brighten-alpha: 0;
+  --page-dim-alpha: 0;
+  --contrast-warm-alpha: 0;
+  --contrast-dark-alpha: 0;
+  --logo-bloom-radius: .4px;
+  --logo-bloom-alpha: .03;
+}
+
+html,
+body,
+.crt-shell,
+.screen-frame {
+  background: var(--page-background) !important;
+}
+
+.screen-frame { background: transparent !important; }
+
+/* One page-wide screen treatment keeps the area inside and outside the
+   132-column frame visually continuous and makes both respond to calibration. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+body::before {
+  z-index: 0;
+  background:
+    linear-gradient(rgb(var(--phosphor-rgb) / var(--contrast-warm-alpha)), rgb(var(--phosphor-rgb) / var(--contrast-warm-alpha))),
+    linear-gradient(rgb(0 0 0 / var(--contrast-dark-alpha)), rgb(0 0 0 / var(--contrast-dark-alpha)));
+}
+body::after {
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at center, rgb(var(--phosphor-rgb) / var(--page-brighten-alpha)), transparent 76%),
+    linear-gradient(rgb(0 0 0 / var(--page-dim-alpha)), rgb(0 0 0 / var(--page-dim-alpha)));
+}
+.crt-shell { position: relative; z-index: 1; }
+
+/* Shift the complete contents of the first three cells by two character cells,
+   not just their labels. */
+.system-inventory,
+.system-current,
+.system-values { padding-left: 1ch; }
+.system-inventory > *,
+.system-current > *,
+.system-values > * { transform: translateX(2ch); }
+
+/* Rebalance bloom toward fine text and inward-facing rule glow. */
+.ascii-logo {
+  text-shadow:
+    0 0 .35px rgb(var(--phosphor-rgb) / .52),
+    0 0 var(--logo-bloom-radius) rgb(var(--phosphor-rgb) / var(--logo-bloom-alpha));
+}
+.bloom-border,
+.terminal-tab,
+.terminal-command,
+.system-bar,
+.display-settings,
+.ingredient-panel,
+.inventory-drawer,
+.results-panel {
+  box-shadow:
+    inset 0 0 calc(var(--border-bloom-radius) * 2.4) rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
+    inset 0 0 1px rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
+    0 0 var(--border-bloom-radius) rgb(var(--phosphor-rgb) / var(--border-bloom-alpha));
+}
+.ingredient-column,
+.ingredient-column h2,
+.system-cell,
+.display-settings-heading {
+  box-shadow: inset 0 0 calc(var(--border-bloom-radius) * 1.6) rgb(var(--phosphor-rgb) / calc(var(--inner-glow-alpha) * .72));
+}
+
+/* Preview tools should read as available controls while remaining inert. */
+.terminal-tab.preview-tool {
+  color: var(--phosphor);
+  cursor: default;
+  opacity: 1;
+}
+.terminal-tab.preview-tool:hover,
+.terminal-tab.preview-tool:focus-visible {
+  color: var(--phosphor);
+  background: transparent;
+  outline: none;
+  text-shadow: inherit;
+}
+
+/* Requested vertical breathing room. */
+.masthead { padding-top: 5em; }
+.main-nav { margin-bottom: 4em; }
+.generate-row { margin-bottom: 3.5em; }
