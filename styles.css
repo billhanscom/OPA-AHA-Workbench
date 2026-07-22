@@ -967,3 +967,123 @@ body::after {
       rgb(var(--phosphor-rgb) / var(--contrast-wash-alpha))
     );
 }
+
+/* v21 phase 1: unified phosphor bloom --------------------------------------
+   Bloom is generated from blurred copies of the complete terminal image.
+   The sharp interface no longer carries element-specific text or box glows. */
+:root {
+  --bloom-tight-radius: .35px;
+  --bloom-tight-opacity: .08;
+  --bloom-mid-radius: 1.2px;
+  --bloom-mid-opacity: .05;
+  --bloom-wide-radius: 3.2px;
+  --bloom-wide-opacity: .025;
+}
+
+.screen-surface {
+  isolation: isolate;
+  /* Preserve contrast and brightness behavior, but remove the obsolete
+     whole-rectangle bloom drop shadow. */
+  filter:
+    contrast(var(--display-contrast))
+    drop-shadow(0 0 var(--brightness-halo-radius) rgb(var(--phosphor-rgb) / var(--brightness-halo-alpha)));
+}
+
+.terminal {
+  z-index: 2;
+  text-shadow: none !important;
+}
+
+/* Remove the accumulated per-element bloom rules. The composite passes below
+   are now the sole source of bloom for text, rules, fills, and generated UI. */
+.terminal *,
+.bloom-border,
+.system-bar,
+.display-settings,
+.ingredient-panel,
+.ingredient-column,
+.ingredient-column h2,
+.inventory-drawer,
+.results-panel,
+.terminal-tab,
+.terminal-command,
+.ingredient-item,
+.ingredient-item.is-selected {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+.phosphor-bloom-stack {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 132ch;
+  min-width: 132ch;
+  max-width: 132ch;
+  min-height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: screen;
+}
+
+.phosphor-bloom-pass {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: auto !important;
+  width: 132ch !important;
+  min-width: 132ch !important;
+  max-width: 132ch !important;
+  min-height: inherit !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  transform: translateZ(0);
+  transform-origin: center;
+  color: rgb(var(--phosphor-rgb)) !important;
+  background: transparent !important;
+  will-change: filter, opacity;
+}
+
+.phosphor-bloom-pass--tight {
+  opacity: var(--bloom-tight-opacity);
+  filter: blur(var(--bloom-tight-radius));
+}
+.phosphor-bloom-pass--mid {
+  opacity: var(--bloom-mid-opacity);
+  filter: blur(var(--bloom-mid-radius));
+}
+.phosphor-bloom-pass--wide {
+  opacity: var(--bloom-wide-opacity);
+  filter: blur(var(--bloom-wide-radius));
+}
+
+/* Turn each clone into a transparent luminance source. Borders and glyphs
+   retain their geometry; only genuinely luminous reverse-video fills remain. */
+.phosphor-bloom-pass,
+.phosphor-bloom-pass * {
+  color: rgb(var(--phosphor-rgb)) !important;
+  border-color: rgb(var(--phosphor-rgb)) !important;
+  outline-color: rgb(var(--phosphor-rgb)) !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  caret-color: transparent !important;
+}
+
+.phosphor-bloom-pass .ingredient-item.is-selected,
+.phosphor-bloom-pass .value-option.is-active,
+.phosphor-bloom-pass .text-control:hover,
+.phosphor-bloom-pass .terminal-tab:hover,
+.phosphor-bloom-pass .terminal-command:hover {
+  color: transparent !important;
+  background: rgb(var(--phosphor-rgb)) !important;
+}
+
+.phosphor-bloom-pass input[type="range"] {
+  accent-color: rgb(var(--phosphor-rgb)) !important;
+}
+
+@media print {
+  .phosphor-bloom-stack { display: none !important; }
+}
