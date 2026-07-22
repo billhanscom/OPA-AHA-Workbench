@@ -833,3 +833,120 @@ body::after {
     inset 0 0 4rem rgb(var(--phosphor-rgb) / .18),
     0 0 var(--brightness-halo-radius) rgb(var(--phosphor-rgb) / var(--brightness-halo-alpha));
 }
+
+/* v16: hue-safe calibration, four-edge focus, and visible fine-text bloom. */
+:root {
+  --brightness-overdrive-alpha: 0;
+  --brightness-core-shadow-alpha: 0;
+  --edge-band-size: 9%;
+}
+
+/* Never use CSS brightness() or a white overlay: both push amber toward yellow
+   and green toward white. Contrast remains a luminance-only operation. */
+.screen-surface {
+  filter: contrast(var(--display-contrast));
+}
+.screen-surface::after {
+  background: radial-gradient(
+    ellipse at center,
+    rgb(var(--phosphor-rgb) / var(--brightness-overdrive-alpha)),
+    transparent 68%
+  );
+  box-shadow:
+    inset 0 0 5rem rgb(var(--phosphor-rgb) / calc(var(--brightness-overdrive-alpha) * .55)),
+    0 0 var(--brightness-halo-radius) rgb(var(--phosphor-rgb) / var(--brightness-halo-alpha));
+  mix-blend-mode: screen;
+}
+
+/* Use separate horizontal and vertical blur bands. This avoids the unreliable
+   combined mask that was only visibly affecting the sides in Chromium. */
+.edge-layer {
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+  overflow: visible;
+}
+.edge-layer::before,
+.edge-layer::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  backdrop-filter: blur(var(--edge-blur));
+  -webkit-backdrop-filter: blur(var(--edge-blur));
+}
+.edge-layer::before {
+  inset: 0;
+  background:
+    linear-gradient(to right,
+      rgb(0 0 0 / var(--edge-darkness)) 0,
+      transparent var(--edge-band-size),
+      transparent calc(100% - var(--edge-band-size)),
+      rgb(0 0 0 / var(--edge-darkness)) 100%);
+  mask-image: linear-gradient(to right,
+      #000 0,
+      #000 var(--edge-band-size),
+      transparent calc(var(--edge-band-size) + 1%),
+      transparent calc(100% - var(--edge-band-size) - 1%),
+      #000 calc(100% - var(--edge-band-size)),
+      #000 100%);
+  -webkit-mask-image: linear-gradient(to right,
+      #000 0,
+      #000 var(--edge-band-size),
+      transparent calc(var(--edge-band-size) + 1%),
+      transparent calc(100% - var(--edge-band-size) - 1%),
+      #000 calc(100% - var(--edge-band-size)),
+      #000 100%);
+}
+.edge-layer::after {
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      rgb(0 0 0 / var(--edge-darkness)) 0,
+      transparent var(--edge-band-size),
+      transparent calc(100% - var(--edge-band-size)),
+      rgb(0 0 0 / var(--edge-darkness)) 100%);
+  mask-image: linear-gradient(to bottom,
+      #000 0,
+      #000 var(--edge-band-size),
+      transparent calc(var(--edge-band-size) + 1%),
+      transparent calc(100% - var(--edge-band-size) - 1%),
+      #000 calc(100% - var(--edge-band-size)),
+      #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+      #000 0,
+      #000 var(--edge-band-size),
+      transparent calc(var(--edge-band-size) + 1%),
+      transparent calc(100% - var(--edge-band-size) - 1%),
+      #000 calc(100% - var(--edge-band-size)),
+      #000 100%);
+}
+
+/* Force the slider-controlled halo onto every fine-text node. The glow uses
+   only the selected phosphor RGB, so its hue cannot drift. */
+.system-bar *,
+.display-settings *,
+.main-nav *,
+.generate-row *,
+.ingredient-panel h2,
+.ingredient-item:not(.is-selected),
+.ingredient-item:not(.is-selected) *,
+.inventory-drawer *,
+.results-panel *,
+.command-row * {
+  text-shadow:
+    0 0 .65px rgb(var(--phosphor-rgb) / .92),
+    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-alpha)),
+    0 0 var(--small-text-bloom-wide-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-wide-alpha)) !important;
+}
+
+/* Reverse-video fill blooms as a phosphor area, while its dark lettering stays crisp. */
+.ingredient-item.is-selected {
+  text-shadow: none !important;
+  box-shadow:
+    inset 0 0 calc(var(--reverse-bloom-radius) * .8) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha)),
+    0 0 var(--reverse-bloom-radius) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha)),
+    0 0 calc(var(--reverse-bloom-radius) * 1.8) rgb(var(--phosphor-rgb) / calc(var(--reverse-bloom-alpha) * .55));
+}
+.ingredient-item.is-selected * { text-shadow: none !important; }

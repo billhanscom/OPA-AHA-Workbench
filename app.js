@@ -117,9 +117,10 @@
       const above = Math.max(0, numeric - 100) / 150;
       const contentOpacity = numeric <= 100 ? 0.10 + Math.pow(below, 1.35) * 0.90 : 1;
       root.style.setProperty("--content-opacity", String(contentOpacity));
-      root.style.setProperty("--display-brightness", String(numeric <= 100 ? 1 : 1 + Math.pow(above, 1.15) * 2.1));
-      root.style.setProperty("--brightness-boost-alpha", String(Math.pow(above, 1.15) * 0.72));
-      root.style.setProperty("--brightness-white-alpha", String(Math.pow(above, 1.8) * 0.48));
+      root.style.setProperty("--display-brightness", "1");
+      root.style.setProperty("--brightness-boost-alpha", String(Math.pow(above, 1.15) * 0.82));
+      root.style.setProperty("--brightness-white-alpha", "0");
+      root.style.setProperty("--brightness-overdrive-alpha", String(Math.pow(above, 1.25) * 0.72));
       root.style.setProperty("--brightness-halo-radius", `${0.4 + Math.pow(above, 1.15) * 17}px`);
       root.style.setProperty("--brightness-halo-alpha", String(0.06 + Math.pow(above, 1.1) * 0.86));
       root.style.setProperty("--page-brighten-alpha", String(Math.pow(above, 1.3) * 0.30));
@@ -147,10 +148,10 @@
       root.style.setProperty("--inner-glow-alpha", String(Math.min(.96, bloomScale * .48)));
       // Thin text strokes need a local phosphor halo in addition to the broad
       // composite bloom. Keep it tighter than the logo halo so glyphs remain legible.
-      root.style.setProperty("--small-text-bloom-radius", `${0.35 + bloomScale * 8.8}px`);
-      root.style.setProperty("--small-text-bloom-alpha", String(Math.min(.98, bloomScale * .52)));
-      root.style.setProperty("--small-text-bloom-wide-radius", `${0.8 + bloomScale * 15}px`);
-      root.style.setProperty("--small-text-bloom-wide-alpha", String(Math.min(.78, bloomScale * .34)));
+      root.style.setProperty("--small-text-bloom-radius", `${0.25 + bloomScale * 11.5}px`);
+      root.style.setProperty("--small-text-bloom-alpha", String(Math.min(.98, bloomScale * .66)));
+      root.style.setProperty("--small-text-bloom-wide-radius", `${0.7 + bloomScale * 22}px`);
+      root.style.setProperty("--small-text-bloom-wide-alpha", String(Math.min(.90, bloomScale * .46)));
       root.style.setProperty("--reverse-bloom-radius", `${0.5 + bloomScale * 13}px`);
       root.style.setProperty("--reverse-bloom-alpha", String(Math.min(.96, bloomScale * .48)));
       root.style.setProperty("--logo-bloom-radius", `${0.2 + bloomScale * 2.3}px`);
@@ -168,8 +169,9 @@
       els.vignetteValue.value = `${numeric}%`;
     } else if (name === "bezel") {
       root.style.setProperty("--edge-strength", String(decimal));
-      root.style.setProperty("--edge-blur", `${decimal * 4.5}px`);
-      root.style.setProperty("--edge-darkness", String(decimal * .24));
+      root.style.setProperty("--edge-blur", `${decimal * 7}px`);
+      root.style.setProperty("--edge-darkness", String(decimal * .28));
+      root.style.setProperty("--edge-band-size", `${5 + decimal * 11}%`);
       els.bezelControl.value = String(numeric);
       els.bezelValue.value = `${numeric}%`;
     } else if (name === "redraw") {
