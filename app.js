@@ -33,9 +33,24 @@
     bloomControl: document.getElementById("bloomControl"),
     vignetteControl: document.getElementById("vignetteControl"),
     scanlineControl: document.getElementById("scanlineControl"),
+    brightnessControl: document.getElementById("brightnessControl"),
+    contrastControl: document.getElementById("contrastControl"),
+    bezelControl: document.getElementById("bezelControl"),
+    curvatureControl: document.getElementById("curvatureControl"),
+    persistenceControl: document.getElementById("persistenceControl"),
+    redrawControl: document.getElementById("redrawControl"),
     bloomValue: document.getElementById("bloomValue"),
     vignetteValue: document.getElementById("vignetteValue"),
-    scanlineValue: document.getElementById("scanlineValue")
+    scanlineValue: document.getElementById("scanlineValue"),
+    brightnessValue: document.getElementById("brightnessValue"),
+    contrastValue: document.getElementById("contrastValue"),
+    bezelValue: document.getElementById("bezelValue"),
+    curvatureValue: document.getElementById("curvatureValue"),
+    persistenceValue: document.getElementById("persistenceValue"),
+    redrawValue: document.getElementById("redrawValue"),
+    screenFrame: document.getElementById("screenFrame"),
+    screenSurface: document.getElementById("screenSurface"),
+    terminal: document.getElementById("terminal")
   };
 
   const nameKeys = { combat: "combat_names", utility: "utility_names", whimsy: "whimsy_names" };
@@ -55,7 +70,19 @@
     }
   };
 
-  const displayDefaults = { phosphor: "amber", bloom: 14, vignette: 82, scanlines: 45 };
+  const displayDefaults = {
+    phosphor: "amber",
+    brightness: 100,
+    contrast: 100,
+    bloom: 14,
+    scanlines: 45,
+    vignette: 52,
+    bezel: 30,
+    curvature: 8,
+    persistence: 40,
+    redraw: 150
+  };
+
   function setStatus() {}
 
   function applyPhosphor(name, save = true) {
@@ -69,7 +96,8 @@
     root.style.setProperty("--phosphor-faint", palette.faint);
     root.style.setProperty("--screen", palette.screen);
     root.style.setProperty("--screen-deep", palette.deep);
-    document.body.style.background = palette.body;
+    document.body.style.background = palette.deep;
+    els.screenFrame.style.background = palette.deep;
     els.phosphorControl.value = key;
     if (save) {
       try { localStorage.setItem("opa-first-age-display-phosphor", key); } catch (error) {}
@@ -77,21 +105,66 @@
   }
 
   function applyDisplaySetting(name, value, save = true) {
-    const numeric = Math.max(0, Math.min(100, Number(value)));
+    const root = document.documentElement;
+    const limits = {
+      brightness: [50, 160], contrast: [50, 180], bloom: [0, 100], scanlines: [0, 100],
+      vignette: [0, 100], bezel: [0, 100], curvature: [0, 100], persistence: [0, 500], redraw: [0, 1500]
+    };
+    const [minimum, maximum] = limits[name] || [0, 100];
+    const numeric = Math.max(minimum, Math.min(maximum, Number(value)));
     const decimal = numeric / 100;
-    if (name === "bloom") {
-      document.documentElement.style.setProperty("--bloom-opacity", decimal);
+
+    if (name === "brightness") {
+      const opacity = Math.min(1, numeric / 100);
+      root.style.setProperty("--brightness-opacity", String(opacity));
+      const extraBloom = Math.max(0, (numeric - 100) / 60);
+      root.style.setProperty("--brightness-glow-alpha", String(extraBloom * .22));
+      els.brightnessControl.value = String(numeric);
+      els.brightnessValue.value = `${numeric}%`;
+    } else if (name === "contrast") {
+      const distance = numeric - 100;
+      root.style.setProperty("--contrast-overlay-alpha", String(distance > 0 ? Math.min(.55, distance / 145) : 0));
+      root.style.setProperty("--contrast-wash-alpha", String(distance < 0 ? Math.min(.18, Math.abs(distance) / 280) : 0));
+      els.contrastControl.value = String(numeric);
+      els.contrastValue.value = `${numeric}%`;
+    } else if (name === "bloom") {
+      root.style.setProperty("--bloom-alpha", String(decimal * .92));
+      root.style.setProperty("--bloom-border-alpha", String(decimal * .72));
+      root.style.setProperty("--bloom-radius", `${(numeric / 100) * 16}px`);
       els.bloomControl.value = String(numeric);
       els.bloomValue.value = `${numeric}%`;
-    } else if (name === "vignette") {
-      document.documentElement.style.setProperty("--vignette-opacity", decimal);
-      els.vignetteControl.value = String(numeric);
-      els.vignetteValue.value = `${numeric}%`;
     } else if (name === "scanlines") {
-      document.documentElement.style.setProperty("--scanline-opacity", decimal);
+      root.style.setProperty("--scanline-light-alpha", String(decimal * .14));
+      root.style.setProperty("--scanline-dark-alpha", String(decimal * .90));
       els.scanlineControl.value = String(numeric);
       els.scanlineValue.value = `${numeric}%`;
+    } else if (name === "vignette") {
+      root.style.setProperty("--vignette-mid-alpha", String(decimal * .18));
+      root.style.setProperty("--vignette-edge-alpha", String(decimal * .78));
+      root.style.setProperty("--vignette-shadow-alpha", String(decimal * .48));
+      els.vignetteControl.value = String(numeric);
+      els.vignetteValue.value = `${numeric}%`;
+    } else if (name === "bezel") {
+      root.style.setProperty("--bezel-alpha", String(decimal * .86));
+      root.style.setProperty("--bezel-glow-alpha", String(decimal * .05));
+      root.style.setProperty("--bezel-inset", `${decimal * 9}rem`);
+      root.style.setProperty("--bezel-outer", "0rem");
+      els.bezelControl.value = String(numeric);
+      els.bezelValue.value = `${numeric}%`;
+    } else if (name === "curvature") {
+      root.style.setProperty("--screen-radius", `${(numeric / 100) * 32}px`);
+      els.curvatureControl.value = String(numeric);
+      els.curvatureValue.value = `${numeric}%`;
+    } else if (name === "persistence") {
+      root.style.setProperty("--persistence-ms", `${numeric}ms`);
+      els.persistenceControl.value = String(numeric);
+      els.persistenceValue.value = `${numeric} ms`;
+    } else if (name === "redraw") {
+      root.style.setProperty("--redraw-ms", `${numeric}ms`);
+      els.redrawControl.value = String(numeric);
+      els.redrawValue.value = `${numeric} ms`;
     }
+
     if (save) {
       try { localStorage.setItem(`opa-first-age-display-${name}`, String(numeric)); } catch (error) {}
     }
@@ -101,7 +174,7 @@
     let phosphor = displayDefaults.phosphor;
     try { phosphor = localStorage.getItem("opa-first-age-display-phosphor") || phosphor; } catch (error) {}
     applyPhosphor(phosphor, false);
-    ["bloom", "vignette", "scanlines"].forEach((name) => {
+    Object.keys(displayDefaults).filter(name => name !== "phosphor").forEach((name) => {
       let value = displayDefaults[name];
       try {
         const stored = localStorage.getItem(`opa-first-age-display-${name}`);
@@ -109,6 +182,29 @@
       } catch (error) {}
       applyDisplaySetting(name, value, false);
     });
+  }
+
+  function capturePersistence() {
+    const duration = Number(els.persistenceControl.value || 0);
+    if (duration <= 0) return;
+    const ghost = els.screenSurface.cloneNode(true);
+    ghost.removeAttribute("id");
+    ghost.querySelectorAll("[id]").forEach(node => node.removeAttribute("id"));
+    ghost.querySelectorAll("button, input, select").forEach(node => node.setAttribute("disabled", ""));
+    ghost.className = "phosphor-ghost";
+    ghost.setAttribute("aria-hidden", "true");
+    els.screenFrame.appendChild(ghost);
+    window.setTimeout(() => ghost.remove(), duration + 50);
+  }
+
+  function redraw(target = els.terminal) {
+    const duration = Number(els.redrawControl.value || 0);
+    if (duration <= 0) return;
+    target.classList.remove("is-redrawing");
+    target.classList.add("redraw-target");
+    void target.offsetWidth;
+    target.classList.add("is-redrawing");
+    window.setTimeout(() => target.classList.remove("is-redrawing"), duration + 20);
   }
 
   function toggleDisplaySettings(forceOpen) {
@@ -226,6 +322,7 @@
   }
 
   function loadInventory() {
+    capturePersistence();
     try {
       const saved = JSON.parse(localStorage.getItem("opa-first-age-inventory") || "[]");
       const validNames = new Set(ingredients.map(item => item.name));
@@ -236,6 +333,7 @@
       syncButtons();
       els.inventoryState.textContent = "";
       updateInventoryDisplay();
+      redraw();
     } catch (error) {
       state.currentName = "Unable to Load Inventory";
       updateInventoryDisplay();
@@ -243,6 +341,7 @@
   }
 
   function setRuleset(ruleset) {
+    capturePersistence();
     state.ruleset = ruleset;
     document.querySelectorAll(".value-option").forEach((button) => {
       const active = button.dataset.ruleset === ruleset;
@@ -252,12 +351,14 @@
     refreshIngredientValues();
     markUnsaved();
     if (state.generated) generateRecipes();
+    redraw(document.getElementById("workspace"));
   }
 
   function getSelectedIngredients() { return ingredients.filter(item => state.selected.has(item.name)); }
   function potionLabel(type, number) { return potionNames[nameKeys[type]]?.[String(number)] || "Unknown Potion"; }
 
   function generateRecipes() {
+    capturePersistence();
     const selected = getSelectedIngredients();
     els.recipeResults.replaceChildren();
     els.resultsPanel.hidden = false;
@@ -269,7 +370,8 @@
       p.textContent = "At least three ingredients are required to calculate a recipe.";
       els.recipeResults.appendChild(p);
       els.resultSummary.textContent = `${selected.length} ingredient${selected.length === 1 ? "" : "s"} available`;
-      els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
+      redraw(els.resultsPanel);
       return;
     }
 
@@ -303,7 +405,8 @@
     }
     const totalRecipes = sortedGroups.reduce((sum, group) => sum + group.recipes.length, 0);
     els.resultSummary.textContent = `${sortedGroups.length} potion${sortedGroups.length === 1 ? "" : "s"} / ${totalRecipes} recipes / ${combinationCount} combinations`;
-    els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
+    redraw(els.resultsPanel);
   }
 
   function renderPotionGroup(group) {
@@ -343,12 +446,18 @@
   document.getElementById("closeDisplaySettings").addEventListener("click", () => toggleDisplaySettings(false));
   document.getElementById("resetDisplaySettings").addEventListener("click", () => {
     applyPhosphor(displayDefaults.phosphor);
-    ["bloom", "vignette", "scanlines"].forEach(name => applyDisplaySetting(name, displayDefaults[name]));
+    Object.keys(displayDefaults).filter(name => name !== "phosphor").forEach(name => applyDisplaySetting(name, displayDefaults[name]));
   });
   els.phosphorControl.addEventListener("change", event => applyPhosphor(event.target.value));
   els.bloomControl.addEventListener("input", event => applyDisplaySetting("bloom", event.target.value));
   els.vignetteControl.addEventListener("input", event => applyDisplaySetting("vignette", event.target.value));
   els.scanlineControl.addEventListener("input", event => applyDisplaySetting("scanlines", event.target.value));
+  els.brightnessControl.addEventListener("input", event => applyDisplaySetting("brightness", event.target.value));
+  els.contrastControl.addEventListener("input", event => applyDisplaySetting("contrast", event.target.value));
+  els.bezelControl.addEventListener("input", event => applyDisplaySetting("bezel", event.target.value));
+  els.curvatureControl.addEventListener("input", event => applyDisplaySetting("curvature", event.target.value));
+  els.persistenceControl.addEventListener("input", event => applyDisplaySetting("persistence", event.target.value));
+  els.redrawControl.addEventListener("input", event => applyDisplaySetting("redraw", event.target.value));
   document.querySelectorAll(".value-option").forEach(button => button.addEventListener("click", () => setRuleset(button.dataset.ruleset)));
   els.filter.addEventListener("input", event => filterIngredients(event.target.value));
   document.addEventListener("keydown", (event) => {
