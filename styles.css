@@ -697,3 +697,38 @@ body::after {
 .masthead { padding-top: 5em; }
 .main-nav { margin-bottom: 4em; }
 .generate-row { margin-bottom: 3.5em; }
+
+/* v13: requested top-nav spacing and reverse-video bloom behavior. */
+.system-inventory,
+.system-current,
+.system-values {
+  padding-left: 2ch;
+}
+
+/* Keep reverse-video controls crisp. Composite-level drop shadows made the
+   entire highlighted button rectangle develop a halo, so bloom is handled by
+   the individual phosphor elements instead. */
+.screen-surface {
+  filter: contrast(var(--display-contrast));
+}
+
+.text-control:hover,
+.text-control:focus-visible,
+.value-option:hover,
+.value-option:focus-visible,
+.value-option.is-active,
+.terminal-tab:hover:not(:disabled),
+.terminal-tab:focus-visible:not(:disabled),
+.terminal-command:hover,
+.terminal-command:focus-visible {
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Reverse-video ingredient rows are phosphor-filled areas, so their fill
+   receives a controlled bloom without reintroducing halos around controls. */
+.ingredient-item.is-selected {
+  box-shadow:
+    inset 0 0 calc(var(--small-text-bloom-radius) * 1.15) rgb(var(--phosphor-rgb) / calc(var(--small-text-bloom-alpha) * .55)),
+    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / calc(var(--small-text-bloom-alpha) * .48));
+}
