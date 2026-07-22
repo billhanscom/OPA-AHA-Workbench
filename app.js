@@ -128,13 +128,13 @@
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      // Restore the v5 contrast treatment. Lower percentages reduce contrast
-      // by washing the screen with the selected phosphor color; higher
-      // percentages deepen the image with a neutral black overlay.
+      // Restored exactly from v5: values below 100 add a phosphor-colored
+      // wash; values above 100 add a black overlay. The slider now reads in
+      // the intuitive direction: lower percentage = lower contrast.
       const distance = numeric - 100;
       root.style.setProperty("--contrast-overlay-alpha", String(distance > 0 ? Math.min(.55, distance / 145) : 0));
       root.style.setProperty("--contrast-wash-alpha", String(distance < 0 ? Math.min(.18, Math.abs(distance) / 280) : 0));
-      // Disable later contrast systems so only the original v5 layer acts.
+      // Disable later contrast experiments so only the v5 layer is active.
       root.style.setProperty("--display-contrast", "1");
       root.style.setProperty("--contrast-warm-alpha", "0");
       root.style.setProperty("--contrast-dark-alpha", "0");

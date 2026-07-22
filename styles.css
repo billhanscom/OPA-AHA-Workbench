@@ -950,3 +950,20 @@ body::after {
     0 0 calc(var(--reverse-bloom-radius) * 1.8) rgb(var(--phosphor-rgb) / calc(var(--reverse-bloom-alpha) * .55));
 }
 .ingredient-item.is-selected * { text-shadow: none !important; }
+
+/* v18: exact v5 contrast control restoration ------------------------------ */
+.viewport-effects .contrast-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      rgb(0 0 0 / var(--contrast-overlay-alpha)),
+      rgb(0 0 0 / var(--contrast-overlay-alpha))
+    ),
+    linear-gradient(
+      rgb(var(--phosphor-rgb) / var(--contrast-wash-alpha)),
+      rgb(var(--phosphor-rgb) / var(--contrast-wash-alpha))
+    );
+}
