@@ -50,9 +50,7 @@
     redrawValue: document.getElementById("redrawValue"),
     screenFrame: document.getElementById("screenFrame"),
     screenSurface: document.getElementById("screenSurface"),
-    terminal: document.getElementById("terminal"),
-    viewportEffects: document.getElementById("viewportEffects"),
-    redrawSweep: document.getElementById("redrawSweep")
+    terminal: document.getElementById("terminal")
   };
 
   const nameKeys = { combat: "combat_names", utility: "utility_names", whimsy: "whimsy_names" };
@@ -109,7 +107,7 @@
   function applyDisplaySetting(name, value, save = true) {
     const root = document.documentElement;
     const limits = {
-      brightness: [20, 200], contrast: [50, 180], bloom: [0, 100], scanlines: [0, 100],
+      brightness: [50, 160], contrast: [50, 180], bloom: [0, 100], scanlines: [0, 100],
       vignette: [0, 100], bezel: [0, 100], curvature: [0, 100], persistence: [0, 500], redraw: [0, 1500]
     };
     const [minimum, maximum] = limits[name] || [0, 100];
@@ -117,36 +115,17 @@
     const decimal = numeric / 100;
 
     if (name === "brightness") {
-      // A deliberately dramatic phosphor-emission control. Low settings deeply
-      // dim the glyphs; high settings add core intensity and a broad halo while
-      // leaving the black background black.
-      const below = Math.min(numeric, 100) / 100;
-      const above = Math.max(0, numeric - 100) / 100;
-      const contentOpacity = numeric <= 100 ? 0.10 + Math.pow(below, 1.35) * 0.90 : 1;
-      root.style.setProperty("--content-opacity", String(contentOpacity));
-      root.style.setProperty("--brightness-boost-alpha", String(above * 0.70));
-      root.style.setProperty("--brightness-halo-radius", `${0.4 + above * 7.6}px`);
-      root.style.setProperty("--brightness-halo-alpha", String(0.08 + above * 0.62));
+      root.style.setProperty("--brightness", String(decimal));
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      // Restore the earlier behavior: contrast acts on the completed display
-      // image. It never raises the black level to gray.
-      root.style.setProperty("--display-contrast", String(numeric / 100));
+      root.style.setProperty("--contrast", String(decimal));
       els.contrastControl.value = String(numeric);
       els.contrastValue.value = `${numeric}%`;
     } else if (name === "bloom") {
-      root.style.setProperty("--composite-bloom-radius", `${0.5 + (numeric / 100) * 7.5}px`);
-      root.style.setProperty("--composite-bloom-alpha", String((numeric / 100) * .46));
-      // Thin rules need a little independent energy to read like the same phosphor
-      // intensity as the much denser block-character logo.
-      root.style.setProperty("--border-bloom-radius", `${0.5 + (numeric / 100) * 4.5}px`);
-      root.style.setProperty("--border-bloom-alpha", String((numeric / 100) * .62));
-      root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .30));
-      // Thin text strokes need a local phosphor halo in addition to the broad
-      // composite bloom. Keep it tighter than the logo halo so glyphs remain legible.
-      root.style.setProperty("--small-text-bloom-radius", `${0.35 + (numeric / 100) * 3.1}px`);
-      root.style.setProperty("--small-text-bloom-alpha", String((numeric / 100) * .42));
+      root.style.setProperty("--bloom-alpha", String(decimal * .92));
+      root.style.setProperty("--bloom-border-alpha", String(decimal * .72));
+      root.style.setProperty("--bloom-radius", `${(numeric / 100) * 16}px`);
       els.bloomControl.value = String(numeric);
       els.bloomValue.value = `${numeric}%`;
     } else if (name === "scanlines") {
@@ -155,19 +134,20 @@
       els.scanlineControl.value = String(numeric);
       els.scanlineValue.value = `${numeric}%`;
     } else if (name === "vignette") {
-      root.style.setProperty("--vignette-strength", String(decimal));
+      root.style.setProperty("--vignette-mid-alpha", String(decimal * .18));
+      root.style.setProperty("--vignette-edge-alpha", String(decimal * .78));
+      root.style.setProperty("--vignette-shadow-alpha", String(decimal * .48));
       els.vignetteControl.value = String(numeric);
       els.vignetteValue.value = `${numeric}%`;
     } else if (name === "bezel") {
-      root.style.setProperty("--edge-strength", String(decimal));
-      root.style.setProperty("--edge-blur", `${decimal * 4.5}px`);
-      root.style.setProperty("--edge-darkness", String(decimal * .24));
+      root.style.setProperty("--bezel-alpha", String(.08 + decimal * .70));
+      root.style.setProperty("--bezel-glow-alpha", String(decimal * .04));
+      root.style.setProperty("--bezel-inset", `${1 + decimal * 5}rem`);
+      root.style.setProperty("--bezel-outer", `${.5 + decimal * 4}rem`);
       els.bezelControl.value = String(numeric);
       els.bezelValue.value = `${numeric}%`;
     } else if (name === "curvature") {
-      root.style.setProperty("--curve", String(decimal));
-      root.style.setProperty("--screen-radius", `${2 + decimal * 46}px`);
-      root.style.setProperty("--curve-edge-alpha", String(decimal * .20));
+      root.style.setProperty("--screen-radius", `${(numeric / 100) * 32}px`);
       els.curvatureControl.value = String(numeric);
       els.curvatureValue.value = `${numeric}%`;
     } else if (name === "persistence") {
@@ -212,21 +192,14 @@
     window.setTimeout(() => ghost.remove(), duration + 50);
   }
 
-  function updateViewportEffectsBounds() {
-    const rect = els.screenFrame.getBoundingClientRect();
-    document.documentElement.style.setProperty("--screen-left", `${Math.max(0, rect.left)}px`);
-    document.documentElement.style.setProperty("--screen-right", `${Math.max(0, window.innerWidth - rect.right)}px`);
-  }
-
-  function redraw() {
+  function redraw(target = els.terminal) {
     const duration = Number(els.redrawControl.value || 0);
-    if (duration <= 0 || !els.redrawSweep) return;
-    updateViewportEffectsBounds();
-    els.redrawSweep.style.setProperty("--active-redraw-ms", `${duration}ms`);
-    els.redrawSweep.classList.remove("is-active");
-    void els.redrawSweep.offsetWidth;
-    els.redrawSweep.classList.add("is-active");
-    window.setTimeout(() => els.redrawSweep.classList.remove("is-active"), duration + 80);
+    if (duration <= 0) return;
+    target.classList.remove("is-redrawing");
+    target.classList.add("redraw-target");
+    void target.offsetWidth;
+    target.classList.add("is-redrawing");
+    window.setTimeout(() => target.classList.remove("is-redrawing"), duration + 20);
   }
 
   function toggleDisplaySettings(forceOpen) {
@@ -238,7 +211,7 @@
   function valueString(ingredient) {
     const values = ingredient.values?.[state.ruleset] || {};
     const pad = value => String(Number(value || 0)).padStart(2, "0");
-    return `[${pad(values.combat)}-${pad(values.utility)}-${pad(values.whimsy)}]`;
+    return `${pad(values.combat)}/${pad(values.utility)}/${pad(values.whimsy)}`;
   }
 
   function renderIngredients() {
@@ -373,7 +346,7 @@
     refreshIngredientValues();
     markUnsaved();
     if (state.generated) generateRecipes();
-    redraw();
+    redraw(document.getElementById("workspace"));
   }
 
   function getSelectedIngredients() { return ingredients.filter(item => state.selected.has(item.name)); }
@@ -393,7 +366,7 @@
       els.recipeResults.appendChild(p);
       els.resultSummary.textContent = `${selected.length} ingredient${selected.length === 1 ? "" : "s"} available`;
       els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-      redraw();
+      redraw(els.resultsPanel);
       return;
     }
 
@@ -428,7 +401,7 @@
     const totalRecipes = sortedGroups.reduce((sum, group) => sum + group.recipes.length, 0);
     els.resultSummary.textContent = `${sortedGroups.length} potion${sortedGroups.length === 1 ? "" : "s"} / ${totalRecipes} recipes / ${combinationCount} combinations`;
     els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-    redraw();
+    redraw(els.resultsPanel);
   }
 
   function renderPotionGroup(group) {
@@ -487,11 +460,7 @@
     else if (event.key === "Escape" && !els.drawer.hidden) els.drawer.hidden = true;
   });
 
-  window.addEventListener("resize", updateViewportEffectsBounds);
-  window.addEventListener("scroll", updateViewportEffectsBounds, { passive: true });
   loadDisplaySettings();
   renderIngredients();
   updateInventoryDisplay();
-  updateViewportEffectsBounds();
-  window.requestAnimationFrame(() => redraw());
 })();

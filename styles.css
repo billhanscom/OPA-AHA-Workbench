@@ -7,13 +7,11 @@
   --screen: #15110a;
   --screen-deep: #0c0a06;
   --line: 1.08;
-  --brightness-opacity: 1;
-  --contrast-overlay-alpha: 0;
-  --contrast-wash-alpha: 0;
+  --brightness: 1;
+  --contrast: 1;
   --bloom-alpha: .14;
   --bloom-border-alpha: .10;
   --bloom-radius: 5px;
-  --brightness-glow-alpha: 0;
   --scanline-light-alpha: .045;
   --scanline-dark-alpha: .324;
   --vignette-mid-alpha: .094;
@@ -69,7 +67,10 @@ h1, h2, h3, p { font: inherit; }
   overflow: hidden;
   border-radius: var(--screen-radius);
   background: var(--screen-deep);
-  box-shadow: none;
+  box-shadow:
+    inset 0 0 var(--bezel-inset) rgb(0 0 0 / var(--bezel-alpha)),
+    inset 0 0 2px rgb(var(--phosphor-rgb) / var(--bezel-glow-alpha)),
+    0 0 var(--bezel-outer) rgb(0 0 0 / var(--bezel-alpha));
 }
 .screen-surface {
   position: relative;
@@ -77,7 +78,7 @@ h1, h2, h3, p { font: inherit; }
   width: 132ch;
   min-height: calc(100vh - 8.75rem);
   margin: 0 auto;
-  opacity: var(--brightness-opacity);
+  filter: brightness(var(--brightness)) contrast(var(--contrast));
   transform: perspective(2200px) translateZ(0);
   transform-origin: center;
 }
@@ -89,34 +90,16 @@ h1, h2, h3, p { font: inherit; }
   color: var(--phosphor);
   text-shadow:
     0 0 1px rgb(var(--phosphor-rgb) / .88),
-    0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-alpha)),
-    0 0 calc(var(--bloom-radius) * 1.6) rgb(var(--phosphor-rgb) / var(--brightness-glow-alpha));
-}
-.terminal button,
-.terminal input,
-.terminal select,
-.terminal output,
-.terminal pre,
-.terminal span,
-.terminal p,
-.terminal h1,
-.terminal h2,
-.terminal h3,
-.terminal li {
-  text-shadow: inherit;
+    0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-alpha));
 }
 .scanline-layer,
-.glass-layer,
-.bezel-layer,
-.contrast-layer {
-  position: fixed;
+.glass-layer {
+  position: absolute;
   inset: 0;
+  z-index: 10;
   pointer-events: none;
+  border-radius: var(--screen-radius);
 }
-.scanline-layer { z-index: 100; }
-.glass-layer { z-index: 101; }
-.bezel-layer { z-index: 102; }
-.contrast-layer { z-index: 99; }
 .scanline-layer {
   background:
     repeating-linear-gradient(
@@ -138,23 +121,13 @@ h1, h2, h3, p { font: inherit; }
       rgb(0 0 0 / var(--vignette-edge-alpha)) 100%
     ),
     linear-gradient(to bottom, rgb(255 255 255 / .015), transparent 18%, transparent 82%, rgb(0 0 0 / var(--vignette-mid-alpha)));
-  box-shadow: inset 0 0 7rem rgb(0 0 0 / var(--vignette-shadow-alpha));
-}
-.bezel-layer {
   box-shadow:
-    inset 0 0 var(--bezel-inset) rgb(0 0 0 / var(--bezel-alpha)),
-    inset 0 0 2px rgb(var(--phosphor-rgb) / var(--bezel-glow-alpha));
-}
-.contrast-layer {
-  background:
-    linear-gradient(rgb(0 0 0 / var(--contrast-overlay-alpha)), rgb(0 0 0 / var(--contrast-overlay-alpha))),
-    linear-gradient(rgb(var(--phosphor-rgb) / var(--contrast-wash-alpha)), rgb(var(--phosphor-rgb) / var(--contrast-wash-alpha)));
+    inset 0 0 7rem rgb(0 0 0 / var(--vignette-shadow-alpha)),
+    inset 0 0 var(--bezel-inset) rgb(var(--phosphor-rgb) / var(--bezel-glow-alpha));
 }
 
 .bloom-border {
-  box-shadow:
-    0 0 1px rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)),
-    0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha));
+  box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha));
 }
 
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
@@ -174,8 +147,8 @@ h1, h2, h3, p { font: inherit; }
 .system-values { justify-content: flex-start; }
 
 .text-control, .value-option { border: 0; padding: 0 .2ch; background: transparent; cursor: pointer; text-decoration: none; }
-.text-control:hover, .text-control:focus-visible, .value-option:hover, .value-option:focus-visible { background: var(--phosphor); color: var(--screen-deep); outline: none; text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
-.value-option.is-active { background: var(--phosphor); color: var(--screen-deep); text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
+.text-control:hover, .text-control:focus-visible, .value-option:hover, .value-option:focus-visible { background: var(--phosphor); color: var(--screen-deep); outline: none; text-shadow: none; }
+.value-option.is-active { background: var(--phosphor); color: var(--screen-deep); text-shadow: none; }
 
 .display-settings { margin-top: 1em; border: 1px solid var(--phosphor); padding: 1em 1.5ch; background: rgb(12 10 6 / .72); }
 .display-settings-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 2ch; padding-bottom: .65em; border-bottom: 1px solid var(--phosphor-dim); }
@@ -187,11 +160,11 @@ h1, h2, h3, p { font: inherit; }
 .display-control output { text-align: right; color: var(--phosphor); }
 .display-control select { width: 100%; border: 1px solid var(--phosphor); border-radius: 0; background: var(--screen-deep); padding: .1em .5ch; }
 
-.masthead { padding: 3em 0 2.25em; display: block; overflow: visible; text-align: center; }
-.ascii-logo { display: inline-block; width: max-content; margin: 0 auto; overflow: visible; color: var(--phosphor); font: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; letter-spacing: 0; line-height: var(--line); white-space: pre; text-align: left; }
+.masthead { padding: 3em 0 2.25em; display: flex; justify-content: center; overflow: visible; }
+.ascii-logo { width: max-content; margin: 0; overflow: visible; color: var(--phosphor-bright); font: inherit; line-height: var(--line); white-space: pre; text-align: left; }
 .main-nav { display: flex; justify-content: center; gap: 2ch; margin-bottom: 2.2em; }
 .terminal-tab, .terminal-command { border: 2px solid currentColor; border-radius: 0; background: transparent; padding: .55em 2ch; letter-spacing: 0; cursor: pointer; }
-.terminal-tab:hover:not(:disabled), .terminal-tab:focus-visible:not(:disabled), .terminal-command:hover, .terminal-command:focus-visible { color: var(--screen-deep); background: var(--phosphor); outline: none; text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
+.terminal-tab:hover:not(:disabled), .terminal-tab:focus-visible:not(:disabled), .terminal-command:hover, .terminal-command:focus-visible { color: var(--screen-deep); background: var(--phosphor); outline: none; text-shadow: none; }
 .terminal-tab.is-active, .primary-command { border-width: 3px; color: var(--phosphor-bright); }
 .terminal-tab:disabled { color: var(--phosphor-faint); cursor: not-allowed; }
 
@@ -203,9 +176,9 @@ h1, h2, h3, p { font: inherit; }
 .ingredient-list { overflow: visible; }
 .ingredient-item { display: grid; grid-template-columns: minmax(0, 1fr) 10ch; width: 100%; min-height: 1.65em; border: 0; background: transparent; padding: .12em 1ch; text-align: left; cursor: pointer; color: var(--phosphor); }
 .ingredient-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ingredient-values { text-align: right; color: inherit; }
+.ingredient-values { text-align: right; color: var(--phosphor-dim); }
 .ingredient-item:hover, .ingredient-item:focus-visible { outline: none; color: var(--phosphor-bright); background: rgb(var(--phosphor-rgb) / .08); }
-.ingredient-item.is-selected { color: var(--screen-deep); background: var(--phosphor); text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
+.ingredient-item.is-selected { color: var(--screen-deep); background: var(--phosphor); text-shadow: none; }
 .ingredient-item.is-selected .ingredient-values { color: var(--screen-deep); }
 .ingredient-item.is-selected .ingredient-name::before { content: "► "; }
 .ingredient-item[hidden] { display: none; }
@@ -253,350 +226,6 @@ h1, h2, h3, p { font: inherit; }
   .crt-shell { padding: 0; display: block; }
   .screen-frame { width: auto; min-height: 0; padding: 0; box-shadow: none; background: #fff; }
   .screen-surface, .terminal { width: auto; min-height: 0; filter: none; text-shadow: none; }
-  .scanline-layer, .glass-layer, .bezel-layer, .contrast-layer { display: none; }
+  .scanline-layer, .glass-layer { display: none; }
   .bloom-border { box-shadow: none; }
-}
-
-/* v6 composite CRT pipeline ------------------------------------------------ */
-:root {
-  --display-brightness: 1;
-  --display-contrast: 1;
-  --composite-bloom-radius: 1.54px;
-  --composite-bloom-alpha: .109;
-  --border-bloom-alpha: .12;
-  --border-bloom-radius: 2px;
-  --small-text-bloom-alpha: .10;
-  --small-text-bloom-radius: 1.2px;
-  --inner-glow-alpha: .045;
-  --content-opacity: 1;
-  --brightness-boost-alpha: 0;
-  --brightness-halo-alpha: .10;
-  --brightness-halo-radius: 1px;
-  --vignette-strength: .52;
-  --edge-strength: .30;
-  --edge-blur: .54px;
-  --edge-darkness: .144;
-  --curve: .08;
-  --curve-edge-alpha: .04;
-  --screen-left: 0px;
-  --screen-right: 0px;
-}
-
-.screen-frame {
-  overflow: hidden;
-  border-radius: var(--screen-radius);
-  clip-path: inset(0 round var(--screen-radius));
-}
-
-
-.screen-surface {
-  opacity: var(--content-opacity, 1);
-  filter:
-    contrast(var(--display-contrast))
-    drop-shadow(0 0 .7px rgb(var(--phosphor-rgb) / .72))
-    drop-shadow(0 0 var(--brightness-halo-radius) rgb(var(--phosphor-rgb) / var(--brightness-halo-alpha)))
-    drop-shadow(0 0 var(--composite-bloom-radius) rgb(var(--phosphor-rgb) / var(--composite-bloom-alpha)));
-  will-change: filter, opacity;
-}
-
-/* The screen composite supplies the broad halo. Small terminal glyphs also
-   receive a restrained local phosphor halo so thin strokes bloom as visibly as
-   the dense block-character logo. The logo itself remains composite-only. */
-.terminal {
-  text-shadow:
-    0 0 .55px rgb(var(--phosphor-rgb) / .78),
-    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-alpha));
-}
-.terminal button,
-.terminal input,
-.terminal select,
-.terminal output,
-.terminal span,
-.terminal p,
-.terminal h1,
-.terminal h2,
-.terminal h3,
-.terminal li,
-.terminal label,
-.terminal legend { text-shadow: inherit; }
-.ascii-logo { text-shadow: none; }
-
-/* Brightness changes phosphor emission. It dims deeply below 100% and adds
-   a broad screen-level phosphor flare above 100% without lifting the black level. */
-.screen-surface::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: var(--brightness-boost-alpha);
-  background: radial-gradient(ellipse at center, rgb(var(--phosphor-rgb) / .10), transparent 72%);
-  box-shadow: inset 0 0 4rem rgb(var(--phosphor-rgb) / .12);
-  mix-blend-mode: screen;
-}
-
-.bloom-border,
-.terminal-tab,
-.terminal-command,
-.system-bar,
-.display-settings,
-.ingredient-panel,
-.inventory-drawer,
-.results-panel {
-  box-shadow:
-    inset 0 0 3px rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
-    0 0 var(--border-bloom-radius) rgb(var(--phosphor-rgb) / var(--border-bloom-alpha));
-}
-
-.terminal-tab:hover:not(:disabled),
-.terminal-tab:focus-visible:not(:disabled),
-.terminal-command:hover,
-.terminal-command:focus-visible,
-.text-control:hover,
-.text-control:focus-visible,
-.value-option:hover,
-.value-option:focus-visible,
-.value-option.is-active,
-.ingredient-item.is-selected { box-shadow: none; }
-
-.viewport-effects {
-  position: fixed;
-  z-index: 90;
-  top: 0;
-  bottom: 0;
-  left: var(--screen-left);
-  right: var(--screen-right);
-  overflow: hidden;
-  border-radius: var(--screen-radius);
-  pointer-events: none;
-  clip-path: inset(0 round var(--screen-radius));
-}
-.viewport-effects > div { position: absolute; inset: 0; pointer-events: none; }
-
-.scanline-layer {
-  position: absolute;
-  z-index: 2;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgb(var(--phosphor-rgb) / var(--scanline-light-alpha)) 0,
-    rgb(var(--phosphor-rgb) / var(--scanline-light-alpha)) 1px,
-    rgb(0 0 0 / var(--scanline-dark-alpha)) 1px,
-    rgb(0 0 0 / var(--scanline-dark-alpha)) 3px
-  );
-}
-
-/* Top and bottom are viewport-relative; left and right follow the screen container. */
-.glass-layer {
-  position: absolute;
-  z-index: 3;
-  background:
-    linear-gradient(to right,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .90)) 0%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .34)) 5%,
-      transparent 14%,
-      transparent 86%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .34)) 95%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .90)) 100%),
-    linear-gradient(to bottom,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .70)) 0%,
-      transparent 13%,
-      transparent 86%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .82)) 100%),
-    radial-gradient(ellipse 104% 92% at 50% 50%,
-      transparent 54%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .18)) 76%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .48)) 100%);
-}
-
-/* Edge focus simulates the loss of sharpness near the perimeter of a CRT.
-   It deliberately does not pretend to geometrically warp the DOM. */
-.edge-layer {
-  z-index: 4;
-  background:
-    linear-gradient(to right,
-      rgb(0 0 0 / var(--edge-darkness)) 0%,
-      transparent calc(4% + 7% * (1 - var(--edge-strength))),
-      transparent calc(96% - 7% * (1 - var(--edge-strength))),
-      rgb(0 0 0 / var(--edge-darkness)) 100%);
-  backdrop-filter: blur(var(--edge-blur));
-  -webkit-backdrop-filter: blur(var(--edge-blur));
-  mask-image: linear-gradient(to right, #000 0 8%, transparent 18% 82%, #000 92% 100%);
-  -webkit-mask-image: linear-gradient(to right, #000 0 8%, transparent 18% 82%, #000 92% 100%);
-}
-
-/* Curvature is represented as curved glass and edge shading only. The content
-   is never scaled, so moving this control cannot look like zooming. */
-.viewport-effects::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  border-radius: var(--screen-radius);
-  box-shadow:
-    inset 0 0 calc(1rem + 3rem * var(--curve)) rgb(0 0 0 / var(--curve-edge-alpha)),
-    inset 0 1px 0 rgb(255 255 255 / calc(var(--curve) * .035));
-}
-
-.redraw-sweep {
-  z-index: 8;
-  display: none;
-  background:
-    linear-gradient(to bottom,
-      #000 0%,
-      #000 46%,
-      rgb(var(--phosphor-rgb) / .42) 49%,
-      rgb(var(--phosphor-rgb) / .10) 50%,
-      #000 53%,
-      #000 100%);
-  transform: translateY(-100%);
-}
-.redraw-sweep.is-active {
-  display: block;
-  animation: full-screen-redraw var(--active-redraw-ms, 150ms) steps(18, end) both;
-}
-@keyframes full-screen-redraw {
-  0% { transform: translateY(-100%); opacity: 1; }
-  92% { transform: translateY(100%); opacity: 1; }
-  100% { transform: translateY(100%); opacity: 0; }
-}
-
-.phosphor-ghost {
-  position: absolute !important;
-  inset: 2rem !important;
-  z-index: 5 !important;
-  width: auto !important;
-  min-height: 0 !important;
-  opacity: .22;
-  filter: blur(1.2px) brightness(1.12);
-  pointer-events: none;
-  animation: ghost-fade var(--persistence-ms) ease-out forwards;
-}
-
-@media print {
-  .viewport-effects { display: none; }
-  .screen-surface { filter: none; transform: none; }
-}
-
-/* v7: faithful 132-column terminal grid ----------------------------------- */
-:root {
-  --terminal-columns: 132;
-  --terminal-width: 132ch;
-  --frame-gutter: 2ch;
-}
-
-body {
-  min-width: calc(var(--terminal-width) + (var(--frame-gutter) * 2));
-  overflow-x: auto;
-}
-
-.crt-shell {
-  padding: 1.5rem var(--frame-gutter) 3rem;
-}
-
-.screen-frame {
-  width: calc(var(--terminal-width) + (var(--frame-gutter) * 2));
-  padding: 2rem var(--frame-gutter);
-}
-
-.screen-surface,
-.terminal {
-  width: var(--terminal-width);
-  min-width: var(--terminal-width);
-  max-width: var(--terminal-width);
-}
-
-/* The four sections correspond to 40, 45, 22, and 20 interior cells in the
-   132-character reference line. Borders are included in the 132ch total. */
-.system-bar {
-  width: 100%;
-  grid-template-columns: 41fr 46fr 23fr 21fr;
-  border-width: 1px;
-}
-.system-cell {
-  min-width: 0;
-  min-height: 3em;
-  gap: 1ch;
-  padding: .45em 1ch;
-}
-.system-cell + .system-cell { border-left-width: 1px; }
-.system-inventory { justify-content: flex-start; }
-.system-inventory,
-.system-current,
-.system-values { padding-left: 3ch; }
-.system-inventory .inventory-state { display: none; }
-.system-current #currentInventory { flex: 1 1 auto; }
-.system-values { justify-content: flex-start; }
-.system-display { justify-content: center; padding-inline: .5ch; }
-.display-toggle { width: 100%; white-space: nowrap; text-align: center; }
-
-.masthead {
-  width: 132ch;
-  padding: 3em 0 2.25em;
-  overflow: hidden;
-  text-align: left;
-}
-.ascii-logo {
-  display: block;
-  width: 132ch;
-  min-width: 132ch;
-  max-width: 132ch;
-  margin: 0;
-  overflow: visible;
-  white-space: pre;
-  text-align: left;
-}
-
-.main-nav {
-  width: 132ch;
-  display: grid;
-  grid-template-columns: repeat(3, max-content);
-  justify-content: center;
-  column-gap: 2ch;
-  margin-bottom: 2.5em;
-}
-.terminal-tab {
-  min-width: 22ch;
-  padding: .55em 1ch;
-}
-
-.generate-row {
-  display: flex;
-  justify-content: center;
-  width: 132ch;
-  margin: 0 0 2em;
-}
-.generate-row .primary-command {
-  min-width: 23ch;
-}
-
-.ingredient-panel {
-  width: 132ch;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-width: 1px;
-}
-.ingredient-column + .ingredient-column { border-left-width: 1px; }
-.ingredient-column h2 {
-  min-height: 3em;
-  border-bottom-width: 1px;
-}
-.ingredient-item {
-  grid-template-columns: minmax(0, 1fr) 10ch;
-  min-height: 3.05em;
-  padding: .75em 2ch;
-  align-items: center;
-}
-
-.command-row {
-  width: 132ch;
-  padding-top: 1em;
-}
-
-.display-settings,
-.inventory-drawer,
-.results-panel { width: 132ch; }
-
-@media (max-width: 1390px) {
-  /* Preserve the actual 132-cell grid. Small viewports scroll rather than
-     silently squeezing or reflowing the terminal. */
-  body { min-width: calc(var(--terminal-width) + (var(--frame-gutter) * 2)); }
 }
