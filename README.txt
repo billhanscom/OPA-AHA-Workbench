@@ -19,3 +19,15 @@ v8 display corrections
 - Vignette now includes explicit left/right falloff at the screen-container edges.
 - Ingredient values use the same color as ingredient names.
 - Ingredient rows have 2-character left/right padding.
+
+V9 CHANGE
+---------
+Bloom now includes a tight local phosphor halo for small terminal text while the large ASCII logo remains composite-only. This makes labels, ingredient names and values, controls, and generated text respond visibly to the Bloom slider without making the logo disproportionately brighter.
+
+
+v10 display-control changes
+---------------------------
+- Restored completed-image contrast; low contrast no longer raises black to gray.
+- Expanded brightness to 20-200% with a much stronger dimming/emission range.
+- Renamed Edge Distortion to Edge Focus and made it an obvious perimeter blur.
+- Removed curvature scaling/perspective so the control no longer zooms the interface.

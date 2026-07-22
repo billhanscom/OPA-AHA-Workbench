@@ -109,7 +109,7 @@
   function applyDisplaySetting(name, value, save = true) {
     const root = document.documentElement;
     const limits = {
-      brightness: [50, 160], contrast: [50, 180], bloom: [0, 100], scanlines: [0, 100],
+      brightness: [20, 200], contrast: [50, 180], bloom: [0, 100], scanlines: [0, 100],
       vignette: [0, 100], bezel: [0, 100], curvature: [0, 100], persistence: [0, 500], redraw: [0, 1500]
     };
     const [minimum, maximum] = limits[name] || [0, 100];
@@ -117,20 +117,22 @@
     const decimal = numeric / 100;
 
     if (name === "brightness") {
-      // Keep the phosphor hue fixed. Below 100% fades emission; above 100%
-      // increases glow rather than running the composite through CSS brightness().
-      const contentOpacity = numeric <= 100 ? 0.45 + (numeric / 100) * 0.55 : 1;
-      const boost = numeric > 100 ? ((numeric - 100) / 60) * 0.28 : 0;
+      // A deliberately dramatic phosphor-emission control. Low settings deeply
+      // dim the glyphs; high settings add core intensity and a broad halo while
+      // leaving the black background black.
+      const below = Math.min(numeric, 100) / 100;
+      const above = Math.max(0, numeric - 100) / 100;
+      const contentOpacity = numeric <= 100 ? 0.10 + Math.pow(below, 1.35) * 0.90 : 1;
       root.style.setProperty("--content-opacity", String(contentOpacity));
-      root.style.setProperty("--brightness-boost-alpha", String(boost));
+      root.style.setProperty("--brightness-boost-alpha", String(above * 0.70));
+      root.style.setProperty("--brightness-halo-radius", `${0.4 + above * 7.6}px`);
+      root.style.setProperty("--brightness-halo-alpha", String(0.08 + above * 0.62));
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      // Contrast changes the black level behind the phosphor, never its color.
-      const low = numeric < 100 ? ((100 - numeric) / 50) * 0.18 : 0;
-      const high = numeric > 100 ? ((numeric - 100) / 80) * 0.42 : 0;
-      root.style.setProperty("--screen-lift-alpha", String(low));
-      root.style.setProperty("--screen-crush-alpha", String(high));
+      // Restore the earlier behavior: contrast acts on the completed display
+      // image. It never raises the black level to gray.
+      root.style.setProperty("--display-contrast", String(numeric / 100));
       els.contrastControl.value = String(numeric);
       els.contrastValue.value = `${numeric}%`;
     } else if (name === "bloom") {
@@ -141,6 +143,10 @@
       root.style.setProperty("--border-bloom-radius", `${0.5 + (numeric / 100) * 4.5}px`);
       root.style.setProperty("--border-bloom-alpha", String((numeric / 100) * .62));
       root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .30));
+      // Thin text strokes need a local phosphor halo in addition to the broad
+      // composite bloom. Keep it tighter than the logo halo so glyphs remain legible.
+      root.style.setProperty("--small-text-bloom-radius", `${0.35 + (numeric / 100) * 3.1}px`);
+      root.style.setProperty("--small-text-bloom-alpha", String((numeric / 100) * .42));
       els.bloomControl.value = String(numeric);
       els.bloomValue.value = `${numeric}%`;
     } else if (name === "scanlines") {
@@ -154,16 +160,14 @@
       els.vignetteValue.value = `${numeric}%`;
     } else if (name === "bezel") {
       root.style.setProperty("--edge-strength", String(decimal));
-      root.style.setProperty("--edge-blur", `${decimal * 1.8}px`);
-      root.style.setProperty("--edge-darkness", String(decimal * .48));
+      root.style.setProperty("--edge-blur", `${decimal * 4.5}px`);
+      root.style.setProperty("--edge-darkness", String(decimal * .24));
       els.bezelControl.value = String(numeric);
       els.bezelValue.value = `${numeric}%`;
     } else if (name === "curvature") {
       root.style.setProperty("--curve", String(decimal));
-      root.style.setProperty("--screen-radius", `${4 + decimal * 38}px`);
-      root.style.setProperty("--curve-scale-x", String(1 - decimal * .018));
-      root.style.setProperty("--curve-scale-y", String(1 - decimal * .008));
-      root.style.setProperty("--curve-perspective", `${2400 - numeric * 10}px`);
+      root.style.setProperty("--screen-radius", `${2 + decimal * 46}px`);
+      root.style.setProperty("--curve-edge-alpha", String(decimal * .20));
       els.curvatureControl.value = String(numeric);
       els.curvatureValue.value = `${numeric}%`;
     } else if (name === "persistence") {
@@ -234,7 +238,7 @@
   function valueString(ingredient) {
     const values = ingredient.values?.[state.ruleset] || {};
     const pad = value => String(Number(value || 0)).padStart(2, "0");
-    return `${pad(values.combat)}/${pad(values.utility)}/${pad(values.whimsy)}`;
+    return `[${pad(values.combat)}-${pad(values.utility)}-${pad(values.whimsy)}]`;
   }
 
   function renderIngredients() {

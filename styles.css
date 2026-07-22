@@ -265,19 +265,19 @@ h1, h2, h3, p { font: inherit; }
   --composite-bloom-alpha: .109;
   --border-bloom-alpha: .12;
   --border-bloom-radius: 2px;
+  --small-text-bloom-alpha: .10;
+  --small-text-bloom-radius: 1.2px;
   --inner-glow-alpha: .045;
   --content-opacity: 1;
   --brightness-boost-alpha: 0;
-  --screen-lift-alpha: 0;
-  --screen-crush-alpha: 0;
+  --brightness-halo-alpha: .10;
+  --brightness-halo-radius: 1px;
   --vignette-strength: .52;
   --edge-strength: .30;
   --edge-blur: .54px;
   --edge-darkness: .144;
   --curve: .08;
-  --curve-scale-x: .99856;
-  --curve-scale-y: .99936;
-  --curve-perspective: 2320px;
+  --curve-edge-alpha: .04;
   --screen-left: 0px;
   --screen-right: 0px;
 }
@@ -288,59 +288,49 @@ h1, h2, h3, p { font: inherit; }
   clip-path: inset(0 round var(--screen-radius));
 }
 
-.screen-frame::before,
-.screen-frame::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.screen-frame::before {
-  z-index: 0;
-  background: rgb(255 255 255 / var(--screen-lift-alpha));
-}
-.screen-frame::after {
-  z-index: 0;
-  background: rgb(0 0 0 / var(--screen-crush-alpha));
-}
 
 .screen-surface {
-  opacity: 1;
-  transform-origin: 50% 50%;
-  transform:
-    perspective(var(--curve-perspective))
-    rotateX(calc(var(--curve) * .42deg))
-    scaleX(var(--curve-scale-x))
-    scaleY(var(--curve-scale-y));
   opacity: var(--content-opacity, 1);
   filter:
+    contrast(var(--display-contrast))
     drop-shadow(0 0 .7px rgb(var(--phosphor-rgb) / .72))
+    drop-shadow(0 0 var(--brightness-halo-radius) rgb(var(--phosphor-rgb) / var(--brightness-halo-alpha)))
     drop-shadow(0 0 var(--composite-bloom-radius) rgb(var(--phosphor-rgb) / var(--composite-bloom-alpha)));
-  will-change: filter, transform;
+  will-change: filter, opacity;
 }
 
-/* The final screen composite blooms; individual glyphs do not. */
-.terminal,
+/* The screen composite supplies the broad halo. Small terminal glyphs also
+   receive a restrained local phosphor halo so thin strokes bloom as visibly as
+   the dense block-character logo. The logo itself remains composite-only. */
+.terminal {
+  text-shadow:
+    0 0 .55px rgb(var(--phosphor-rgb) / .78),
+    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-alpha));
+}
 .terminal button,
 .terminal input,
 .terminal select,
 .terminal output,
-.terminal pre,
 .terminal span,
 .terminal p,
 .terminal h1,
 .terminal h2,
 .terminal h3,
-.terminal li { text-shadow: none !important; }
+.terminal li,
+.terminal label,
+.terminal legend { text-shadow: inherit; }
+.ascii-logo { text-shadow: none; }
 
-/* Brightness above 100% increases phosphor emission without recoloring glyphs. */
+/* Brightness changes phosphor emission. It dims deeply below 100% and adds
+   a broad screen-level phosphor flare above 100% without lifting the black level. */
 .screen-surface::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   opacity: var(--brightness-boost-alpha);
-  box-shadow: inset 0 0 2.5rem rgb(var(--phosphor-rgb) / .08);
+  background: radial-gradient(ellipse at center, rgb(var(--phosphor-rgb) / .10), transparent 72%);
+  box-shadow: inset 0 0 4rem rgb(var(--phosphor-rgb) / .12);
   mix-blend-mode: screen;
 }
 
@@ -417,16 +407,34 @@ h1, h2, h3, p { font: inherit; }
       rgb(0 0 0 / calc(var(--vignette-strength) * .48)) 100%);
 }
 
-/* Edge focus falloff and compression cue, separate from the vignette. */
+/* Edge focus simulates the loss of sharpness near the perimeter of a CRT.
+   It deliberately does not pretend to geometrically warp the DOM. */
 .edge-layer {
   z-index: 4;
+  background:
+    linear-gradient(to right,
+      rgb(0 0 0 / var(--edge-darkness)) 0%,
+      transparent calc(4% + 7% * (1 - var(--edge-strength))),
+      transparent calc(96% - 7% * (1 - var(--edge-strength))),
+      rgb(0 0 0 / var(--edge-darkness)) 100%);
   backdrop-filter: blur(var(--edge-blur));
   -webkit-backdrop-filter: blur(var(--edge-blur));
-  mask-image: radial-gradient(ellipse 82% 78% at center, transparent 0 58%, #000 82% 100%);
-  -webkit-mask-image: radial-gradient(ellipse 82% 78% at center, transparent 0 58%, #000 82% 100%);
+  mask-image: linear-gradient(to right, #000 0 8%, transparent 18% 82%, #000 92% 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 0 8%, transparent 18% 82%, #000 92% 100%);
+}
+
+/* Curvature is represented as curved glass and edge shading only. The content
+   is never scaled, so moving this control cannot look like zooming. */
+.viewport-effects::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: var(--screen-radius);
   box-shadow:
-    inset calc(2.4rem * var(--edge-strength)) 0 calc(4.8rem * var(--edge-strength)) rgb(0 0 0 / var(--edge-darkness)),
-    inset calc(-2.4rem * var(--edge-strength)) 0 calc(4.8rem * var(--edge-strength)) rgb(0 0 0 / var(--edge-darkness));
+    inset 0 0 calc(1rem + 3rem * var(--curve)) rgb(0 0 0 / var(--curve-edge-alpha)),
+    inset 0 1px 0 rgb(255 255 255 / calc(var(--curve) * .035));
 }
 
 .redraw-sweep {
@@ -512,6 +520,9 @@ body {
 }
 .system-cell + .system-cell { border-left-width: 1px; }
 .system-inventory { justify-content: flex-start; }
+.system-inventory,
+.system-current,
+.system-values { padding-left: 3ch; }
 .system-inventory .inventory-state { display: none; }
 .system-current #currentInventory { flex: 1 1 auto; }
 .system-values { justify-content: flex-start; }
