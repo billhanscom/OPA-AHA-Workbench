@@ -9,6 +9,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+
+<style id="crt-slider-patch">
+:root{--slider-track: color-mix(in srgb,var(--phosphor-color,#ffb000) 18%, #000);--slider-fill: var(--phosphor-color,#ffb000);}
+input[type="range"]{
+accent-color: var(--phosphor-color,#ffb000);
+}
+input[type="range"]::-webkit-slider-runnable-track{
+background: var(--slider-track)!important;
+}
+input[type="range"]::-moz-range-track{
+background: var(--slider-track)!important;
+}
+</style>
+
 </head>
 <body>
   <a class="skip-link" href="#workspace">Skip to Recipe Generator</a>
@@ -62,13 +76,13 @@
               </label>
               <label class="display-control" for="brightnessControl">
                 <span>BRIGHTNESS</span>
-                <input id="brightnessControl" type="range" min="20" max="250" step="1" value="100">
-                <output id="brightnessValue" for="brightnessControl">100%</output>
+                <input id="brightnessControl" type="range" min="0" max="100" step="1" value="44">
+                <output id="brightnessValue" for="brightnessControl">44%</output>
               </label>
               <label class="display-control" for="contrastControl">
                 <span>CONTRAST</span>
-                <input id="contrastControl" type="range" min="50" max="180" step="1" value="100">
-                <output id="contrastValue" for="contrastControl">100%</output>
+                <input id="contrastControl" type="range" min="0" max="100" step="1" value="38">
+                <output id="contrastValue" for="contrastControl">38%</output>
               </label>
               <label class="display-control" for="bloomControl">
                 <span>BLOOM</span>

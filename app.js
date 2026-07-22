@@ -3,6 +3,7 @@
 
   const STORAGE_PREFIX = "opa-first-age";
   const DISPLAY_STORAGE_PREFIX = `${STORAGE_PREFIX}-display`;
+  const DISPLAY_SCALE_VERSION = "2";
   const POTION_TYPES = ["combat", "utility", "whimsy"];
   const TYPE_ORDER = { combat: 0, utility: 1, whimsy: 2 };
   const NAME_KEYS = {
@@ -161,8 +162,8 @@
 
   const displayDefaults = {
     phosphor: "amber",
-    brightness: 100,
-    contrast: 100,
+    brightness: 44,
+    contrast: 38,
     bloom: 14,
     scanlines: 45,
     vignette: 52,
@@ -171,8 +172,8 @@
   };
 
   const displayLimits = {
-    brightness: [20, 250],
-    contrast: [50, 180],
+    brightness: [0, 100],
+    contrast: [0, 100],
     bloom: [0, 200],
     scanlines: [0, 100],
     vignette: [0, 100],
@@ -241,10 +242,19 @@
     }
   }
 
+  function mapBrightnessToLegacy(numeric) {
+    return 20 + (numeric / 100) * 180;
+  }
+
+  function mapContrastToLegacy(numeric) {
+    return 50 + (numeric / 100) * 130;
+  }
+
   function applyBrightness(numeric) {
-    const below = Math.min(numeric, 100) / 100;
-    const above = Math.max(0, numeric - 100) / 150;
-    const contentOpacity = numeric <= 100
+    const legacyValue = mapBrightnessToLegacy(numeric);
+    const below = Math.min(legacyValue, 100) / 100;
+    const above = Math.max(0, legacyValue - 100) / 100;
+    const contentOpacity = legacyValue <= 100
       ? 0.10 + Math.pow(below, 1.35) * 0.90
       : 1;
 
@@ -260,9 +270,10 @@
   }
 
   function applyContrast(numeric) {
-    // Restored from v5, with the slider direction reversed: values above
-    // 100 add the phosphor-colored wash; values below 100 add the black overlay.
-    const distance = 100 - numeric;
+    // Preserve the restored v5 contrast response while exposing it on a
+    // normalized 0-100 developer scale.
+    const legacyValue = mapContrastToLegacy(numeric);
+    const distance = 100 - legacyValue;
 
     setRootProperty(
       "--contrast-overlay-alpha",
@@ -336,6 +347,14 @@
     }
   }
 
+  function legacyBrightnessToScale(value) {
+    return ((clamp(value, 20, 200) - 20) / 180) * 100;
+  }
+
+  function legacyContrastToScale(value) {
+    return ((clamp(value, 50, 180) - 50) / 130) * 100;
+  }
+
   function loadDisplaySettings() {
     const phosphor = readStorage(
       `${DISPLAY_STORAGE_PREFIX}-phosphor`,
@@ -343,15 +362,30 @@
     );
     applyPhosphor(phosphor, false);
 
+    const scaleVersion = readStorage(`${DISPLAY_STORAGE_PREFIX}-scale-version`);
+
     Object.keys(displayDefaults)
       .filter((name) => name !== "phosphor")
       .forEach((name) => {
         const stored = readStorage(`${DISPLAY_STORAGE_PREFIX}-${name}`);
-        const value = stored !== null && stored !== ""
+        let value = stored !== null && stored !== ""
           ? Number(stored)
           : displayDefaults[name];
+
+        if (scaleVersion !== DISPLAY_SCALE_VERSION) {
+          if (name === "brightness" && stored !== null && stored !== "") {
+            value = legacyBrightnessToScale(value);
+          } else if (name === "contrast" && stored !== null && stored !== "") {
+            value = legacyContrastToScale(value);
+          }
+        }
+
         applyDisplaySetting(name, value, false);
       });
+
+    writeStorage(`${DISPLAY_STORAGE_PREFIX}-scale-version`, DISPLAY_SCALE_VERSION);
+    writeStorage(`${DISPLAY_STORAGE_PREFIX}-brightness`, String(els.brightnessControl.value));
+    writeStorage(`${DISPLAY_STORAGE_PREFIX}-contrast`, String(els.contrastControl.value));
   }
 
   function updateViewportEffectsBounds() {
