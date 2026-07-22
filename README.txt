@@ -21,3 +21,13 @@ RECIPE ASSUMPTION
 A recipe contains three different selected ingredients. For each potion type,
 the three corresponding ingredient values are added together. A valid total
 from 1 through 60 maps to that numbered potion in potion_names.json.
+
+V4 DISPLAY CALIBRATION
+----------------------
+This prototype adds developer-only calibration controls for phosphor color,
+brightness, contrast, bloom, scanlines, vignette, screen-edge bezel shading,
+curvature, phosphor persistence, and top-down redraw speed.
+
+The logo is centered within the 132-column display. Scanlines now range from
+invisible to intentionally severe, and the vignette affects all four edges of
+the screen. Bloom applies to text and interface borders.

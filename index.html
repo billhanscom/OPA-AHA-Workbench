@@ -14,134 +14,170 @@
   <a class="skip-link" href="#workspace">Skip to Recipe Generator</a>
 
   <div class="crt-shell">
-    <div class="terminal" id="terminal">
-      <header class="system-bar" aria-label="System controls">
-        <section class="system-cell system-inventory" aria-label="Inventory controls">
-          <span class="system-label">INVENTORY</span><span class="inventory-state" id="inventoryState" aria-live="polite">&nbsp;</span>
-          <button type="button" class="text-control" id="clearInventory">Clear</button>
-          <button type="button" class="text-control" id="saveInventory">Save</button>
-          <button type="button" class="text-control" id="loadInventory">Load</button>
-          <button type="button" class="text-control" id="viewInventory">View</button>
-        </section>
+    <div class="screen-frame" id="screenFrame">
+      <div class="screen-surface" id="screenSurface">
+        <div class="terminal" id="terminal">
+          <header class="system-bar bloom-border" aria-label="System controls">
+            <section class="system-cell system-inventory" aria-label="Inventory controls">
+              <span class="system-label">INVENTORY</span><span class="inventory-state" id="inventoryState" aria-live="polite">&nbsp;</span>
+              <button type="button" class="text-control" id="clearInventory">Clear</button>
+              <button type="button" class="text-control" id="saveInventory">Save</button>
+              <button type="button" class="text-control" id="loadInventory">Load</button>
+              <button type="button" class="text-control" id="viewInventory">View</button>
+            </section>
 
-        <section class="system-cell system-current" aria-live="polite">
-          <span class="system-label">CURRENT</span>
-          <span id="currentInventory" title="No Inventory Loaded">No Inventory Loaded</span>
-        </section>
+            <section class="system-cell system-current" aria-live="polite">
+              <span class="system-label">CURRENT</span>
+              <span id="currentInventory" title="No Inventory Loaded">No Inventory Loaded</span>
+            </section>
 
-        <section class="system-cell system-values" aria-label="Rules values">
-          <span class="system-label">VALUES</span>
-          <button type="button" class="value-option is-active" data-ruleset="2024" aria-pressed="true">2024</button>
-          <button type="button" class="value-option" data-ruleset="2014" aria-pressed="false">2014</button>
-          <button type="button" class="text-control display-toggle" id="displaySettingsToggle" aria-expanded="false" aria-controls="displaySettings">CRT</button>
-        </section>
-      </header>
+            <section class="system-cell system-values" aria-label="Rules values">
+              <span class="system-label">VALUES</span>
+              <button type="button" class="value-option is-active" data-ruleset="2024" aria-pressed="true">2024</button>
+              <button type="button" class="value-option" data-ruleset="2014" aria-pressed="false">2014</button>
+              <button type="button" class="text-control display-toggle" id="displaySettingsToggle" aria-expanded="false" aria-controls="displaySettings">CRT</button>
+            </section>
+          </header>
 
-      <section class="display-settings" id="displaySettings" hidden aria-labelledby="displaySettingsTitle">
-        <div class="display-settings-heading">
-          <h2 id="displaySettingsTitle">CRT DISPLAY</h2>
-          <div>
-            <button type="button" class="text-control" id="resetDisplaySettings">Reset</button>
-            <button type="button" class="text-control" id="closeDisplaySettings">Close</button>
-          </div>
+          <section class="display-settings bloom-border" id="displaySettings" hidden aria-labelledby="displaySettingsTitle">
+            <div class="display-settings-heading">
+              <h2 id="displaySettingsTitle">DISPLAY CALIBRATION</h2>
+              <div>
+                <button type="button" class="text-control" id="resetDisplaySettings">Reset</button>
+                <button type="button" class="text-control" id="closeDisplaySettings">Close</button>
+              </div>
+            </div>
+            <div class="display-controls">
+              <label class="display-control phosphor-control" for="phosphorControl">
+                <span>PHOSPHOR</span>
+                <select id="phosphorControl">
+                  <option value="amber">Amber</option>
+                  <option value="green">Green</option>
+                  <option value="white">White</option>
+                </select>
+              </label>
+              <label class="display-control" for="brightnessControl">
+                <span>BRIGHTNESS</span>
+                <input id="brightnessControl" type="range" min="50" max="160" step="1" value="100">
+                <output id="brightnessValue" for="brightnessControl">100%</output>
+              </label>
+              <label class="display-control" for="contrastControl">
+                <span>CONTRAST</span>
+                <input id="contrastControl" type="range" min="50" max="180" step="1" value="100">
+                <output id="contrastValue" for="contrastControl">100%</output>
+              </label>
+              <label class="display-control" for="bloomControl">
+                <span>BLOOM</span>
+                <input id="bloomControl" type="range" min="0" max="100" step="1" value="14">
+                <output id="bloomValue" for="bloomControl">14%</output>
+              </label>
+              <label class="display-control" for="scanlineControl">
+                <span>SCANLINES</span>
+                <input id="scanlineControl" type="range" min="0" max="100" step="1" value="45">
+                <output id="scanlineValue" for="scanlineControl">45%</output>
+              </label>
+              <label class="display-control" for="vignetteControl">
+                <span>VIGNETTE</span>
+                <input id="vignetteControl" type="range" min="0" max="100" step="1" value="52">
+                <output id="vignetteValue" for="vignetteControl">52%</output>
+              </label>
+              <label class="display-control" for="bezelControl">
+                <span>BEZEL</span>
+                <input id="bezelControl" type="range" min="0" max="100" step="1" value="30">
+                <output id="bezelValue" for="bezelControl">30%</output>
+              </label>
+              <label class="display-control" for="curvatureControl">
+                <span>CURVATURE</span>
+                <input id="curvatureControl" type="range" min="0" max="100" step="1" value="8">
+                <output id="curvatureValue" for="curvatureControl">8%</output>
+              </label>
+              <label class="display-control" for="persistenceControl">
+                <span>PERSISTENCE</span>
+                <input id="persistenceControl" type="range" min="0" max="500" step="10" value="40">
+                <output id="persistenceValue" for="persistenceControl">40 ms</output>
+              </label>
+              <label class="display-control" for="redrawControl">
+                <span>REDRAW</span>
+                <input id="redrawControl" type="range" min="0" max="1500" step="25" value="150">
+                <output id="redrawValue" for="redrawControl">150 ms</output>
+              </label>
+            </div>
+          </section>
+
+          <section class="masthead" aria-labelledby="site-title">
+            <h1 id="site-title" class="visually-hidden">Obojima Potion Almanac</h1>
+            <pre class="ascii-logo" aria-hidden="true">▒███████ ▒████████  ▒███████    ▒█████▒████▒██     ▒██  ▒█████
+▒██    ▒██▒██    ▒██▒██    ▒██      ▒██ ▒██ ▒███   ▒███ ▒██  ▒██
+▒██    ▒██▒████████ ▒██    ▒██      ▒██ ▒██ ▒████ ▒████▒█████████
+▒██    ▒██▒██    ▒██▒██    ▒██▒██   ▒██ ▒██ ▒██ ▒██ ▒██▒██    ▒██
+ ▒███████ ▒████████  ▒███████  ▒██████ ▒████▒██     ▒██▒██    ▒██
+
+     ▒████████  ▒███████ ▒████████▒████ ▒███████ ▒███   ▒██
+     ▒██    ▒██▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒████  ▒██
+     ▒████████ ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██▒███▒██
+     ▒██       ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██  ▒████
+     ▒██        ▒███████    ▒██   ▒████ ▒███████ ▒██   ▒███
+
+▒█████  ▒██      ▒██     ▒██  ▒█████  ▒██    ▒██  ▒█████   ▒███████
+▒██  ▒██ ▒██      ▒███   ▒███ ▒██  ▒██ ▒████  ▒██ ▒██  ▒██ ▒██    ▒██
+▒█████████▒██      ▒████ ▒████▒█████████▒██▒███▒██▒█████████▒██
+▒██    ▒██▒██      ▒██ ▒██ ▒██▒██    ▒██▒██  ▒████▒██    ▒██▒██    ▒██
+▒██    ▒██▒████████▒██     ▒██▒██    ▒██▒██    ▒██▒██    ▒██ ▒███████</pre>
+          </section>
+
+          <nav class="main-nav" aria-label="Primary tools">
+            <button class="terminal-tab is-active bloom-border" type="button" aria-current="page">RECIPE GENERATOR</button>
+            <button class="terminal-tab bloom-border" type="button" disabled title="Not included in this prototype">INGREDIENT FINDER</button>
+            <button class="terminal-tab bloom-border" type="button" disabled title="Not included in this prototype">FORAGING AID</button>
+          </nav>
+
+          <main id="workspace">
+            <p class="instructions" id="selectionHelp">Select the ingredients in your inventory.</p>
+
+            <section class="ingredient-panel bloom-border" aria-describedby="selectionHelp">
+              <div class="ingredient-column" data-rarity="common">
+                <h2>COMMON INGREDIENTS</h2>
+                <div class="ingredient-list" id="commonList"></div>
+              </div>
+              <div class="ingredient-column" data-rarity="uncommon">
+                <h2>UNCOMMON INGREDIENTS</h2>
+                <div class="ingredient-list" id="uncommonList"></div>
+              </div>
+              <div class="ingredient-column" data-rarity="rare">
+                <h2>RARE INGREDIENTS</h2>
+                <div class="ingredient-list" id="rareList"></div>
+              </div>
+            </section>
+
+            <section class="command-row" aria-label="Recipe generator commands">
+              <button type="button" class="terminal-command primary-command bloom-border" id="generateRecipes">GENERATE RECIPES</button>
+              <button type="button" class="terminal-command bloom-border" id="clearSelection">CLEAR SELECTION</button>
+              <label class="filter-control">
+                <span>FILTER</span>
+                <input id="ingredientFilter" type="search" autocomplete="off" spellcheck="false" placeholder="Ingredient name">
+              </label>
+            </section>
+
+            <section class="inventory-drawer bloom-border" id="inventoryDrawer" hidden aria-labelledby="inventoryDrawerTitle">
+              <div class="drawer-heading">
+                <h2 id="inventoryDrawerTitle">CURRENT INVENTORY</h2>
+                <button type="button" class="text-control" id="closeInventory">Close</button>
+              </div>
+              <ol id="inventorySummary"></ol>
+            </section>
+
+            <section class="results-panel bloom-border" id="resultsPanel" aria-labelledby="resultsTitle" hidden>
+              <div class="results-heading">
+                <h2 id="resultsTitle">BREWABLE POTIONS</h2>
+                <p id="resultSummary"></p>
+              </div>
+              <div id="recipeResults" class="recipe-results"></div>
+            </section>
+          </main>
         </div>
-        <div class="display-controls">
-          <label class="display-control" for="phosphorControl">
-            <span>PHOSPHOR</span>
-            <select id="phosphorControl">
-              <option value="amber">Amber</option>
-              <option value="green">Green</option>
-              <option value="white">White</option>
-            </select>
-          </label>
-          <label class="display-control" for="bloomControl">
-            <span>BLOOM</span>
-            <input id="bloomControl" type="range" min="0" max="100" step="1" value="14">
-            <output id="bloomValue" for="bloomControl">14%</output>
-          </label>
-          <label class="display-control" for="vignetteControl">
-            <span>VIGNETTE</span>
-            <input id="vignetteControl" type="range" min="0" max="100" step="1" value="82">
-            <output id="vignetteValue" for="vignetteControl">82%</output>
-          </label>
-          <label class="display-control" for="scanlineControl">
-            <span>SCANLINES</span>
-            <input id="scanlineControl" type="range" min="0" max="100" step="1" value="45">
-            <output id="scanlineValue" for="scanlineControl">45%</output>
-          </label>
-        </div>
-      </section>
-
-      <section class="masthead" aria-labelledby="site-title">
-        <h1 id="site-title" class="visually-hidden">Obojima Potion Almanac</h1>
-        <pre class="ascii-logo" aria-hidden="true">                  ▒███████ ▒████████  ▒███████    ▒█████▒████▒██     ▒██  ▒█████
-                 ▒██    ▒██▒██    ▒██▒██    ▒██      ▒██ ▒██ ▒███   ▒███ ▒██  ▒██
-                 ▒██    ▒██▒████████ ▒██    ▒██      ▒██ ▒██ ▒████ ▒████▒█████████
-                 ▒██    ▒██▒██    ▒██▒██    ▒██▒██   ▒██ ▒██ ▒██ ▒██ ▒██▒██    ▒██
-                  ▒███████ ▒████████  ▒███████  ▒██████ ▒████▒██     ▒██▒██    ▒██
-
-                      ▒████████  ▒███████ ▒████████▒████ ▒███████ ▒███   ▒██
-                      ▒██    ▒██▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒████  ▒██
-                      ▒████████ ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██▒███▒██
-                      ▒██       ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██  ▒████
-                      ▒██        ▒███████    ▒██   ▒████ ▒███████ ▒██   ▒███
-
-                 ▒█████  ▒██      ▒██     ▒██  ▒█████  ▒██    ▒██  ▒█████   ▒███████
-                ▒██  ▒██ ▒██      ▒███   ▒███ ▒██  ▒██ ▒████  ▒██ ▒██  ▒██ ▒██    ▒██
-               ▒█████████▒██      ▒████ ▒████▒█████████▒██▒███▒██▒█████████▒██
-               ▒██    ▒██▒██      ▒██ ▒██ ▒██▒██    ▒██▒██  ▒████▒██    ▒██▒██    ▒██
-               ▒██    ▒██▒████████▒██     ▒██▒██    ▒██▒██    ▒██▒██    ▒██ ▒███████</pre>
-      </section>
-
-      <nav class="main-nav" aria-label="Primary tools">
-        <button class="terminal-tab is-active" type="button" aria-current="page">RECIPE GENERATOR</button>
-        <button class="terminal-tab" type="button" disabled title="Not included in this prototype">INGREDIENT FINDER</button>
-        <button class="terminal-tab" type="button" disabled title="Not included in this prototype">FORAGING AID</button>
-      </nav>
-
-      <main id="workspace">
-        <p class="instructions" id="selectionHelp">Select the ingredients in your inventory.</p>
-
-        <section class="ingredient-panel" aria-describedby="selectionHelp">
-          <div class="ingredient-column" data-rarity="common">
-            <h2>COMMON INGREDIENTS</h2>
-            <div class="ingredient-list" id="commonList"></div>
-          </div>
-          <div class="ingredient-column" data-rarity="uncommon">
-            <h2>UNCOMMON INGREDIENTS</h2>
-            <div class="ingredient-list" id="uncommonList"></div>
-          </div>
-          <div class="ingredient-column" data-rarity="rare">
-            <h2>RARE INGREDIENTS</h2>
-            <div class="ingredient-list" id="rareList"></div>
-          </div>
-        </section>
-
-        <section class="command-row" aria-label="Recipe generator commands">
-          <button type="button" class="terminal-command primary-command" id="generateRecipes">GENERATE RECIPES</button>
-          <button type="button" class="terminal-command" id="clearSelection">CLEAR SELECTION</button>
-          <label class="filter-control">
-            <span>FILTER</span>
-            <input id="ingredientFilter" type="search" autocomplete="off" spellcheck="false" placeholder="Ingredient name">
-          </label>
-        </section>
-
-        <section class="inventory-drawer" id="inventoryDrawer" hidden aria-labelledby="inventoryDrawerTitle">
-          <div class="drawer-heading">
-            <h2 id="inventoryDrawerTitle">CURRENT INVENTORY</h2>
-            <button type="button" class="text-control" id="closeInventory">Close</button>
-          </div>
-          <ol id="inventorySummary"></ol>
-        </section>
-
-        <section class="results-panel" id="resultsPanel" aria-labelledby="resultsTitle" hidden>
-          <div class="results-heading">
-            <h2 id="resultsTitle">BREWABLE POTIONS</h2>
-            <p id="resultSummary"></p>
-          </div>
-          <div id="recipeResults" class="recipe-results"></div>
-        </section>
-      </main>
+      </div>
+      <div class="scanline-layer" aria-hidden="true"></div>
+      <div class="glass-layer" aria-hidden="true"></div>
     </div>
   </div>
 
