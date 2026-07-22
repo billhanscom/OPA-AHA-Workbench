@@ -31,3 +31,10 @@ curvature, phosphor persistence, and top-down redraw speed.
 The logo is centered within the 132-column display. Scanlines now range from
 invisible to intentionally severe, and the vignette affects all four edges of
 the screen. Bloom applies to text and interface borders.
+
+V5 display corrections:
+- Brightness and contrast no longer use CSS filters that shift phosphor hue.
+- Bloom now reaches dynamically generated ingredient text and luminous control fills.
+- Vignette, scanlines, contrast, and bezel are fixed to the visible browser viewport.
+- Bezel is a viewport-edge glass/shadow effect only.
+- ASCII logo centering and ligature behavior were corrected.

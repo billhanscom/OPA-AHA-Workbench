@@ -115,11 +115,16 @@
     const decimal = numeric / 100;
 
     if (name === "brightness") {
-      root.style.setProperty("--brightness", String(decimal));
+      const opacity = Math.min(1, numeric / 100);
+      root.style.setProperty("--brightness-opacity", String(opacity));
+      const extraBloom = Math.max(0, (numeric - 100) / 60);
+      root.style.setProperty("--brightness-glow-alpha", String(extraBloom * .22));
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      root.style.setProperty("--contrast", String(decimal));
+      const distance = numeric - 100;
+      root.style.setProperty("--contrast-overlay-alpha", String(distance > 0 ? Math.min(.55, distance / 145) : 0));
+      root.style.setProperty("--contrast-wash-alpha", String(distance < 0 ? Math.min(.18, Math.abs(distance) / 280) : 0));
       els.contrastControl.value = String(numeric);
       els.contrastValue.value = `${numeric}%`;
     } else if (name === "bloom") {
@@ -140,10 +145,10 @@
       els.vignetteControl.value = String(numeric);
       els.vignetteValue.value = `${numeric}%`;
     } else if (name === "bezel") {
-      root.style.setProperty("--bezel-alpha", String(.08 + decimal * .70));
-      root.style.setProperty("--bezel-glow-alpha", String(decimal * .04));
-      root.style.setProperty("--bezel-inset", `${1 + decimal * 5}rem`);
-      root.style.setProperty("--bezel-outer", `${.5 + decimal * 4}rem`);
+      root.style.setProperty("--bezel-alpha", String(decimal * .86));
+      root.style.setProperty("--bezel-glow-alpha", String(decimal * .05));
+      root.style.setProperty("--bezel-inset", `${decimal * 9}rem`);
+      root.style.setProperty("--bezel-outer", "0rem");
       els.bezelControl.value = String(numeric);
       els.bezelValue.value = `${numeric}%`;
     } else if (name === "curvature") {
