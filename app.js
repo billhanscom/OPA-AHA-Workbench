@@ -128,10 +128,9 @@
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      // Restored exactly from v5: values below 100 add a phosphor-colored
-      // wash; values above 100 add a black overlay. The slider now reads in
-      // the intuitive direction: lower percentage = lower contrast.
-      const distance = numeric - 100;
+      // Restored from v5, with the slider direction reversed: values above
+      // 100 add the phosphor-colored wash; values below 100 add the black overlay.
+      const distance = 100 - numeric;
       root.style.setProperty("--contrast-overlay-alpha", String(distance > 0 ? Math.min(.55, distance / 145) : 0));
       root.style.setProperty("--contrast-wash-alpha", String(distance < 0 ? Math.min(.18, Math.abs(distance) / 280) : 0));
       // Disable later contrast experiments so only the v5 layer is active.
