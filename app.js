@@ -9,8 +9,7 @@
   const state = {
     ruleset: "2024",
     selected: new Set(),
-    generated: false,
-    currentName: "No Inventory Loaded"
+    generated: false
   };
 
   const els = {
@@ -19,209 +18,26 @@
       uncommon: document.getElementById("uncommonList"),
       rare: document.getElementById("rareList")
     },
+    selectedCount: document.getElementById("selectedCount"),
+    ingredientCount: document.getElementById("ingredientCount"),
     currentInventory: document.getElementById("currentInventory"),
-    inventoryState: document.getElementById("inventoryState"),
+    status: document.getElementById("systemStatus"),
     filter: document.getElementById("ingredientFilter"),
     drawer: document.getElementById("inventoryDrawer"),
     inventorySummary: document.getElementById("inventorySummary"),
     resultsPanel: document.getElementById("resultsPanel"),
     recipeResults: document.getElementById("recipeResults"),
-    resultSummary: document.getElementById("resultSummary"),
-    displaySettings: document.getElementById("displaySettings"),
-    displaySettingsToggle: document.getElementById("displaySettingsToggle"),
-    phosphorControl: document.getElementById("phosphorControl"),
-    bloomControl: document.getElementById("bloomControl"),
-    vignetteControl: document.getElementById("vignetteControl"),
-    scanlineControl: document.getElementById("scanlineControl"),
-    brightnessControl: document.getElementById("brightnessControl"),
-    contrastControl: document.getElementById("contrastControl"),
-    bezelControl: document.getElementById("bezelControl"),
-    curvatureControl: document.getElementById("curvatureControl"),
-    persistenceControl: document.getElementById("persistenceControl"),
-    redrawControl: document.getElementById("redrawControl"),
-    bloomValue: document.getElementById("bloomValue"),
-    vignetteValue: document.getElementById("vignetteValue"),
-    scanlineValue: document.getElementById("scanlineValue"),
-    brightnessValue: document.getElementById("brightnessValue"),
-    contrastValue: document.getElementById("contrastValue"),
-    bezelValue: document.getElementById("bezelValue"),
-    curvatureValue: document.getElementById("curvatureValue"),
-    persistenceValue: document.getElementById("persistenceValue"),
-    redrawValue: document.getElementById("redrawValue"),
-    screenFrame: document.getElementById("screenFrame"),
-    screenSurface: document.getElementById("screenSurface"),
-    terminal: document.getElementById("terminal"),
-    viewportEffects: document.getElementById("viewportEffects"),
-    redrawSweep: document.getElementById("redrawSweep")
+    resultSummary: document.getElementById("resultSummary")
   };
 
-  const nameKeys = { combat: "combat_names", utility: "utility_names", whimsy: "whimsy_names" };
-
-  const phosphors = {
-    amber: {
-      rgb: "255 176 0", phosphor: "#ffb000", bright: "#ffb000", dim: "#a87300", faint: "#674800",
-      screen: "#15110a", deep: "#0c0a06", body: "radial-gradient(ellipse at center, #20180b 0%, #080704 72%, #020201 100%)"
-    },
-    green: {
-      rgb: "51 255 102", phosphor: "#33ff66", bright: "#33ff66", dim: "#20a843", faint: "#146629",
-      screen: "#07150b", deep: "#030c05", body: "radial-gradient(ellipse at center, #0b2111 0%, #040a05 72%, #010301 100%)"
-    },
-    white: {
-      rgb: "232 239 232", phosphor: "#e8efe8", bright: "#f7fff7", dim: "#99a399", faint: "#5d665d",
-      screen: "#111411", deep: "#080a08", body: "radial-gradient(ellipse at center, #1b201b 0%, #080a08 72%, #020302 100%)"
-    }
+  const nameKeys = {
+    combat: "combat_names",
+    utility: "utility_names",
+    whimsy: "whimsy_names"
   };
 
-  const displayDefaults = {
-    phosphor: "amber",
-    brightness: 100,
-    contrast: 100,
-    bloom: 14,
-    scanlines: 45,
-    vignette: 52,
-    bezel: 30,
-    curvature: 8,
-    persistence: 40,
-    redraw: 150
-  };
-
-  function setStatus() {}
-
-  function applyPhosphor(name, save = true) {
-    const key = phosphors[name] ? name : "amber";
-    const palette = phosphors[key];
-    const root = document.documentElement;
-    root.style.setProperty("--phosphor-rgb", palette.rgb);
-    root.style.setProperty("--phosphor", palette.phosphor);
-    root.style.setProperty("--phosphor-bright", palette.bright);
-    root.style.setProperty("--phosphor-dim", palette.dim);
-    root.style.setProperty("--phosphor-faint", palette.faint);
-    root.style.setProperty("--screen", palette.screen);
-    root.style.setProperty("--screen-deep", palette.deep);
-    document.body.style.background = palette.deep;
-    els.screenFrame.style.background = palette.deep;
-    els.phosphorControl.value = key;
-    if (save) {
-      try { localStorage.setItem("opa-first-age-display-phosphor", key); } catch (error) {}
-    }
-  }
-
-  function applyDisplaySetting(name, value, save = true) {
-    const root = document.documentElement;
-    const limits = {
-      brightness: [50, 160], contrast: [50, 180], bloom: [0, 100], scanlines: [0, 100],
-      vignette: [0, 100], bezel: [0, 100], curvature: [0, 100], persistence: [0, 500], redraw: [0, 1500]
-    };
-    const [minimum, maximum] = limits[name] || [0, 100];
-    const numeric = Math.max(minimum, Math.min(maximum, Number(value)));
-    const decimal = numeric / 100;
-
-    if (name === "brightness") {
-      root.style.setProperty("--display-brightness", String(numeric / 100));
-      els.brightnessControl.value = String(numeric);
-      els.brightnessValue.value = `${numeric}%`;
-    } else if (name === "contrast") {
-      root.style.setProperty("--display-contrast", String(numeric / 100));
-      els.contrastControl.value = String(numeric);
-      els.contrastValue.value = `${numeric}%`;
-    } else if (name === "bloom") {
-      root.style.setProperty("--composite-bloom-radius", `${(numeric / 100) * 11}px`);
-      root.style.setProperty("--composite-bloom-alpha", String((numeric / 100) * .78));
-      root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .32));
-      els.bloomControl.value = String(numeric);
-      els.bloomValue.value = `${numeric}%`;
-    } else if (name === "scanlines") {
-      root.style.setProperty("--scanline-light-alpha", String(decimal * .14));
-      root.style.setProperty("--scanline-dark-alpha", String(decimal * .90));
-      els.scanlineControl.value = String(numeric);
-      els.scanlineValue.value = `${numeric}%`;
-    } else if (name === "vignette") {
-      root.style.setProperty("--vignette-strength", String(decimal));
-      els.vignetteControl.value = String(numeric);
-      els.vignetteValue.value = `${numeric}%`;
-    } else if (name === "bezel") {
-      root.style.setProperty("--edge-strength", String(decimal));
-      root.style.setProperty("--edge-blur", `${decimal * 1.8}px`);
-      root.style.setProperty("--edge-darkness", String(decimal * .48));
-      els.bezelControl.value = String(numeric);
-      els.bezelValue.value = `${numeric}%`;
-    } else if (name === "curvature") {
-      root.style.setProperty("--curve", String(decimal));
-      root.style.setProperty("--screen-radius", `${4 + decimal * 38}px`);
-      root.style.setProperty("--curve-scale-x", String(1 - decimal * .018));
-      root.style.setProperty("--curve-scale-y", String(1 - decimal * .008));
-      root.style.setProperty("--curve-perspective", `${2400 - numeric * 10}px`);
-      els.curvatureControl.value = String(numeric);
-      els.curvatureValue.value = `${numeric}%`;
-    } else if (name === "persistence") {
-      root.style.setProperty("--persistence-ms", `${numeric}ms`);
-      els.persistenceControl.value = String(numeric);
-      els.persistenceValue.value = `${numeric} ms`;
-    } else if (name === "redraw") {
-      root.style.setProperty("--redraw-ms", `${numeric}ms`);
-      els.redrawControl.value = String(numeric);
-      els.redrawValue.value = `${numeric} ms`;
-    }
-
-    if (save) {
-      try { localStorage.setItem(`opa-first-age-display-${name}`, String(numeric)); } catch (error) {}
-    }
-  }
-
-  function loadDisplaySettings() {
-    let phosphor = displayDefaults.phosphor;
-    try { phosphor = localStorage.getItem("opa-first-age-display-phosphor") || phosphor; } catch (error) {}
-    applyPhosphor(phosphor, false);
-    Object.keys(displayDefaults).filter(name => name !== "phosphor").forEach((name) => {
-      let value = displayDefaults[name];
-      try {
-        const stored = localStorage.getItem(`opa-first-age-display-${name}`);
-        if (stored !== null && stored !== "") value = Number(stored);
-      } catch (error) {}
-      applyDisplaySetting(name, value, false);
-    });
-  }
-
-  function capturePersistence() {
-    const duration = Number(els.persistenceControl.value || 0);
-    if (duration <= 0) return;
-    const ghost = els.screenSurface.cloneNode(true);
-    ghost.removeAttribute("id");
-    ghost.querySelectorAll("[id]").forEach(node => node.removeAttribute("id"));
-    ghost.querySelectorAll("button, input, select").forEach(node => node.setAttribute("disabled", ""));
-    ghost.className = "phosphor-ghost";
-    ghost.setAttribute("aria-hidden", "true");
-    els.screenFrame.appendChild(ghost);
-    window.setTimeout(() => ghost.remove(), duration + 50);
-  }
-
-  function updateViewportEffectsBounds() {
-    const rect = els.screenFrame.getBoundingClientRect();
-    document.documentElement.style.setProperty("--screen-left", `${Math.max(0, rect.left)}px`);
-    document.documentElement.style.setProperty("--screen-right", `${Math.max(0, window.innerWidth - rect.right)}px`);
-  }
-
-  function redraw() {
-    const duration = Number(els.redrawControl.value || 0);
-    if (duration <= 0 || !els.redrawSweep) return;
-    updateViewportEffectsBounds();
-    els.redrawSweep.style.setProperty("--active-redraw-ms", `${duration}ms`);
-    els.redrawSweep.classList.remove("is-active");
-    void els.redrawSweep.offsetWidth;
-    els.redrawSweep.classList.add("is-active");
-    window.setTimeout(() => els.redrawSweep.classList.remove("is-active"), duration + 80);
-  }
-
-  function toggleDisplaySettings(forceOpen) {
-    const open = typeof forceOpen === "boolean" ? forceOpen : els.displaySettings.hidden;
-    els.displaySettings.hidden = !open;
-    els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
-  }
-
-  function valueString(ingredient) {
-    const values = ingredient.values?.[state.ruleset] || {};
-    const pad = value => String(Number(value || 0)).padStart(2, "0");
-    return `${pad(values.combat)}/${pad(values.utility)}/${pad(values.whimsy)}`;
+  function setStatus(message) {
+    els.status.textContent = message.toUpperCase();
   }
 
   function renderIngredients() {
@@ -230,33 +46,14 @@
       const button = document.createElement("button");
       button.type = "button";
       button.className = "ingredient-item";
+      button.textContent = ingredient.name;
       button.dataset.name = ingredient.name;
       button.setAttribute("aria-pressed", "false");
-      button.title = ingredient.name;
-
-      const name = document.createElement("span");
-      name.className = "ingredient-name";
-      name.textContent = ingredient.name;
-      const values = document.createElement("span");
-      values.className = "ingredient-values";
-      values.textContent = valueString(ingredient);
-      button.append(name, values);
-
+      button.title = `${ingredient.name} — ${ingredient.rarity}`;
       button.addEventListener("click", () => toggleIngredient(ingredient.name, button));
       els.lists[ingredient.rarity]?.appendChild(button);
     });
-  }
-
-  function refreshIngredientValues() {
-    document.querySelectorAll(".ingredient-item").forEach((button) => {
-      const ingredient = ingredients.find(item => item.name === button.dataset.name);
-      const values = button.querySelector(".ingredient-values");
-      if (ingredient && values) values.textContent = valueString(ingredient);
-    });
-  }
-
-  function markUnsaved() {
-    els.inventoryState.textContent = "";
+    els.ingredientCount.textContent = String(ingredients.length);
   }
 
   function toggleIngredient(name, button) {
@@ -264,13 +61,14 @@
       state.selected.delete(name);
       button.classList.remove("is-selected");
       button.setAttribute("aria-pressed", "false");
+      setStatus(`${name} removed`);
     } else {
       state.selected.add(name);
       button.classList.add("is-selected");
       button.setAttribute("aria-pressed", "true");
+      setStatus(`${name} added`);
     }
     state.generated = false;
-    markUnsaved();
     updateInventoryDisplay();
   }
 
@@ -283,8 +81,9 @@
   }
 
   function updateInventoryDisplay() {
-    els.currentInventory.textContent = state.currentName;
-    els.currentInventory.title = state.currentName;
+    const count = state.selected.size;
+    els.selectedCount.textContent = String(count);
+    els.currentInventory.textContent = count ? `${count} Ingredient${count === 1 ? "" : "s"} Selected` : "No Inventory Loaded";
     renderInventorySummary();
     if (state.generated) generateRecipes();
   }
@@ -306,64 +105,59 @@
   function clearSelection() {
     state.selected.clear();
     state.generated = false;
-    state.currentName = "No Inventory Loaded";
     syncButtons();
-    markUnsaved();
     updateInventoryDisplay();
     els.resultsPanel.hidden = true;
+    setStatus("Inventory cleared");
   }
 
   function saveInventory() {
     try {
       localStorage.setItem("opa-first-age-inventory", JSON.stringify([...state.selected]));
       localStorage.setItem("opa-first-age-ruleset", state.ruleset);
-      localStorage.setItem("opa-first-age-inventory-name", "Saved Inventory");
-      state.currentName = "Saved Inventory";
-      els.inventoryState.textContent = "Saved";
-      updateInventoryDisplay();
+      setStatus(`Inventory saved / ${state.selected.size} ingredients`);
     } catch (error) {
-      els.inventoryState.textContent = "Error";
+      setStatus("Unable to save inventory");
     }
   }
 
   function loadInventory() {
-    capturePersistence();
     try {
       const saved = JSON.parse(localStorage.getItem("opa-first-age-inventory") || "[]");
       const validNames = new Set(ingredients.map(item => item.name));
       state.selected = new Set(saved.filter(name => validNames.has(name)));
-      state.currentName = localStorage.getItem("opa-first-age-inventory-name") || "Saved Inventory";
       const savedRuleset = localStorage.getItem("opa-first-age-ruleset");
       if (savedRuleset === "2014" || savedRuleset === "2024") setRuleset(savedRuleset);
       syncButtons();
-      els.inventoryState.textContent = "";
       updateInventoryDisplay();
-      redraw();
+      setStatus(`Inventory loaded / ${state.selected.size} ingredients`);
     } catch (error) {
-      state.currentName = "Unable to Load Inventory";
-      updateInventoryDisplay();
+      setStatus("Unable to load inventory");
     }
   }
 
   function setRuleset(ruleset) {
-    capturePersistence();
     state.ruleset = ruleset;
     document.querySelectorAll(".value-option").forEach((button) => {
       const active = button.dataset.ruleset === ruleset;
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", String(active));
     });
-    refreshIngredientValues();
-    markUnsaved();
+    setStatus(`${ruleset} values active`);
     if (state.generated) generateRecipes();
-    redraw();
   }
 
-  function getSelectedIngredients() { return ingredients.filter(item => state.selected.has(item.name)); }
-  function potionLabel(type, number) { return potionNames[nameKeys[type]]?.[String(number)] || "Unknown Potion"; }
+  function getSelectedIngredients() {
+    const names = state.selected;
+    return ingredients.filter(item => names.has(item.name));
+  }
+
+  function potionLabel(type, number) {
+    const key = nameKeys[type];
+    return potionNames[key]?.[String(number)] || "Unknown Potion";
+  }
 
   function generateRecipes() {
-    capturePersistence();
     const selected = getSelectedIngredients();
     els.recipeResults.replaceChildren();
     els.resultsPanel.hidden = false;
@@ -375,20 +169,23 @@
       p.textContent = "At least three ingredients are required to calculate a recipe.";
       els.recipeResults.appendChild(p);
       els.resultSummary.textContent = `${selected.length} ingredient${selected.length === 1 ? "" : "s"} available`;
-      els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-      redraw();
+      setStatus("Insufficient ingredients");
+      els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
 
     const groups = new Map();
     let combinationCount = 0;
+
     for (let i = 0; i < selected.length - 2; i++) {
       for (let j = i + 1; j < selected.length - 1; j++) {
         for (let k = j + 1; k < selected.length; k++) {
           combinationCount++;
           const trio = [selected[i], selected[j], selected[k]];
           ["combat", "utility", "whimsy"].forEach((type) => {
-            const number = trio.reduce((sum, ingredient) => sum + Number(ingredient.values?.[state.ruleset]?.[type] || 0), 0);
+            const number = trio.reduce((sum, ingredient) => {
+              return sum + Number(ingredient.values?.[state.ruleset]?.[type] || 0);
+            }, 0);
             if (number < 1 || number > 60) return;
             const key = `${type}:${number}`;
             if (!groups.has(key)) groups.set(key, { type, number, recipes: [] });
@@ -398,8 +195,11 @@
       }
     }
 
-    const typeOrder = { combat: 0, utility: 1, whimsy: 2 };
-    const sortedGroups = [...groups.values()].sort((a, b) => typeOrder[a.type] - typeOrder[b.type] || a.number - b.number);
+    const sortedGroups = [...groups.values()].sort((a, b) => {
+      const typeOrder = { combat: 0, utility: 1, whimsy: 2 };
+      return typeOrder[a.type] - typeOrder[b.type] || a.number - b.number;
+    });
+
     if (!sortedGroups.length) {
       const p = document.createElement("p");
       p.className = "empty-output";
@@ -408,73 +208,85 @@
     } else {
       sortedGroups.forEach(renderPotionGroup);
     }
+
     const totalRecipes = sortedGroups.reduce((sum, group) => sum + group.recipes.length, 0);
     els.resultSummary.textContent = `${sortedGroups.length} potion${sortedGroups.length === 1 ? "" : "s"} / ${totalRecipes} recipes / ${combinationCount} combinations`;
-    els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-    redraw();
+    setStatus(`Search complete / ${sortedGroups.length} potions found`);
+    els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderPotionGroup(group) {
     const article = document.createElement("article");
     article.className = "potion-group";
+
     const title = document.createElement("div");
     title.className = "potion-title";
     title.innerHTML = `<span class="potion-type">${group.type.toUpperCase()}</span><span class="potion-number">${group.number}</span><span class="potion-name"></span>`;
     title.querySelector(".potion-name").textContent = potionLabel(group.type, group.number);
     article.appendChild(title);
+
     const list = document.createElement("ol");
     list.className = "recipe-list";
-    group.recipes.forEach((recipe) => {
+    const visibleRecipes = group.recipes.slice(0, 12);
+    visibleRecipes.forEach((recipe) => {
       const li = document.createElement("li");
       li.textContent = recipe.join(" + ");
       list.appendChild(li);
     });
     article.appendChild(list);
+
+    if (group.recipes.length > visibleRecipes.length) {
+      const details = document.createElement("details");
+      details.className = "recipe-overflow";
+      const summary = document.createElement("summary");
+      summary.textContent = `Show ${group.recipes.length - visibleRecipes.length} additional recipes`;
+      details.appendChild(summary);
+      const extra = document.createElement("ol");
+      extra.className = "recipe-list";
+      group.recipes.slice(12).forEach((recipe) => {
+        const li = document.createElement("li");
+        li.textContent = recipe.join(" + ");
+        extra.appendChild(li);
+      });
+      details.appendChild(extra);
+      article.appendChild(details);
+    }
+
     els.recipeResults.appendChild(article);
   }
 
   function filterIngredients(query) {
     const normalized = query.trim().toLocaleLowerCase();
     document.querySelectorAll(".ingredient-item").forEach((button) => {
-      button.hidden = Boolean(normalized && !button.dataset.name.toLocaleLowerCase().includes(normalized));
+      button.hidden = normalized && !button.dataset.name.toLocaleLowerCase().includes(normalized);
     });
+    setStatus(normalized ? `Filter active / ${query}` : "Filter cleared");
   }
 
   document.getElementById("clearInventory").addEventListener("click", clearSelection);
   document.getElementById("clearSelection").addEventListener("click", clearSelection);
   document.getElementById("saveInventory").addEventListener("click", saveInventory);
   document.getElementById("loadInventory").addEventListener("click", loadInventory);
-  document.getElementById("viewInventory").addEventListener("click", () => { els.drawer.hidden = !els.drawer.hidden; });
-  document.getElementById("closeInventory").addEventListener("click", () => { els.drawer.hidden = true; });
-  document.getElementById("generateRecipes").addEventListener("click", generateRecipes);
-  els.displaySettingsToggle.addEventListener("click", () => toggleDisplaySettings());
-  document.getElementById("closeDisplaySettings").addEventListener("click", () => toggleDisplaySettings(false));
-  document.getElementById("resetDisplaySettings").addEventListener("click", () => {
-    applyPhosphor(displayDefaults.phosphor);
-    Object.keys(displayDefaults).filter(name => name !== "phosphor").forEach(name => applyDisplaySetting(name, displayDefaults[name]));
+  document.getElementById("viewInventory").addEventListener("click", () => {
+    els.drawer.hidden = !els.drawer.hidden;
+    setStatus(els.drawer.hidden ? "Inventory view closed" : "Inventory view opened");
   });
-  els.phosphorControl.addEventListener("change", event => applyPhosphor(event.target.value));
-  els.bloomControl.addEventListener("input", event => applyDisplaySetting("bloom", event.target.value));
-  els.vignetteControl.addEventListener("input", event => applyDisplaySetting("vignette", event.target.value));
-  els.scanlineControl.addEventListener("input", event => applyDisplaySetting("scanlines", event.target.value));
-  els.brightnessControl.addEventListener("input", event => applyDisplaySetting("brightness", event.target.value));
-  els.contrastControl.addEventListener("input", event => applyDisplaySetting("contrast", event.target.value));
-  els.bezelControl.addEventListener("input", event => applyDisplaySetting("bezel", event.target.value));
-  els.curvatureControl.addEventListener("input", event => applyDisplaySetting("curvature", event.target.value));
-  els.persistenceControl.addEventListener("input", event => applyDisplaySetting("persistence", event.target.value));
-  els.redrawControl.addEventListener("input", event => applyDisplaySetting("redraw", event.target.value));
-  document.querySelectorAll(".value-option").forEach(button => button.addEventListener("click", () => setRuleset(button.dataset.ruleset)));
+  document.getElementById("closeInventory").addEventListener("click", () => {
+    els.drawer.hidden = true;
+    setStatus("Inventory view closed");
+  });
+  document.getElementById("generateRecipes").addEventListener("click", generateRecipes);
+  document.querySelectorAll(".value-option").forEach(button => {
+    button.addEventListener("click", () => setRuleset(button.dataset.ruleset));
+  });
   els.filter.addEventListener("input", event => filterIngredients(event.target.value));
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !els.displaySettings.hidden) toggleDisplaySettings(false);
-    else if (event.key === "Escape" && !els.drawer.hidden) els.drawer.hidden = true;
+    if (event.key === "Escape" && !els.drawer.hidden) {
+      els.drawer.hidden = true;
+      setStatus("Inventory view closed");
+    }
   });
 
-  window.addEventListener("resize", updateViewportEffectsBounds);
-  window.addEventListener("scroll", updateViewportEffectsBounds, { passive: true });
-  loadDisplaySettings();
   renderIngredients();
   updateInventoryDisplay();
-  updateViewportEffectsBounds();
-  window.requestAnimationFrame(() => redraw());
 })();
