@@ -11,15 +11,23 @@
   <link rel="stylesheet" href="styles.css">
 
 <style id="crt-slider-patch">
-:root{--slider-track: color-mix(in srgb,var(--phosphor-color,#ffb000) 18%, #000);--slider-fill: var(--phosphor-color,#ffb000);}
-input[type="range"]{
-accent-color: var(--phosphor-color,#ffb000);
+:root {
+  --slider-track: color-mix(in srgb, var(--phosphor) 22%, var(--screen-deep));
+  --slider-border: color-mix(in srgb, var(--phosphor) 58%, var(--screen-deep));
 }
-input[type="range"]::-webkit-slider-runnable-track{
-background: var(--slider-track)!important;
+
+input[type="range"] {
+  accent-color: var(--phosphor);
 }
-input[type="range"]::-moz-range-track{
-background: var(--slider-track)!important;
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--slider-track);
+  border: 1px solid var(--slider-border);
+}
+
+input[type="range"]::-moz-range-track {
+  background: var(--slider-track);
+  border: 1px solid var(--slider-border);
 }
 </style>
 

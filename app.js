@@ -3,6 +3,8 @@
 
   const STORAGE_PREFIX = "opa-first-age";
   const DISPLAY_STORAGE_PREFIX = `${STORAGE_PREFIX}-display`;
+  const ACTIVE_SELECTION_STORAGE_KEY = `${STORAGE_PREFIX}-active-selection`;
+  const DISPLAY_PANEL_STORAGE_KEY = `${DISPLAY_STORAGE_PREFIX}-panel-open`;
   const DISPLAY_SCALE_VERSION = "2";
   const POTION_TYPES = ["combat", "utility", "whimsy"];
   const TYPE_ORDER = { combat: 0, utility: 1, whimsy: 2 };
@@ -409,12 +411,36 @@
     );
   }
 
+  function persistActiveSelection() {
+    writeStorage(ACTIVE_SELECTION_STORAGE_KEY, JSON.stringify([...state.selected]));
+  }
+
+  function restoreActiveSelection() {
+    const stored = readStorage(ACTIVE_SELECTION_STORAGE_KEY);
+    if (!stored) return;
+
+    try {
+      const validNames = new Set(ingredients.map((item) => item.name));
+      const savedNames = JSON.parse(stored);
+      if (Array.isArray(savedNames)) {
+        state.selected = new Set(savedNames.filter((name) => validNames.has(name)));
+      }
+    } catch (error) {}
+  }
+
+  function restoreDisplaySettingsVisibility() {
+    const open = readStorage(DISPLAY_PANEL_STORAGE_KEY, "false") === "true";
+    els.displaySettings.hidden = !open;
+    els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
+  }
+
   function toggleDisplaySettings(forceOpen) {
     const open = typeof forceOpen === "boolean"
       ? forceOpen
       : els.displaySettings.hidden;
     els.displaySettings.hidden = !open;
     els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
+    writeStorage(DISPLAY_PANEL_STORAGE_KEY, String(open));
   }
 
   function valueString(ingredient) {
@@ -474,6 +500,7 @@
     button.classList.toggle("is-selected", !selected);
     button.setAttribute("aria-pressed", String(!selected));
     state.generated = false;
+    persistActiveSelection();
     markUnsaved();
     updateInventoryDisplay();
   }
@@ -518,6 +545,7 @@
     state.selected.clear();
     state.generated = false;
     state.currentName = "No Inventory Loaded";
+    persistActiveSelection();
     syncButtons();
     markUnsaved();
     updateInventoryDisplay();
@@ -549,6 +577,7 @@
         setRuleset(savedRuleset);
       }
 
+      persistActiveSelection();
       syncButtons();
       els.inventoryState.textContent = "";
       updateInventoryDisplay();
@@ -749,7 +778,10 @@
   function initialize() {
     bindEvents();
     loadDisplaySettings();
+    restoreDisplaySettingsVisibility();
+    restoreActiveSelection();
     renderIngredients();
+    syncButtons();
     updateInventoryDisplay();
     initializeBloomComposite();
     updateViewportEffectsBounds();
