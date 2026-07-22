@@ -428,3 +428,124 @@ h1, h2, h3, p { font: inherit; }
   .viewport-effects { display: none; }
   .screen-surface { filter: none; transform: none; }
 }
+
+/* v7: faithful 132-column terminal grid ----------------------------------- */
+:root {
+  --terminal-columns: 132;
+  --terminal-width: 132ch;
+  --frame-gutter: 2ch;
+}
+
+body {
+  min-width: calc(var(--terminal-width) + (var(--frame-gutter) * 2));
+  overflow-x: auto;
+}
+
+.crt-shell {
+  padding: 1.5rem var(--frame-gutter) 3rem;
+}
+
+.screen-frame {
+  width: calc(var(--terminal-width) + (var(--frame-gutter) * 2));
+  padding: 2rem var(--frame-gutter);
+}
+
+.screen-surface,
+.terminal {
+  width: var(--terminal-width);
+  min-width: var(--terminal-width);
+  max-width: var(--terminal-width);
+}
+
+/* The four sections correspond to 40, 45, 22, and 20 interior cells in the
+   132-character reference line. Borders are included in the 132ch total. */
+.system-bar {
+  width: 100%;
+  grid-template-columns: 41fr 46fr 23fr 21fr;
+  border-width: 1px;
+}
+.system-cell {
+  min-width: 0;
+  min-height: 3em;
+  gap: 1ch;
+  padding: .45em 1ch;
+}
+.system-cell + .system-cell { border-left-width: 1px; }
+.system-inventory { justify-content: flex-start; }
+.system-inventory .inventory-state { display: none; }
+.system-current #currentInventory { flex: 1 1 auto; }
+.system-values { justify-content: flex-start; }
+.system-display { justify-content: center; padding-inline: .5ch; }
+.display-toggle { width: 100%; white-space: nowrap; text-align: center; }
+
+.masthead {
+  width: 132ch;
+  padding: 3em 0 2.25em;
+  overflow: hidden;
+  text-align: left;
+}
+.ascii-logo {
+  display: block;
+  width: 132ch;
+  min-width: 132ch;
+  max-width: 132ch;
+  margin: 0;
+  overflow: visible;
+  white-space: pre;
+  text-align: left;
+}
+
+.main-nav {
+  width: 132ch;
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  justify-content: center;
+  column-gap: 2ch;
+  margin-bottom: 2.5em;
+}
+.terminal-tab {
+  min-width: 22ch;
+  padding: .55em 1ch;
+}
+
+.generate-row {
+  display: flex;
+  justify-content: center;
+  width: 132ch;
+  margin: 0 0 2em;
+}
+.generate-row .primary-command {
+  min-width: 23ch;
+}
+
+.ingredient-panel {
+  width: 132ch;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-width: 1px;
+}
+.ingredient-column + .ingredient-column { border-left-width: 1px; }
+.ingredient-column h2 {
+  min-height: 3em;
+  border-bottom-width: 1px;
+}
+.ingredient-item {
+  grid-template-columns: minmax(0, 1fr) 10ch;
+  min-height: 3.05em;
+  padding: .75em 1ch;
+  align-items: center;
+}
+
+.command-row {
+  width: 132ch;
+  padding-top: 1em;
+}
+
+.display-settings,
+.inventory-drawer,
+.results-panel { width: 132ch; }
+
+@media (max-width: 1390px) {
+  /* Preserve the actual 132-cell grid. Small viewports scroll rather than
+     silently squeezing or reflowing the terminal. */
+  body { min-width: calc(var(--terminal-width) + (var(--frame-gutter) * 2)); }
+}
