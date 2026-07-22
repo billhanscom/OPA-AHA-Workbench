@@ -237,16 +237,6 @@ h1, h2, h3, p { font: inherit; }
   from { clip-path: inset(0 0 100% 0); }
   to { clip-path: inset(0 0 0 0); }
 }
-.phosphor-ghost {
-  position: absolute;
-  inset: 2rem;
-  z-index: 9;
-  pointer-events: none;
-  opacity: .22;
-  filter: blur(.6px);
-  animation: ghost-fade var(--persistence-ms) linear forwards;
-}
-@keyframes ghost-fade { to { opacity: 0; } }
 
 @media print {
   body { min-width: 0; background: #fff; color: #000; }
@@ -276,16 +266,14 @@ h1, h2, h3, p { font: inherit; }
   --edge-strength: .30;
   --edge-blur: .54px;
   --edge-darkness: .144;
-  --curve: .08;
-  --curve-edge-alpha: .04;
   --screen-left: 0px;
   --screen-right: 0px;
 }
 
 .screen-frame {
   overflow: hidden;
-  border-radius: var(--screen-radius);
-  clip-path: inset(0 round var(--screen-radius));
+  border-radius: 0;
+  clip-path: none;
 }
 
 
@@ -366,9 +354,9 @@ h1, h2, h3, p { font: inherit; }
   left: var(--screen-left);
   right: var(--screen-right);
   overflow: hidden;
-  border-radius: var(--screen-radius);
+  border-radius: 0;
   pointer-events: none;
-  clip-path: inset(0 round var(--screen-radius));
+  clip-path: none;
 }
 .viewport-effects > div { position: absolute; inset: 0; pointer-events: none; }
 
@@ -731,4 +719,64 @@ body::after {
   box-shadow:
     inset 0 0 calc(var(--small-text-bloom-radius) * 1.15) rgb(var(--phosphor-rgb) / calc(var(--small-text-bloom-alpha) * .55)),
     0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / calc(var(--small-text-bloom-alpha) * .48));
+}
+
+/* v14: final requested top-nav balance and bloom corrections. */
+.system-inventory,
+.system-current,
+.system-values {
+  padding-left: 1ch;
+  padding-right: 3ch;
+}
+.system-inventory > *,
+.system-current > *,
+.system-values > * {
+  transform: none;
+}
+
+/* Apply the slider-controlled phosphor halo directly to fine terminal text.
+   This bypasses the screen-level filter and makes small glyphs visibly bloom. */
+.system-bar,
+.display-settings,
+.ingredient-panel,
+.inventory-drawer,
+.results-panel,
+.command-row,
+.recipe-results,
+.terminal-tab,
+.terminal-command,
+.ingredient-item,
+.ingredient-item .ingredient-name,
+.ingredient-item .ingredient-values {
+  text-shadow:
+    0 0 .55px rgb(var(--phosphor-rgb) / .88),
+    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-alpha)),
+    0 0 var(--small-text-bloom-wide-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-wide-alpha));
+}
+
+/* Reverse-video buttons stay crisp and halo-free. */
+.text-control:hover,
+.text-control:focus-visible,
+.value-option:hover,
+.value-option:focus-visible,
+.value-option.is-active,
+.terminal-tab:hover:not(:disabled),
+.terminal-tab:focus-visible:not(:disabled),
+.terminal-command:hover,
+.terminal-command:focus-visible {
+  text-shadow: none;
+  box-shadow: none;
+}
+
+/* The selected ingredient's phosphor-filled rectangle gets its own bloom. */
+.ingredient-item.is-selected {
+  position: relative;
+  z-index: 0;
+  box-shadow:
+    inset 0 0 calc(var(--reverse-bloom-radius) * .65) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha)),
+    0 0 var(--reverse-bloom-radius) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha));
+}
+.ingredient-item.is-selected .ingredient-name,
+.ingredient-item.is-selected .ingredient-values {
+  text-shadow: none;
 }
