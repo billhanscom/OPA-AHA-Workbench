@@ -38,3 +38,14 @@ V5 display corrections:
 - Vignette, scanlines, contrast, and bezel are fixed to the visible browser viewport.
 - Bezel is a viewport-edge glass/shadow effect only.
 - ASCII logo centering and ligature behavior were corrected.
+
+V6 CRT changes
+--------------
+- Bloom is applied to the completed screen composite, so static and generated content glow consistently.
+- Brightness and contrast now use neutral luminance filters rather than colored overlays.
+- Vignette is fixed to the viewport vertically and follows the terminal container horizontally.
+- "Bezel" is now labeled "Edge Distortion" and controls edge defocus/darkening rather than duplicating the vignette.
+- Curvature now changes the screen transform and clipping, not just corner radius.
+- Borders include an inner phosphor glow.
+- Reload triggers a full-screen raster redraw using the REDRAW duration.
+- Persistence remains visible after content-changing actions as a fading phosphor ghost.

@@ -256,3 +256,175 @@ h1, h2, h3, p { font: inherit; }
   .scanline-layer, .glass-layer, .bezel-layer, .contrast-layer { display: none; }
   .bloom-border { box-shadow: none; }
 }
+
+/* v6 composite CRT pipeline ------------------------------------------------ */
+:root {
+  --display-brightness: 1;
+  --display-contrast: 1;
+  --composite-bloom-radius: 1.54px;
+  --composite-bloom-alpha: .109;
+  --inner-glow-alpha: .045;
+  --vignette-strength: .52;
+  --edge-strength: .30;
+  --edge-blur: .54px;
+  --edge-darkness: .144;
+  --curve: .08;
+  --curve-scale-x: .99856;
+  --curve-scale-y: .99936;
+  --curve-perspective: 2320px;
+  --screen-left: 0px;
+  --screen-right: 0px;
+}
+
+.screen-frame {
+  overflow: hidden;
+  border-radius: var(--screen-radius);
+  clip-path: inset(0 round var(--screen-radius));
+}
+
+.screen-surface {
+  opacity: 1;
+  transform-origin: 50% 50%;
+  transform:
+    perspective(var(--curve-perspective))
+    rotateX(calc(var(--curve) * .42deg))
+    scaleX(var(--curve-scale-x))
+    scaleY(var(--curve-scale-y));
+  filter:
+    brightness(var(--display-brightness))
+    contrast(var(--display-contrast))
+    drop-shadow(0 0 .7px rgb(var(--phosphor-rgb) / .72))
+    drop-shadow(0 0 var(--composite-bloom-radius) rgb(var(--phosphor-rgb) / var(--composite-bloom-alpha)));
+  will-change: filter, transform;
+}
+
+/* The final screen composite blooms; individual glyphs do not. */
+.terminal,
+.terminal button,
+.terminal input,
+.terminal select,
+.terminal output,
+.terminal pre,
+.terminal span,
+.terminal p,
+.terminal h1,
+.terminal h2,
+.terminal h3,
+.terminal li { text-shadow: none !important; }
+
+.bloom-border,
+.terminal-tab,
+.terminal-command,
+.system-bar,
+.display-settings,
+.ingredient-panel,
+.inventory-drawer,
+.results-panel {
+  box-shadow:
+    inset 0 0 3px rgb(var(--phosphor-rgb) / var(--inner-glow-alpha));
+}
+
+.terminal-tab:hover:not(:disabled),
+.terminal-tab:focus-visible:not(:disabled),
+.terminal-command:hover,
+.terminal-command:focus-visible,
+.text-control:hover,
+.text-control:focus-visible,
+.value-option:hover,
+.value-option:focus-visible,
+.value-option.is-active,
+.ingredient-item.is-selected { box-shadow: none; }
+
+.viewport-effects {
+  position: fixed;
+  z-index: 90;
+  top: 0;
+  bottom: 0;
+  left: var(--screen-left);
+  right: var(--screen-right);
+  overflow: hidden;
+  border-radius: var(--screen-radius);
+  pointer-events: none;
+  clip-path: inset(0 round var(--screen-radius));
+}
+.viewport-effects > div { position: absolute; inset: 0; pointer-events: none; }
+
+.scanline-layer {
+  position: absolute;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(var(--phosphor-rgb) / var(--scanline-light-alpha)) 0,
+    rgb(var(--phosphor-rgb) / var(--scanline-light-alpha)) 1px,
+    rgb(0 0 0 / var(--scanline-dark-alpha)) 1px,
+    rgb(0 0 0 / var(--scanline-dark-alpha)) 3px
+  );
+}
+
+/* Top and bottom are viewport-relative; left and right follow the screen container. */
+.glass-layer {
+  position: absolute;
+  z-index: 3;
+  background:
+    linear-gradient(to bottom,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .58)) 0%,
+      transparent 12%,
+      transparent 86%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .72)) 100%),
+    radial-gradient(ellipse 112% 94% at 50% 50%,
+      transparent 58%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .20)) 78%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .66)) 100%);
+}
+
+/* Edge focus falloff and compression cue, separate from the vignette. */
+.edge-layer {
+  z-index: 4;
+  backdrop-filter: blur(var(--edge-blur));
+  -webkit-backdrop-filter: blur(var(--edge-blur));
+  mask-image: radial-gradient(ellipse 82% 78% at center, transparent 0 58%, #000 82% 100%);
+  -webkit-mask-image: radial-gradient(ellipse 82% 78% at center, transparent 0 58%, #000 82% 100%);
+  box-shadow:
+    inset calc(2.4rem * var(--edge-strength)) 0 calc(4.8rem * var(--edge-strength)) rgb(0 0 0 / var(--edge-darkness)),
+    inset calc(-2.4rem * var(--edge-strength)) 0 calc(4.8rem * var(--edge-strength)) rgb(0 0 0 / var(--edge-darkness));
+}
+
+.redraw-sweep {
+  z-index: 8;
+  display: none;
+  background:
+    linear-gradient(to bottom,
+      #000 0%,
+      #000 46%,
+      rgb(var(--phosphor-rgb) / .42) 49%,
+      rgb(var(--phosphor-rgb) / .10) 50%,
+      #000 53%,
+      #000 100%);
+  transform: translateY(-100%);
+}
+.redraw-sweep.is-active {
+  display: block;
+  animation: full-screen-redraw var(--active-redraw-ms, 150ms) steps(18, end) both;
+}
+@keyframes full-screen-redraw {
+  0% { transform: translateY(-100%); opacity: 1; }
+  92% { transform: translateY(100%); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.phosphor-ghost {
+  position: absolute !important;
+  inset: 2rem !important;
+  z-index: 5 !important;
+  width: auto !important;
+  min-height: 0 !important;
+  opacity: .22;
+  filter: blur(1.2px) brightness(1.12);
+  pointer-events: none;
+  animation: ghost-fade var(--persistence-ms) ease-out forwards;
+}
+
+@media print {
+  .viewport-effects { display: none; }
+  .screen-surface { filter: none; transform: none; }
+}

@@ -50,7 +50,9 @@
     redrawValue: document.getElementById("redrawValue"),
     screenFrame: document.getElementById("screenFrame"),
     screenSurface: document.getElementById("screenSurface"),
-    terminal: document.getElementById("terminal")
+    terminal: document.getElementById("terminal"),
+    viewportEffects: document.getElementById("viewportEffects"),
+    redrawSweep: document.getElementById("redrawSweep")
   };
 
   const nameKeys = { combat: "combat_names", utility: "utility_names", whimsy: "whimsy_names" };
@@ -115,22 +117,17 @@
     const decimal = numeric / 100;
 
     if (name === "brightness") {
-      const opacity = Math.min(1, numeric / 100);
-      root.style.setProperty("--brightness-opacity", String(opacity));
-      const extraBloom = Math.max(0, (numeric - 100) / 60);
-      root.style.setProperty("--brightness-glow-alpha", String(extraBloom * .22));
+      root.style.setProperty("--display-brightness", String(numeric / 100));
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      const distance = numeric - 100;
-      root.style.setProperty("--contrast-overlay-alpha", String(distance > 0 ? Math.min(.55, distance / 145) : 0));
-      root.style.setProperty("--contrast-wash-alpha", String(distance < 0 ? Math.min(.18, Math.abs(distance) / 280) : 0));
+      root.style.setProperty("--display-contrast", String(numeric / 100));
       els.contrastControl.value = String(numeric);
       els.contrastValue.value = `${numeric}%`;
     } else if (name === "bloom") {
-      root.style.setProperty("--bloom-alpha", String(decimal * .92));
-      root.style.setProperty("--bloom-border-alpha", String(decimal * .72));
-      root.style.setProperty("--bloom-radius", `${(numeric / 100) * 16}px`);
+      root.style.setProperty("--composite-bloom-radius", `${(numeric / 100) * 11}px`);
+      root.style.setProperty("--composite-bloom-alpha", String((numeric / 100) * .78));
+      root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .32));
       els.bloomControl.value = String(numeric);
       els.bloomValue.value = `${numeric}%`;
     } else if (name === "scanlines") {
@@ -139,20 +136,21 @@
       els.scanlineControl.value = String(numeric);
       els.scanlineValue.value = `${numeric}%`;
     } else if (name === "vignette") {
-      root.style.setProperty("--vignette-mid-alpha", String(decimal * .18));
-      root.style.setProperty("--vignette-edge-alpha", String(decimal * .78));
-      root.style.setProperty("--vignette-shadow-alpha", String(decimal * .48));
+      root.style.setProperty("--vignette-strength", String(decimal));
       els.vignetteControl.value = String(numeric);
       els.vignetteValue.value = `${numeric}%`;
     } else if (name === "bezel") {
-      root.style.setProperty("--bezel-alpha", String(decimal * .86));
-      root.style.setProperty("--bezel-glow-alpha", String(decimal * .05));
-      root.style.setProperty("--bezel-inset", `${decimal * 9}rem`);
-      root.style.setProperty("--bezel-outer", "0rem");
+      root.style.setProperty("--edge-strength", String(decimal));
+      root.style.setProperty("--edge-blur", `${decimal * 1.8}px`);
+      root.style.setProperty("--edge-darkness", String(decimal * .48));
       els.bezelControl.value = String(numeric);
       els.bezelValue.value = `${numeric}%`;
     } else if (name === "curvature") {
-      root.style.setProperty("--screen-radius", `${(numeric / 100) * 32}px`);
+      root.style.setProperty("--curve", String(decimal));
+      root.style.setProperty("--screen-radius", `${4 + decimal * 38}px`);
+      root.style.setProperty("--curve-scale-x", String(1 - decimal * .018));
+      root.style.setProperty("--curve-scale-y", String(1 - decimal * .008));
+      root.style.setProperty("--curve-perspective", `${2400 - numeric * 10}px`);
       els.curvatureControl.value = String(numeric);
       els.curvatureValue.value = `${numeric}%`;
     } else if (name === "persistence") {
@@ -197,14 +195,21 @@
     window.setTimeout(() => ghost.remove(), duration + 50);
   }
 
-  function redraw(target = els.terminal) {
+  function updateViewportEffectsBounds() {
+    const rect = els.screenFrame.getBoundingClientRect();
+    document.documentElement.style.setProperty("--screen-left", `${Math.max(0, rect.left)}px`);
+    document.documentElement.style.setProperty("--screen-right", `${Math.max(0, window.innerWidth - rect.right)}px`);
+  }
+
+  function redraw() {
     const duration = Number(els.redrawControl.value || 0);
-    if (duration <= 0) return;
-    target.classList.remove("is-redrawing");
-    target.classList.add("redraw-target");
-    void target.offsetWidth;
-    target.classList.add("is-redrawing");
-    window.setTimeout(() => target.classList.remove("is-redrawing"), duration + 20);
+    if (duration <= 0 || !els.redrawSweep) return;
+    updateViewportEffectsBounds();
+    els.redrawSweep.style.setProperty("--active-redraw-ms", `${duration}ms`);
+    els.redrawSweep.classList.remove("is-active");
+    void els.redrawSweep.offsetWidth;
+    els.redrawSweep.classList.add("is-active");
+    window.setTimeout(() => els.redrawSweep.classList.remove("is-active"), duration + 80);
   }
 
   function toggleDisplaySettings(forceOpen) {
@@ -351,7 +356,7 @@
     refreshIngredientValues();
     markUnsaved();
     if (state.generated) generateRecipes();
-    redraw(document.getElementById("workspace"));
+    redraw();
   }
 
   function getSelectedIngredients() { return ingredients.filter(item => state.selected.has(item.name)); }
@@ -371,7 +376,7 @@
       els.recipeResults.appendChild(p);
       els.resultSummary.textContent = `${selected.length} ingredient${selected.length === 1 ? "" : "s"} available`;
       els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-      redraw(els.resultsPanel);
+      redraw();
       return;
     }
 
@@ -406,7 +411,7 @@
     const totalRecipes = sortedGroups.reduce((sum, group) => sum + group.recipes.length, 0);
     els.resultSummary.textContent = `${sortedGroups.length} potion${sortedGroups.length === 1 ? "" : "s"} / ${totalRecipes} recipes / ${combinationCount} combinations`;
     els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-    redraw(els.resultsPanel);
+    redraw();
   }
 
   function renderPotionGroup(group) {
@@ -465,7 +470,11 @@
     else if (event.key === "Escape" && !els.drawer.hidden) els.drawer.hidden = true;
   });
 
+  window.addEventListener("resize", updateViewportEffectsBounds);
+  window.addEventListener("scroll", updateViewportEffectsBounds, { passive: true });
   loadDisplaySettings();
   renderIngredients();
   updateInventoryDisplay();
+  updateViewportEffectsBounds();
+  window.requestAnimationFrame(() => redraw());
 })();
