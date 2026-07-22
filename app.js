@@ -36,6 +36,8 @@
     brightnessControl: document.getElementById("brightnessControl"),
     contrastControl: document.getElementById("contrastControl"),
     bezelControl: document.getElementById("bezelControl"),
+    curvatureControl: document.getElementById("curvatureControl"),
+    persistenceControl: document.getElementById("persistenceControl"),
     redrawControl: document.getElementById("redrawControl"),
     bloomValue: document.getElementById("bloomValue"),
     vignetteValue: document.getElementById("vignetteValue"),
@@ -43,6 +45,8 @@
     brightnessValue: document.getElementById("brightnessValue"),
     contrastValue: document.getElementById("contrastValue"),
     bezelValue: document.getElementById("bezelValue"),
+    curvatureValue: document.getElementById("curvatureValue"),
+    persistenceValue: document.getElementById("persistenceValue"),
     redrawValue: document.getElementById("redrawValue"),
     screenFrame: document.getElementById("screenFrame"),
     screenSurface: document.getElementById("screenSurface"),
@@ -76,6 +80,8 @@
     scanlines: 45,
     vignette: 52,
     bezel: 30,
+    curvature: 8,
+    persistence: 40,
     redraw: 150
   };
 
@@ -92,9 +98,8 @@
     root.style.setProperty("--phosphor-faint", palette.faint);
     root.style.setProperty("--screen", palette.screen);
     root.style.setProperty("--screen-deep", palette.deep);
-    root.style.setProperty("--page-background", palette.deep);
     document.body.style.background = palette.deep;
-    els.screenFrame.style.background = "transparent";
+    els.screenFrame.style.background = palette.deep;
     els.phosphorControl.value = key;
     if (save) {
       try { localStorage.setItem("opa-first-age-display-phosphor", key); } catch (error) {}
@@ -104,58 +109,25 @@
   function applyDisplaySetting(name, value, save = true) {
     const root = document.documentElement;
     const limits = {
-      brightness: [20, 250], contrast: [50, 180], bloom: [0, 200], scanlines: [0, 100],
-      vignette: [0, 100], bezel: [0, 100], redraw: [0, 1500]
+      brightness: [50, 160], contrast: [50, 180], bloom: [0, 100], scanlines: [0, 100],
+      vignette: [0, 100], bezel: [0, 100], curvature: [0, 100], persistence: [0, 500], redraw: [0, 1500]
     };
     const [minimum, maximum] = limits[name] || [0, 100];
     const numeric = Math.max(minimum, Math.min(maximum, Number(value)));
     const decimal = numeric / 100;
 
     if (name === "brightness") {
-      // Brightness changes both phosphor emission and the visible screen black.
-      const below = Math.min(numeric, 100) / 100;
-      const above = Math.max(0, numeric - 100) / 150;
-      const contentOpacity = numeric <= 100 ? 0.10 + Math.pow(below, 1.35) * 0.90 : 1;
-      root.style.setProperty("--content-opacity", String(contentOpacity));
-      root.style.setProperty("--display-brightness", "1");
-      root.style.setProperty("--brightness-boost-alpha", String(Math.pow(above, 1.15) * 0.82));
-      root.style.setProperty("--brightness-white-alpha", "0");
-      root.style.setProperty("--brightness-overdrive-alpha", String(Math.pow(above, 1.25) * 0.72));
-      root.style.setProperty("--brightness-halo-radius", `${0.4 + Math.pow(above, 1.15) * 17}px`);
-      root.style.setProperty("--brightness-halo-alpha", String(0.06 + Math.pow(above, 1.1) * 0.86));
-      root.style.setProperty("--page-brighten-alpha", String(Math.pow(above, 1.3) * 0.30));
-      root.style.setProperty("--page-dim-alpha", String((1 - below) * 0.72));
+      root.style.setProperty("--display-brightness", String(numeric / 100));
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      // Low contrast restores the earlier warm phosphor wash; high contrast
-      // deepens the black level. Both the frame and surrounding page respond.
-      const low = Math.max(0, 100 - numeric) / 50;
-      const high = Math.max(0, numeric - 100) / 80;
-      root.style.setProperty("--display-contrast", String(0.88 + (numeric / 100) * 0.12));
-      root.style.setProperty("--contrast-warm-alpha", String(low * 0.22));
-      root.style.setProperty("--contrast-dark-alpha", String(high * 0.34));
+      root.style.setProperty("--display-contrast", String(numeric / 100));
       els.contrastControl.value = String(numeric);
       els.contrastValue.value = `${numeric}%`;
     } else if (name === "bloom") {
-      const bloomScale = numeric / 100;
-      root.style.setProperty("--composite-bloom-radius", `${0.25 + bloomScale * 4.8}px`);
-      root.style.setProperty("--composite-bloom-alpha", String(Math.min(.62, bloomScale * .28)));
-      // Thin rules need a little independent energy to read like the same phosphor
-      // intensity as the much denser block-character logo.
-      root.style.setProperty("--border-bloom-radius", `${0.4 + bloomScale * 6.4}px`);
-      root.style.setProperty("--border-bloom-alpha", String(Math.min(.92, bloomScale * .46)));
-      root.style.setProperty("--inner-glow-alpha", String(Math.min(.96, bloomScale * .48)));
-      // Thin text strokes need a local phosphor halo in addition to the broad
-      // composite bloom. Keep it tighter than the logo halo so glyphs remain legible.
-      root.style.setProperty("--small-text-bloom-radius", `${0.25 + bloomScale * 11.5}px`);
-      root.style.setProperty("--small-text-bloom-alpha", String(Math.min(.98, bloomScale * .66)));
-      root.style.setProperty("--small-text-bloom-wide-radius", `${0.7 + bloomScale * 22}px`);
-      root.style.setProperty("--small-text-bloom-wide-alpha", String(Math.min(.90, bloomScale * .46)));
-      root.style.setProperty("--reverse-bloom-radius", `${0.5 + bloomScale * 13}px`);
-      root.style.setProperty("--reverse-bloom-alpha", String(Math.min(.96, bloomScale * .48)));
-      root.style.setProperty("--logo-bloom-radius", `${0.2 + bloomScale * 2.3}px`);
-      root.style.setProperty("--logo-bloom-alpha", String(Math.min(.38, bloomScale * .16)));
+      root.style.setProperty("--composite-bloom-radius", `${(numeric / 100) * 11}px`);
+      root.style.setProperty("--composite-bloom-alpha", String((numeric / 100) * .78));
+      root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .32));
       els.bloomControl.value = String(numeric);
       els.bloomValue.value = `${numeric}%`;
     } else if (name === "scanlines") {
@@ -169,11 +141,22 @@
       els.vignetteValue.value = `${numeric}%`;
     } else if (name === "bezel") {
       root.style.setProperty("--edge-strength", String(decimal));
-      root.style.setProperty("--edge-blur", `${decimal * 7}px`);
-      root.style.setProperty("--edge-darkness", String(decimal * .28));
-      root.style.setProperty("--edge-band-size", `${5 + decimal * 11}%`);
+      root.style.setProperty("--edge-blur", `${decimal * 1.8}px`);
+      root.style.setProperty("--edge-darkness", String(decimal * .48));
       els.bezelControl.value = String(numeric);
       els.bezelValue.value = `${numeric}%`;
+    } else if (name === "curvature") {
+      root.style.setProperty("--curve", String(decimal));
+      root.style.setProperty("--screen-radius", `${4 + decimal * 38}px`);
+      root.style.setProperty("--curve-scale-x", String(1 - decimal * .018));
+      root.style.setProperty("--curve-scale-y", String(1 - decimal * .008));
+      root.style.setProperty("--curve-perspective", `${2400 - numeric * 10}px`);
+      els.curvatureControl.value = String(numeric);
+      els.curvatureValue.value = `${numeric}%`;
+    } else if (name === "persistence") {
+      root.style.setProperty("--persistence-ms", `${numeric}ms`);
+      els.persistenceControl.value = String(numeric);
+      els.persistenceValue.value = `${numeric} ms`;
     } else if (name === "redraw") {
       root.style.setProperty("--redraw-ms", `${numeric}ms`);
       els.redrawControl.value = String(numeric);
@@ -197,6 +180,19 @@
       } catch (error) {}
       applyDisplaySetting(name, value, false);
     });
+  }
+
+  function capturePersistence() {
+    const duration = Number(els.persistenceControl.value || 0);
+    if (duration <= 0) return;
+    const ghost = els.screenSurface.cloneNode(true);
+    ghost.removeAttribute("id");
+    ghost.querySelectorAll("[id]").forEach(node => node.removeAttribute("id"));
+    ghost.querySelectorAll("button, input, select").forEach(node => node.setAttribute("disabled", ""));
+    ghost.className = "phosphor-ghost";
+    ghost.setAttribute("aria-hidden", "true");
+    els.screenFrame.appendChild(ghost);
+    window.setTimeout(() => ghost.remove(), duration + 50);
   }
 
   function updateViewportEffectsBounds() {
@@ -225,7 +221,7 @@
   function valueString(ingredient) {
     const values = ingredient.values?.[state.ruleset] || {};
     const pad = value => String(Number(value || 0)).padStart(2, "0");
-    return `[${pad(values.combat)}-${pad(values.utility)}-${pad(values.whimsy)}]`;
+    return `${pad(values.combat)}/${pad(values.utility)}/${pad(values.whimsy)}`;
   }
 
   function renderIngredients() {
@@ -331,6 +327,7 @@
   }
 
   function loadInventory() {
+    capturePersistence();
     try {
       const saved = JSON.parse(localStorage.getItem("opa-first-age-inventory") || "[]");
       const validNames = new Set(ingredients.map(item => item.name));
@@ -349,6 +346,7 @@
   }
 
   function setRuleset(ruleset) {
+    capturePersistence();
     state.ruleset = ruleset;
     document.querySelectorAll(".value-option").forEach((button) => {
       const active = button.dataset.ruleset === ruleset;
@@ -365,6 +363,7 @@
   function potionLabel(type, number) { return potionNames[nameKeys[type]]?.[String(number)] || "Unknown Potion"; }
 
   function generateRecipes() {
+    capturePersistence();
     const selected = getSelectedIngredients();
     els.recipeResults.replaceChildren();
     els.resultsPanel.hidden = false;
@@ -461,12 +460,11 @@
   els.brightnessControl.addEventListener("input", event => applyDisplaySetting("brightness", event.target.value));
   els.contrastControl.addEventListener("input", event => applyDisplaySetting("contrast", event.target.value));
   els.bezelControl.addEventListener("input", event => applyDisplaySetting("bezel", event.target.value));
+  els.curvatureControl.addEventListener("input", event => applyDisplaySetting("curvature", event.target.value));
+  els.persistenceControl.addEventListener("input", event => applyDisplaySetting("persistence", event.target.value));
   els.redrawControl.addEventListener("input", event => applyDisplaySetting("redraw", event.target.value));
   document.querySelectorAll(".value-option").forEach(button => button.addEventListener("click", () => setRuleset(button.dataset.ruleset)));
   els.filter.addEventListener("input", event => filterIngredients(event.target.value));
-  document.querySelectorAll("[data-preview-tool]").forEach(button => {
-    button.addEventListener("click", event => event.preventDefault());
-  });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !els.displaySettings.hidden) toggleDisplaySettings(false);
     else if (event.key === "Escape" && !els.drawer.hidden) els.drawer.hidden = true;

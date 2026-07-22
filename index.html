@@ -19,8 +19,7 @@
         <div class="terminal" id="terminal">
           <header class="system-bar bloom-border" aria-label="System controls">
             <section class="system-cell system-inventory" aria-label="Inventory controls">
-              <span class="system-label">INVENTORY</span>
-              <span class="inventory-state" id="inventoryState" aria-live="polite"></span>
+              <span class="system-label">INVENTORY</span><span class="inventory-state" id="inventoryState" aria-live="polite">&nbsp;</span>
               <button type="button" class="text-control" id="clearInventory">Clear</button>
               <button type="button" class="text-control" id="saveInventory">Save</button>
               <button type="button" class="text-control" id="loadInventory">Load</button>
@@ -36,10 +35,7 @@
               <span class="system-label">VALUES</span>
               <button type="button" class="value-option is-active" data-ruleset="2024" aria-pressed="true">2024</button>
               <button type="button" class="value-option" data-ruleset="2014" aria-pressed="false">2014</button>
-            </section>
-
-            <section class="system-cell system-display" aria-label="Display controls">
-              <button type="button" class="text-control display-toggle" id="displaySettingsToggle" aria-expanded="false" aria-controls="displaySettings">DISPLAY CONTROLS</button>
+              <button type="button" class="text-control display-toggle" id="displaySettingsToggle" aria-expanded="false" aria-controls="displaySettings">CRT</button>
             </section>
           </header>
 
@@ -62,7 +58,7 @@
               </label>
               <label class="display-control" for="brightnessControl">
                 <span>BRIGHTNESS</span>
-                <input id="brightnessControl" type="range" min="20" max="250" step="1" value="100">
+                <input id="brightnessControl" type="range" min="50" max="160" step="1" value="100">
                 <output id="brightnessValue" for="brightnessControl">100%</output>
               </label>
               <label class="display-control" for="contrastControl">
@@ -72,7 +68,7 @@
               </label>
               <label class="display-control" for="bloomControl">
                 <span>BLOOM</span>
-                <input id="bloomControl" type="range" min="0" max="200" step="1" value="14">
+                <input id="bloomControl" type="range" min="0" max="100" step="1" value="14">
                 <output id="bloomValue" for="bloomControl">14%</output>
               </label>
               <label class="display-control" for="scanlineControl">
@@ -86,9 +82,19 @@
                 <output id="vignetteValue" for="vignetteControl">52%</output>
               </label>
               <label class="display-control" for="bezelControl">
-                <span>EDGE FOCUS</span>
+                <span>EDGE DISTORTION</span>
                 <input id="bezelControl" type="range" min="0" max="100" step="1" value="30">
                 <output id="bezelValue" for="bezelControl">30%</output>
+              </label>
+              <label class="display-control" for="curvatureControl">
+                <span>CURVATURE</span>
+                <input id="curvatureControl" type="range" min="0" max="100" step="1" value="8">
+                <output id="curvatureValue" for="curvatureControl">8%</output>
+              </label>
+              <label class="display-control" for="persistenceControl">
+                <span>PERSISTENCE</span>
+                <input id="persistenceControl" type="range" min="0" max="500" step="10" value="40">
+                <output id="persistenceValue" for="persistenceControl">40 ms</output>
               </label>
               <label class="display-control" for="redrawControl">
                 <span>REDRAW</span>
@@ -100,37 +106,33 @@
 
           <section class="masthead" aria-labelledby="site-title">
             <h1 id="site-title" class="visually-hidden">Obojima Potion Almanac</h1>
-            <pre class="ascii-logo" aria-hidden="true">                                  ▒███████ ▒████████  ▒███████    ▒█████▒████▒██     ▒██  ▒█████
-                                 ▒██    ▒██▒██    ▒██▒██    ▒██      ▒██ ▒██ ▒███   ▒███ ▒██  ▒██
-                                 ▒██    ▒██▒████████ ▒██    ▒██      ▒██ ▒██ ▒████ ▒████▒█████████
-                                 ▒██    ▒██▒██    ▒██▒██    ▒██▒██   ▒██ ▒██ ▒██ ▒██ ▒██▒██    ▒██
-                                  ▒███████ ▒████████  ▒███████  ▒██████ ▒████▒██     ▒██▒██    ▒██
+            <pre class="ascii-logo" aria-hidden="true">▒███████ ▒████████  ▒███████    ▒█████▒████▒██     ▒██  ▒█████
+▒██    ▒██▒██    ▒██▒██    ▒██      ▒██ ▒██ ▒███   ▒███ ▒██  ▒██
+▒██    ▒██▒████████ ▒██    ▒██      ▒██ ▒██ ▒████ ▒████▒█████████
+▒██    ▒██▒██    ▒██▒██    ▒██▒██   ▒██ ▒██ ▒██ ▒██ ▒██▒██    ▒██
+ ▒███████ ▒████████  ▒███████  ▒██████ ▒████▒██     ▒██▒██    ▒██
 
-                                      ▒████████  ▒███████ ▒████████▒████ ▒███████ ▒███   ▒██
-                                      ▒██    ▒██▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒████  ▒██
-                                      ▒████████ ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██▒███▒██
-                                      ▒██       ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██  ▒████
-                                      ▒██        ▒███████    ▒██   ▒████ ▒███████ ▒██   ▒███
+     ▒████████  ▒███████ ▒████████▒████ ▒███████ ▒███   ▒██
+     ▒██    ▒██▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒████  ▒██
+     ▒████████ ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██▒███▒██
+     ▒██       ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██  ▒████
+     ▒██        ▒███████    ▒██   ▒████ ▒███████ ▒██   ▒███
 
-                                ▒█████  ▒██      ▒██     ▒██  ▒█████  ▒██    ▒██  ▒█████   ▒███████
-                               ▒██  ▒██ ▒██      ▒███   ▒███ ▒██  ▒██ ▒████  ▒██ ▒██  ▒██ ▒██    ▒██
-                              ▒█████████▒██      ▒████ ▒████▒█████████▒██▒███▒██▒█████████▒██       
-                              ▒██    ▒██▒██      ▒██ ▒██ ▒██▒██    ▒██▒██  ▒████▒██    ▒██▒██    ▒██
-                              ▒██    ▒██▒████████▒██     ▒██▒██    ▒██▒██    ▒██▒██    ▒██ ▒███████</pre>
+▒█████  ▒██      ▒██     ▒██  ▒█████  ▒██    ▒██  ▒█████   ▒███████
+▒██  ▒██ ▒██      ▒███   ▒███ ▒██  ▒██ ▒████  ▒██ ▒██  ▒██ ▒██    ▒██
+▒█████████▒██      ▒████ ▒████▒█████████▒██▒███▒██▒█████████▒██
+▒██    ▒██▒██      ▒██ ▒██ ▒██▒██    ▒██▒██  ▒████▒██    ▒██▒██    ▒██
+▒██    ▒██▒████████▒██     ▒██▒██    ▒██▒██    ▒██▒██    ▒██ ▒███████</pre>
           </section>
 
           <nav class="main-nav" aria-label="Primary tools">
             <button class="terminal-tab is-active bloom-border" type="button" aria-current="page">RECIPE GENERATOR</button>
-            <button class="terminal-tab bloom-border preview-tool" type="button" data-preview-tool aria-disabled="true" title="Not included in this prototype">INGREDIENT FINDER</button>
-            <button class="terminal-tab bloom-border preview-tool" type="button" data-preview-tool aria-disabled="true" title="Not included in this prototype">FORAGING AID</button>
+            <button class="terminal-tab bloom-border" type="button" disabled title="Not included in this prototype">INGREDIENT FINDER</button>
+            <button class="terminal-tab bloom-border" type="button" disabled title="Not included in this prototype">FORAGING AID</button>
           </nav>
 
           <main id="workspace">
-            <p class="visually-hidden" id="selectionHelp">Select the ingredients in your inventory.</p>
-
-            <section class="generate-row" aria-label="Primary recipe command">
-              <button type="button" class="terminal-command primary-command bloom-border" id="generateRecipes">GENERATE RECIPES</button>
-            </section>
+            <p class="instructions" id="selectionHelp">Select the ingredients in your inventory.</p>
 
             <section class="ingredient-panel bloom-border" aria-describedby="selectionHelp">
               <div class="ingredient-column" data-rarity="common">
@@ -147,7 +149,8 @@
               </div>
             </section>
 
-            <section class="command-row" aria-label="Recipe generator utilities">
+            <section class="command-row" aria-label="Recipe generator commands">
+              <button type="button" class="terminal-command primary-command bloom-border" id="generateRecipes">GENERATE RECIPES</button>
               <button type="button" class="terminal-command bloom-border" id="clearSelection">CLEAR SELECTION</button>
               <label class="filter-control">
                 <span>FILTER</span>

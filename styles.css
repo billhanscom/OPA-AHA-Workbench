@@ -188,7 +188,7 @@ h1, h2, h3, p { font: inherit; }
 .display-control select { width: 100%; border: 1px solid var(--phosphor); border-radius: 0; background: var(--screen-deep); padding: .1em .5ch; }
 
 .masthead { padding: 3em 0 2.25em; display: block; overflow: visible; text-align: center; }
-.ascii-logo { display: inline-block; width: max-content; margin: 0 auto; overflow: visible; color: var(--phosphor); font: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; letter-spacing: 0; line-height: var(--line); white-space: pre; text-align: left; }
+.ascii-logo { display: inline-block; width: max-content; margin: 0 auto; overflow: visible; color: var(--phosphor-bright); font: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; letter-spacing: 0; line-height: var(--line); white-space: pre; text-align: left; }
 .main-nav { display: flex; justify-content: center; gap: 2ch; margin-bottom: 2.2em; }
 .terminal-tab, .terminal-command { border: 2px solid currentColor; border-radius: 0; background: transparent; padding: .55em 2ch; letter-spacing: 0; cursor: pointer; }
 .terminal-tab:hover:not(:disabled), .terminal-tab:focus-visible:not(:disabled), .terminal-command:hover, .terminal-command:focus-visible { color: var(--screen-deep); background: var(--phosphor); outline: none; text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
@@ -203,7 +203,7 @@ h1, h2, h3, p { font: inherit; }
 .ingredient-list { overflow: visible; }
 .ingredient-item { display: grid; grid-template-columns: minmax(0, 1fr) 10ch; width: 100%; min-height: 1.65em; border: 0; background: transparent; padding: .12em 1ch; text-align: left; cursor: pointer; color: var(--phosphor); }
 .ingredient-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ingredient-values { text-align: right; color: inherit; }
+.ingredient-values { text-align: right; color: var(--phosphor-dim); }
 .ingredient-item:hover, .ingredient-item:focus-visible { outline: none; color: var(--phosphor-bright); background: rgb(var(--phosphor-rgb) / .08); }
 .ingredient-item.is-selected { color: var(--screen-deep); background: var(--phosphor); text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
 .ingredient-item.is-selected .ingredient-values { color: var(--screen-deep); }
@@ -237,6 +237,16 @@ h1, h2, h3, p { font: inherit; }
   from { clip-path: inset(0 0 100% 0); }
   to { clip-path: inset(0 0 0 0); }
 }
+.phosphor-ghost {
+  position: absolute;
+  inset: 2rem;
+  z-index: 9;
+  pointer-events: none;
+  opacity: .22;
+  filter: blur(.6px);
+  animation: ghost-fade var(--persistence-ms) linear forwards;
+}
+@keyframes ghost-fade { to { opacity: 0; } }
 
 @media print {
   body { min-width: 0; background: #fff; color: #000; }
@@ -253,74 +263,54 @@ h1, h2, h3, p { font: inherit; }
   --display-contrast: 1;
   --composite-bloom-radius: 1.54px;
   --composite-bloom-alpha: .109;
-  --border-bloom-alpha: .12;
-  --border-bloom-radius: 2px;
-  --small-text-bloom-alpha: .10;
-  --small-text-bloom-radius: 1.2px;
   --inner-glow-alpha: .045;
-  --content-opacity: 1;
-  --brightness-boost-alpha: 0;
-  --brightness-halo-alpha: .10;
-  --brightness-halo-radius: 1px;
   --vignette-strength: .52;
   --edge-strength: .30;
   --edge-blur: .54px;
   --edge-darkness: .144;
+  --curve: .08;
+  --curve-scale-x: .99856;
+  --curve-scale-y: .99936;
+  --curve-perspective: 2320px;
   --screen-left: 0px;
   --screen-right: 0px;
 }
 
 .screen-frame {
   overflow: hidden;
-  border-radius: 0;
-  clip-path: none;
+  border-radius: var(--screen-radius);
+  clip-path: inset(0 round var(--screen-radius));
 }
-
 
 .screen-surface {
-  opacity: var(--content-opacity, 1);
+  opacity: 1;
+  transform-origin: 50% 50%;
+  transform:
+    perspective(var(--curve-perspective))
+    rotateX(calc(var(--curve) * .42deg))
+    scaleX(var(--curve-scale-x))
+    scaleY(var(--curve-scale-y));
   filter:
+    brightness(var(--display-brightness))
     contrast(var(--display-contrast))
     drop-shadow(0 0 .7px rgb(var(--phosphor-rgb) / .72))
-    drop-shadow(0 0 var(--brightness-halo-radius) rgb(var(--phosphor-rgb) / var(--brightness-halo-alpha)))
     drop-shadow(0 0 var(--composite-bloom-radius) rgb(var(--phosphor-rgb) / var(--composite-bloom-alpha)));
-  will-change: filter, opacity;
+  will-change: filter, transform;
 }
 
-/* The screen composite supplies the broad halo. Small terminal glyphs also
-   receive a restrained local phosphor halo so thin strokes bloom as visibly as
-   the dense block-character logo. The logo itself remains composite-only. */
-.terminal {
-  text-shadow:
-    0 0 .55px rgb(var(--phosphor-rgb) / .78),
-    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-alpha));
-}
+/* The final screen composite blooms; individual glyphs do not. */
+.terminal,
 .terminal button,
 .terminal input,
 .terminal select,
 .terminal output,
+.terminal pre,
 .terminal span,
 .terminal p,
 .terminal h1,
 .terminal h2,
 .terminal h3,
-.terminal li,
-.terminal label,
-.terminal legend { text-shadow: inherit; }
-.ascii-logo { text-shadow: none; }
-
-/* Brightness changes phosphor emission. It dims deeply below 100% and adds
-   a broad screen-level phosphor flare above 100% without lifting the black level. */
-.screen-surface::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: var(--brightness-boost-alpha);
-  background: radial-gradient(ellipse at center, rgb(var(--phosphor-rgb) / .10), transparent 72%);
-  box-shadow: inset 0 0 4rem rgb(var(--phosphor-rgb) / .12);
-  mix-blend-mode: screen;
-}
+.terminal li { text-shadow: none !important; }
 
 .bloom-border,
 .terminal-tab,
@@ -331,8 +321,7 @@ h1, h2, h3, p { font: inherit; }
 .inventory-drawer,
 .results-panel {
   box-shadow:
-    inset 0 0 3px rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
-    0 0 var(--border-bloom-radius) rgb(var(--phosphor-rgb) / var(--border-bloom-alpha));
+    inset 0 0 3px rgb(var(--phosphor-rgb) / var(--inner-glow-alpha));
 }
 
 .terminal-tab:hover:not(:disabled),
@@ -354,9 +343,9 @@ h1, h2, h3, p { font: inherit; }
   left: var(--screen-left);
   right: var(--screen-right);
   overflow: hidden;
-  border-radius: 0;
+  border-radius: var(--screen-radius);
   pointer-events: none;
-  clip-path: none;
+  clip-path: inset(0 round var(--screen-radius));
 }
 .viewport-effects > div { position: absolute; inset: 0; pointer-events: none; }
 
@@ -377,52 +366,27 @@ h1, h2, h3, p { font: inherit; }
   position: absolute;
   z-index: 3;
   background:
-    linear-gradient(to right,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .90)) 0%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .34)) 5%,
-      transparent 14%,
-      transparent 86%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .34)) 95%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .90)) 100%),
     linear-gradient(to bottom,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .70)) 0%,
-      transparent 13%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .58)) 0%,
+      transparent 12%,
       transparent 86%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .82)) 100%),
-    radial-gradient(ellipse 104% 92% at 50% 50%,
-      transparent 54%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .18)) 76%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .48)) 100%);
+      rgb(0 0 0 / calc(var(--vignette-strength) * .72)) 100%),
+    radial-gradient(ellipse 112% 94% at 50% 50%,
+      transparent 58%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .20)) 78%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .66)) 100%);
 }
 
-/* Edge focus simulates the loss of sharpness near the perimeter of a CRT.
-   It deliberately does not pretend to geometrically warp the DOM. */
+/* Edge focus falloff and compression cue, separate from the vignette. */
 .edge-layer {
   z-index: 4;
-  background:
-    linear-gradient(to right,
-      rgb(0 0 0 / var(--edge-darkness)) 0%,
-      transparent calc(4% + 7% * (1 - var(--edge-strength))),
-      transparent calc(96% - 7% * (1 - var(--edge-strength))),
-      rgb(0 0 0 / var(--edge-darkness)) 100%);
   backdrop-filter: blur(var(--edge-blur));
   -webkit-backdrop-filter: blur(var(--edge-blur));
-  mask-image: linear-gradient(to right, #000 0 8%, transparent 18% 82%, #000 92% 100%);
-  -webkit-mask-image: linear-gradient(to right, #000 0 8%, transparent 18% 82%, #000 92% 100%);
-}
-
-/* Curvature is represented as curved glass and edge shading only. The content
-   is never scaled, so moving this control cannot look like zooming. */
-.viewport-effects::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  border-radius: var(--screen-radius);
+  mask-image: radial-gradient(ellipse 82% 78% at center, transparent 0 58%, #000 82% 100%);
+  -webkit-mask-image: radial-gradient(ellipse 82% 78% at center, transparent 0 58%, #000 82% 100%);
   box-shadow:
-    inset 0 0 calc(1rem + 3rem * var(--curve)) rgb(0 0 0 / var(--curve-edge-alpha)),
-    inset 0 1px 0 rgb(255 255 255 / calc(var(--curve) * .035));
+    inset calc(2.4rem * var(--edge-strength)) 0 calc(4.8rem * var(--edge-strength)) rgb(0 0 0 / var(--edge-darkness)),
+    inset calc(-2.4rem * var(--edge-strength)) 0 calc(4.8rem * var(--edge-strength)) rgb(0 0 0 / var(--edge-darkness));
 }
 
 .redraw-sweep {
@@ -464,489 +428,3 @@ h1, h2, h3, p { font: inherit; }
   .viewport-effects { display: none; }
   .screen-surface { filter: none; transform: none; }
 }
-
-/* v7: faithful 132-column terminal grid ----------------------------------- */
-:root {
-  --terminal-columns: 132;
-  --terminal-width: 132ch;
-  --frame-gutter: 2ch;
-}
-
-body {
-  min-width: calc(var(--terminal-width) + (var(--frame-gutter) * 2));
-  overflow-x: auto;
-}
-
-.crt-shell {
-  padding: 1.5rem var(--frame-gutter) 3rem;
-}
-
-.screen-frame {
-  width: calc(var(--terminal-width) + (var(--frame-gutter) * 2));
-  padding: 2rem var(--frame-gutter);
-}
-
-.screen-surface,
-.terminal {
-  width: var(--terminal-width);
-  min-width: var(--terminal-width);
-  max-width: var(--terminal-width);
-}
-
-/* The four sections correspond to 40, 45, 22, and 20 interior cells in the
-   132-character reference line. Borders are included in the 132ch total. */
-.system-bar {
-  width: 100%;
-  grid-template-columns: 41fr 46fr 23fr 21fr;
-  border-width: 1px;
-}
-.system-cell {
-  min-width: 0;
-  min-height: 3em;
-  gap: 1ch;
-  padding: .45em 1ch;
-}
-.system-cell + .system-cell { border-left-width: 1px; }
-.system-inventory { justify-content: flex-start; }
-.system-inventory,
-.system-current,
-.system-values { padding-left: 3ch; }
-.system-inventory .inventory-state { display: none; }
-.system-current #currentInventory { flex: 1 1 auto; }
-.system-values { justify-content: flex-start; }
-.system-display { justify-content: center; padding-inline: .5ch; }
-.display-toggle { width: 100%; white-space: nowrap; text-align: center; }
-
-.masthead {
-  width: 132ch;
-  padding: 3em 0 2.25em;
-  overflow: hidden;
-  text-align: left;
-}
-.ascii-logo {
-  display: block;
-  width: 132ch;
-  min-width: 132ch;
-  max-width: 132ch;
-  margin: 0;
-  overflow: visible;
-  white-space: pre;
-  text-align: left;
-}
-
-.main-nav {
-  width: 132ch;
-  display: grid;
-  grid-template-columns: repeat(3, max-content);
-  justify-content: center;
-  column-gap: 2ch;
-  margin-bottom: 2.5em;
-}
-.terminal-tab {
-  min-width: 22ch;
-  padding: .55em 1ch;
-}
-
-.generate-row {
-  display: flex;
-  justify-content: center;
-  width: 132ch;
-  margin: 0 0 2em;
-}
-.generate-row .primary-command {
-  min-width: 23ch;
-}
-
-.ingredient-panel {
-  width: 132ch;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-width: 1px;
-}
-.ingredient-column + .ingredient-column { border-left-width: 1px; }
-.ingredient-column h2 {
-  min-height: 3em;
-  border-bottom-width: 1px;
-}
-.ingredient-item {
-  grid-template-columns: minmax(0, 1fr) 10ch;
-  min-height: 3.05em;
-  padding: .75em 2ch;
-  align-items: center;
-}
-
-.command-row {
-  width: 132ch;
-  padding-top: 1em;
-}
-
-.display-settings,
-.inventory-drawer,
-.results-panel { width: 132ch; }
-
-@media (max-width: 1390px) {
-  /* Preserve the actual 132-cell grid. Small viewports scroll rather than
-     silently squeezing or reflowing the terminal. */
-  body { min-width: calc(var(--terminal-width) + (var(--frame-gutter) * 2)); }
-}
-
-/* v12 requested refinements ------------------------------------------------ */
-:root {
-  --page-background: #0c0a06;
-  --page-brighten-alpha: 0;
-  --page-dim-alpha: 0;
-  --contrast-warm-alpha: 0;
-  --contrast-dark-alpha: 0;
-  --logo-bloom-radius: .4px;
-  --logo-bloom-alpha: .03;
-}
-
-html,
-body,
-.crt-shell,
-.screen-frame {
-  background: var(--page-background) !important;
-}
-
-.screen-frame { background: transparent !important; }
-
-/* One page-wide screen treatment keeps the area inside and outside the
-   132-column frame visually continuous and makes both respond to calibration. */
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-body::before {
-  z-index: 0;
-  background:
-    linear-gradient(rgb(var(--phosphor-rgb) / var(--contrast-warm-alpha)), rgb(var(--phosphor-rgb) / var(--contrast-warm-alpha))),
-    linear-gradient(rgb(0 0 0 / var(--contrast-dark-alpha)), rgb(0 0 0 / var(--contrast-dark-alpha)));
-}
-body::after {
-  z-index: 0;
-  background:
-    radial-gradient(ellipse at center, rgb(var(--phosphor-rgb) / var(--page-brighten-alpha)), transparent 76%),
-    linear-gradient(rgb(0 0 0 / var(--page-dim-alpha)), rgb(0 0 0 / var(--page-dim-alpha)));
-}
-.crt-shell { position: relative; z-index: 1; }
-
-/* Shift the complete contents of the first three cells by two character cells,
-   not just their labels. */
-.system-inventory,
-.system-current,
-.system-values { padding-left: 1ch; }
-.system-inventory > *,
-.system-current > *,
-.system-values > * { transform: translateX(2ch); }
-
-/* Rebalance bloom toward fine text and inward-facing rule glow. */
-.ascii-logo {
-  text-shadow:
-    0 0 .35px rgb(var(--phosphor-rgb) / .52),
-    0 0 var(--logo-bloom-radius) rgb(var(--phosphor-rgb) / var(--logo-bloom-alpha));
-}
-.bloom-border,
-.terminal-tab,
-.terminal-command,
-.system-bar,
-.display-settings,
-.ingredient-panel,
-.inventory-drawer,
-.results-panel {
-  box-shadow:
-    inset 0 0 calc(var(--border-bloom-radius) * 2.4) rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
-    inset 0 0 1px rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
-    0 0 var(--border-bloom-radius) rgb(var(--phosphor-rgb) / var(--border-bloom-alpha));
-}
-.ingredient-column,
-.ingredient-column h2,
-.system-cell,
-.display-settings-heading {
-  box-shadow: inset 0 0 calc(var(--border-bloom-radius) * 1.6) rgb(var(--phosphor-rgb) / calc(var(--inner-glow-alpha) * .72));
-}
-
-/* Preview tools should read as available controls while remaining inert. */
-.terminal-tab.preview-tool {
-  color: var(--phosphor);
-  cursor: default;
-  opacity: 1;
-}
-.terminal-tab.preview-tool:hover,
-.terminal-tab.preview-tool:focus-visible {
-  color: var(--phosphor);
-  background: transparent;
-  outline: none;
-  text-shadow: inherit;
-}
-
-/* Requested vertical breathing room. */
-.masthead { padding-top: 5em; }
-.main-nav { margin-bottom: 4em; }
-.generate-row { margin-bottom: 3.5em; }
-
-/* v13: requested top-nav spacing and reverse-video bloom behavior. */
-.system-inventory,
-.system-current,
-.system-values {
-  padding-left: 2ch;
-}
-
-/* Keep reverse-video controls crisp. Composite-level drop shadows made the
-   entire highlighted button rectangle develop a halo, so bloom is handled by
-   the individual phosphor elements instead. */
-.screen-surface {
-  filter: contrast(var(--display-contrast));
-}
-
-.text-control:hover,
-.text-control:focus-visible,
-.value-option:hover,
-.value-option:focus-visible,
-.value-option.is-active,
-.terminal-tab:hover:not(:disabled),
-.terminal-tab:focus-visible:not(:disabled),
-.terminal-command:hover,
-.terminal-command:focus-visible {
-  box-shadow: none;
-  text-shadow: none;
-}
-
-/* Reverse-video ingredient rows are phosphor-filled areas, so their fill
-   receives a controlled bloom without reintroducing halos around controls. */
-.ingredient-item.is-selected {
-  box-shadow:
-    inset 0 0 calc(var(--small-text-bloom-radius) * 1.15) rgb(var(--phosphor-rgb) / calc(var(--small-text-bloom-alpha) * .55)),
-    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / calc(var(--small-text-bloom-alpha) * .48));
-}
-
-/* v14: final requested top-nav balance and bloom corrections. */
-.system-inventory,
-.system-current,
-.system-values {
-  padding-left: 1ch;
-  padding-right: 3ch;
-}
-.system-inventory > *,
-.system-current > *,
-.system-values > * {
-  transform: none;
-}
-
-/* Apply the slider-controlled phosphor halo directly to fine terminal text.
-   This bypasses the screen-level filter and makes small glyphs visibly bloom. */
-.system-bar,
-.display-settings,
-.ingredient-panel,
-.inventory-drawer,
-.results-panel,
-.command-row,
-.recipe-results,
-.terminal-tab,
-.terminal-command,
-.ingredient-item,
-.ingredient-item .ingredient-name,
-.ingredient-item .ingredient-values {
-  text-shadow:
-    0 0 .55px rgb(var(--phosphor-rgb) / .88),
-    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-alpha)),
-    0 0 var(--small-text-bloom-wide-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-wide-alpha));
-}
-
-/* Reverse-video buttons stay crisp and halo-free. */
-.text-control:hover,
-.text-control:focus-visible,
-.value-option:hover,
-.value-option:focus-visible,
-.value-option.is-active,
-.terminal-tab:hover:not(:disabled),
-.terminal-tab:focus-visible:not(:disabled),
-.terminal-command:hover,
-.terminal-command:focus-visible {
-  text-shadow: none;
-  box-shadow: none;
-}
-
-/* The selected ingredient's phosphor-filled rectangle gets its own bloom. */
-.ingredient-item.is-selected {
-  position: relative;
-  z-index: 0;
-  box-shadow:
-    inset 0 0 calc(var(--reverse-bloom-radius) * .65) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha)),
-    0 0 var(--reverse-bloom-radius) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha));
-}
-.ingredient-item.is-selected .ingredient-name,
-.ingredient-item.is-selected .ingredient-values {
-  text-shadow: none;
-}
-
-/* v15: perimeter edge focus, balanced status-cell spacing, and expanded calibration ranges. */
-:root {
-  --brightness-white-alpha: 0;
-}
-
-/* Keep exactly two character cells between each cell border and all of the
-   contents in INVENTORY, CURRENT, and VALUES. */
-.system-inventory,
-.system-current,
-.system-values {
-  padding-left: 2ch;
-  padding-right: 2ch;
-}
-.system-inventory > *,
-.system-current > *,
-.system-values > * {
-  transform: none;
-}
-
-/* Blur/focus falloff follows the same geometry as the vignette: top and bottom
-   of the viewport, left and right of the 132-column screen container. */
-.edge-layer {
-  background:
-    linear-gradient(to right,
-      rgb(0 0 0 / var(--edge-darkness)) 0%,
-      transparent calc(4% + 7% * (1 - var(--edge-strength))),
-      transparent calc(96% - 7% * (1 - var(--edge-strength))),
-      rgb(0 0 0 / var(--edge-darkness)) 100%),
-    linear-gradient(to bottom,
-      rgb(0 0 0 / var(--edge-darkness)) 0%,
-      transparent calc(4% + 7% * (1 - var(--edge-strength))),
-      transparent calc(96% - 7% * (1 - var(--edge-strength))),
-      rgb(0 0 0 / var(--edge-darkness)) 100%);
-  backdrop-filter: blur(var(--edge-blur));
-  -webkit-backdrop-filter: blur(var(--edge-blur));
-  mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, transparent 0 62%, rgb(0 0 0 / .18) 74%, #000 100%);
-  -webkit-mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, transparent 0 62%, rgb(0 0 0 / .18) 74%, #000 100%);
-}
-
-/* Above 100%, brightness now drives the phosphor toward clipping and adds a
-   white-hot core, producing an intentionally overdriven CRT appearance. */
-.screen-surface {
-  filter: brightness(var(--display-brightness)) contrast(var(--display-contrast));
-}
-.screen-surface::after {
-  background:
-    radial-gradient(ellipse at center, rgb(255 255 255 / var(--brightness-white-alpha)), transparent 58%),
-    radial-gradient(ellipse at center, rgb(var(--phosphor-rgb) / .16), transparent 76%);
-  box-shadow:
-    inset 0 0 4rem rgb(var(--phosphor-rgb) / .18),
-    0 0 var(--brightness-halo-radius) rgb(var(--phosphor-rgb) / var(--brightness-halo-alpha));
-}
-
-/* v16: hue-safe calibration, four-edge focus, and visible fine-text bloom. */
-:root {
-  --brightness-overdrive-alpha: 0;
-  --brightness-core-shadow-alpha: 0;
-  --edge-band-size: 9%;
-}
-
-/* Never use CSS brightness() or a white overlay: both push amber toward yellow
-   and green toward white. Contrast remains a luminance-only operation. */
-.screen-surface {
-  filter: contrast(var(--display-contrast));
-}
-.screen-surface::after {
-  background: radial-gradient(
-    ellipse at center,
-    rgb(var(--phosphor-rgb) / var(--brightness-overdrive-alpha)),
-    transparent 68%
-  );
-  box-shadow:
-    inset 0 0 5rem rgb(var(--phosphor-rgb) / calc(var(--brightness-overdrive-alpha) * .55)),
-    0 0 var(--brightness-halo-radius) rgb(var(--phosphor-rgb) / var(--brightness-halo-alpha));
-  mix-blend-mode: screen;
-}
-
-/* Use separate horizontal and vertical blur bands. This avoids the unreliable
-   combined mask that was only visibly affecting the sides in Chromium. */
-.edge-layer {
-  background: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  mask-image: none;
-  -webkit-mask-image: none;
-  overflow: visible;
-}
-.edge-layer::before,
-.edge-layer::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  backdrop-filter: blur(var(--edge-blur));
-  -webkit-backdrop-filter: blur(var(--edge-blur));
-}
-.edge-layer::before {
-  inset: 0;
-  background:
-    linear-gradient(to right,
-      rgb(0 0 0 / var(--edge-darkness)) 0,
-      transparent var(--edge-band-size),
-      transparent calc(100% - var(--edge-band-size)),
-      rgb(0 0 0 / var(--edge-darkness)) 100%);
-  mask-image: linear-gradient(to right,
-      #000 0,
-      #000 var(--edge-band-size),
-      transparent calc(var(--edge-band-size) + 1%),
-      transparent calc(100% - var(--edge-band-size) - 1%),
-      #000 calc(100% - var(--edge-band-size)),
-      #000 100%);
-  -webkit-mask-image: linear-gradient(to right,
-      #000 0,
-      #000 var(--edge-band-size),
-      transparent calc(var(--edge-band-size) + 1%),
-      transparent calc(100% - var(--edge-band-size) - 1%),
-      #000 calc(100% - var(--edge-band-size)),
-      #000 100%);
-}
-.edge-layer::after {
-  inset: 0;
-  background:
-    linear-gradient(to bottom,
-      rgb(0 0 0 / var(--edge-darkness)) 0,
-      transparent var(--edge-band-size),
-      transparent calc(100% - var(--edge-band-size)),
-      rgb(0 0 0 / var(--edge-darkness)) 100%);
-  mask-image: linear-gradient(to bottom,
-      #000 0,
-      #000 var(--edge-band-size),
-      transparent calc(var(--edge-band-size) + 1%),
-      transparent calc(100% - var(--edge-band-size) - 1%),
-      #000 calc(100% - var(--edge-band-size)),
-      #000 100%);
-  -webkit-mask-image: linear-gradient(to bottom,
-      #000 0,
-      #000 var(--edge-band-size),
-      transparent calc(var(--edge-band-size) + 1%),
-      transparent calc(100% - var(--edge-band-size) - 1%),
-      #000 calc(100% - var(--edge-band-size)),
-      #000 100%);
-}
-
-/* Force the slider-controlled halo onto every fine-text node. The glow uses
-   only the selected phosphor RGB, so its hue cannot drift. */
-.system-bar *,
-.display-settings *,
-.main-nav *,
-.generate-row *,
-.ingredient-panel h2,
-.ingredient-item:not(.is-selected),
-.ingredient-item:not(.is-selected) *,
-.inventory-drawer *,
-.results-panel *,
-.command-row * {
-  text-shadow:
-    0 0 .65px rgb(var(--phosphor-rgb) / .92),
-    0 0 var(--small-text-bloom-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-alpha)),
-    0 0 var(--small-text-bloom-wide-radius) rgb(var(--phosphor-rgb) / var(--small-text-bloom-wide-alpha)) !important;
-}
-
-/* Reverse-video fill blooms as a phosphor area, while its dark lettering stays crisp. */
-.ingredient-item.is-selected {
-  text-shadow: none !important;
-  box-shadow:
-    inset 0 0 calc(var(--reverse-bloom-radius) * .8) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha)),
-    0 0 var(--reverse-bloom-radius) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha)),
-    0 0 calc(var(--reverse-bloom-radius) * 1.8) rgb(var(--phosphor-rgb) / calc(var(--reverse-bloom-alpha) * .55));
-}
-.ingredient-item.is-selected * { text-shadow: none !important; }
