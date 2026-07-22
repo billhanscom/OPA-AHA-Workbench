@@ -117,17 +117,30 @@
     const decimal = numeric / 100;
 
     if (name === "brightness") {
-      root.style.setProperty("--display-brightness", String(numeric / 100));
+      // Keep the phosphor hue fixed. Below 100% fades emission; above 100%
+      // increases glow rather than running the composite through CSS brightness().
+      const contentOpacity = numeric <= 100 ? 0.45 + (numeric / 100) * 0.55 : 1;
+      const boost = numeric > 100 ? ((numeric - 100) / 60) * 0.28 : 0;
+      root.style.setProperty("--content-opacity", String(contentOpacity));
+      root.style.setProperty("--brightness-boost-alpha", String(boost));
       els.brightnessControl.value = String(numeric);
       els.brightnessValue.value = `${numeric}%`;
     } else if (name === "contrast") {
-      root.style.setProperty("--display-contrast", String(numeric / 100));
+      // Contrast changes the black level behind the phosphor, never its color.
+      const low = numeric < 100 ? ((100 - numeric) / 50) * 0.18 : 0;
+      const high = numeric > 100 ? ((numeric - 100) / 80) * 0.42 : 0;
+      root.style.setProperty("--screen-lift-alpha", String(low));
+      root.style.setProperty("--screen-crush-alpha", String(high));
       els.contrastControl.value = String(numeric);
       els.contrastValue.value = `${numeric}%`;
     } else if (name === "bloom") {
-      root.style.setProperty("--composite-bloom-radius", `${(numeric / 100) * 11}px`);
-      root.style.setProperty("--composite-bloom-alpha", String((numeric / 100) * .78));
-      root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .32));
+      root.style.setProperty("--composite-bloom-radius", `${0.5 + (numeric / 100) * 7.5}px`);
+      root.style.setProperty("--composite-bloom-alpha", String((numeric / 100) * .46));
+      // Thin rules need a little independent energy to read like the same phosphor
+      // intensity as the much denser block-character logo.
+      root.style.setProperty("--border-bloom-radius", `${0.5 + (numeric / 100) * 4.5}px`);
+      root.style.setProperty("--border-bloom-alpha", String((numeric / 100) * .62));
+      root.style.setProperty("--inner-glow-alpha", String((numeric / 100) * .30));
       els.bloomControl.value = String(numeric);
       els.bloomValue.value = `${numeric}%`;
     } else if (name === "scanlines") {

@@ -11,3 +11,11 @@ This revision rebuilds the interface around a fixed 132-character terminal grid:
 - narrow browser windows scroll rather than squeezing the character grid
 
 CRT calibration controls remain available through DISPLAY CONTROLS.
+
+v8 display corrections
+- Brightness no longer uses CSS brightness filtering; hue remains fixed.
+- Contrast changes screen black level rather than recoloring phosphor.
+- Bloom balance improved between dense logo glyphs and thin borders.
+- Vignette now includes explicit left/right falloff at the screen-container edges.
+- Ingredient values use the same color as ingredient names.
+- Ingredient rows have 2-character left/right padding.

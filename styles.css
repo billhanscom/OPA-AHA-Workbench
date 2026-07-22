@@ -188,7 +188,7 @@ h1, h2, h3, p { font: inherit; }
 .display-control select { width: 100%; border: 1px solid var(--phosphor); border-radius: 0; background: var(--screen-deep); padding: .1em .5ch; }
 
 .masthead { padding: 3em 0 2.25em; display: block; overflow: visible; text-align: center; }
-.ascii-logo { display: inline-block; width: max-content; margin: 0 auto; overflow: visible; color: var(--phosphor-bright); font: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; letter-spacing: 0; line-height: var(--line); white-space: pre; text-align: left; }
+.ascii-logo { display: inline-block; width: max-content; margin: 0 auto; overflow: visible; color: var(--phosphor); font: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; letter-spacing: 0; line-height: var(--line); white-space: pre; text-align: left; }
 .main-nav { display: flex; justify-content: center; gap: 2ch; margin-bottom: 2.2em; }
 .terminal-tab, .terminal-command { border: 2px solid currentColor; border-radius: 0; background: transparent; padding: .55em 2ch; letter-spacing: 0; cursor: pointer; }
 .terminal-tab:hover:not(:disabled), .terminal-tab:focus-visible:not(:disabled), .terminal-command:hover, .terminal-command:focus-visible { color: var(--screen-deep); background: var(--phosphor); outline: none; text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
@@ -203,7 +203,7 @@ h1, h2, h3, p { font: inherit; }
 .ingredient-list { overflow: visible; }
 .ingredient-item { display: grid; grid-template-columns: minmax(0, 1fr) 10ch; width: 100%; min-height: 1.65em; border: 0; background: transparent; padding: .12em 1ch; text-align: left; cursor: pointer; color: var(--phosphor); }
 .ingredient-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ingredient-values { text-align: right; color: var(--phosphor-dim); }
+.ingredient-values { text-align: right; color: inherit; }
 .ingredient-item:hover, .ingredient-item:focus-visible { outline: none; color: var(--phosphor-bright); background: rgb(var(--phosphor-rgb) / .08); }
 .ingredient-item.is-selected { color: var(--screen-deep); background: var(--phosphor); text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
 .ingredient-item.is-selected .ingredient-values { color: var(--screen-deep); }
@@ -263,7 +263,13 @@ h1, h2, h3, p { font: inherit; }
   --display-contrast: 1;
   --composite-bloom-radius: 1.54px;
   --composite-bloom-alpha: .109;
+  --border-bloom-alpha: .12;
+  --border-bloom-radius: 2px;
   --inner-glow-alpha: .045;
+  --content-opacity: 1;
+  --brightness-boost-alpha: 0;
+  --screen-lift-alpha: 0;
+  --screen-crush-alpha: 0;
   --vignette-strength: .52;
   --edge-strength: .30;
   --edge-blur: .54px;
@@ -282,6 +288,22 @@ h1, h2, h3, p { font: inherit; }
   clip-path: inset(0 round var(--screen-radius));
 }
 
+.screen-frame::before,
+.screen-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.screen-frame::before {
+  z-index: 0;
+  background: rgb(255 255 255 / var(--screen-lift-alpha));
+}
+.screen-frame::after {
+  z-index: 0;
+  background: rgb(0 0 0 / var(--screen-crush-alpha));
+}
+
 .screen-surface {
   opacity: 1;
   transform-origin: 50% 50%;
@@ -290,9 +312,8 @@ h1, h2, h3, p { font: inherit; }
     rotateX(calc(var(--curve) * .42deg))
     scaleX(var(--curve-scale-x))
     scaleY(var(--curve-scale-y));
+  opacity: var(--content-opacity, 1);
   filter:
-    brightness(var(--display-brightness))
-    contrast(var(--display-contrast))
     drop-shadow(0 0 .7px rgb(var(--phosphor-rgb) / .72))
     drop-shadow(0 0 var(--composite-bloom-radius) rgb(var(--phosphor-rgb) / var(--composite-bloom-alpha)));
   will-change: filter, transform;
@@ -312,6 +333,17 @@ h1, h2, h3, p { font: inherit; }
 .terminal h3,
 .terminal li { text-shadow: none !important; }
 
+/* Brightness above 100% increases phosphor emission without recoloring glyphs. */
+.screen-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--brightness-boost-alpha);
+  box-shadow: inset 0 0 2.5rem rgb(var(--phosphor-rgb) / .08);
+  mix-blend-mode: screen;
+}
+
 .bloom-border,
 .terminal-tab,
 .terminal-command,
@@ -321,7 +353,8 @@ h1, h2, h3, p { font: inherit; }
 .inventory-drawer,
 .results-panel {
   box-shadow:
-    inset 0 0 3px rgb(var(--phosphor-rgb) / var(--inner-glow-alpha));
+    inset 0 0 3px rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
+    0 0 var(--border-bloom-radius) rgb(var(--phosphor-rgb) / var(--border-bloom-alpha));
 }
 
 .terminal-tab:hover:not(:disabled),
@@ -366,15 +399,22 @@ h1, h2, h3, p { font: inherit; }
   position: absolute;
   z-index: 3;
   background:
-    linear-gradient(to bottom,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .58)) 0%,
-      transparent 12%,
+    linear-gradient(to right,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .90)) 0%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .34)) 5%,
+      transparent 14%,
       transparent 86%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .72)) 100%),
-    radial-gradient(ellipse 112% 94% at 50% 50%,
-      transparent 58%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .20)) 78%,
-      rgb(0 0 0 / calc(var(--vignette-strength) * .66)) 100%);
+      rgb(0 0 0 / calc(var(--vignette-strength) * .34)) 95%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .90)) 100%),
+    linear-gradient(to bottom,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .70)) 0%,
+      transparent 13%,
+      transparent 86%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .82)) 100%),
+    radial-gradient(ellipse 104% 92% at 50% 50%,
+      transparent 54%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .18)) 76%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .48)) 100%);
 }
 
 /* Edge focus falloff and compression cue, separate from the vignette. */
@@ -531,7 +571,7 @@ body {
 .ingredient-item {
   grid-template-columns: minmax(0, 1fr) 10ch;
   min-height: 3.05em;
-  padding: .75em 1ch;
+  padding: .75em 2ch;
   align-items: center;
 }
 
