@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#15110a">
+  <title>Obojima Potion Almanac — First Age Display</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+<style id="crt-slider-patch">
+:root {
+  --slider-track: color-mix(in srgb, var(--phosphor) 22%, var(--screen-deep));
+  --slider-border: color-mix(in srgb, var(--phosphor) 58%, var(--screen-deep));
+}
+
+input[type="range"] {
+  accent-color: var(--phosphor);
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--slider-track);
+  border: 1px solid var(--slider-border);
+}
+
+input[type="range"]::-moz-range-track {
+  background: var(--slider-track);
+  border: 1px solid var(--slider-border);
+}
+</style>
+
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to Recipe Generator</a>
+
+  <div class="crt-shell">
+    <div class="screen-frame" id="screenFrame">
+      <div class="screen-surface" id="screenSurface">
+        <div class="terminal" id="terminal">
+          <div class="system-identification" aria-label="System identification">
+            <span class="system-identification-title">AHA SAMPLE REPOSITORY DATABASE</span>
+            <span class="system-identification-terminal">TERMINAL ID: <span id="terminalId">____-____</span></span>
+            <span class="system-identification-build">Build v.0.8.1</span>
+          </div>
+          <header class="system-bar" aria-label="System controls">
+            <div class="system-frame-line" aria-hidden="true">╔═════════════════════════════════════════╦════════════════════════════════════════════════╦══════════════════════╦════════════════╗</div>
+            <div class="system-bar-row">
+              <span class="system-frame-edge" aria-hidden="true">║</span>
+              <section class="system-cell system-inventory" aria-label="Inventory controls">
+                <span class="system-label">INVENTORY</span>
+                <button type="button" class="text-control" id="clearInventory">Clear</button>
+                <button type="button" class="text-control save-state" id="saveInventory">Save*</button>
+                <button type="button" class="text-control" id="loadInventory">Load</button>
+                <button type="button" class="text-control" id="viewInventory">View</button>
+              </section>
+              <span class="system-frame-edge" aria-hidden="true">║</span>
+              <section class="system-cell system-current" aria-live="polite">
+                <span class="system-label">CURRENT</span>
+                <span class="current-inventory-window" id="currentInventory" title="No Inventory Loaded">No Inventory Loaded</span>
+              </section>
+              <span class="system-frame-edge" aria-hidden="true">║</span>
+              <section class="system-cell system-values" aria-label="Rules values">
+                <span class="system-label">VALUES</span>
+                <button type="button" class="value-option is-active" data-ruleset="2024" aria-pressed="true">2024</button>
+                <button type="button" class="value-option" data-ruleset="2014" aria-pressed="false">2014</button>
+              </section>
+              <span class="system-frame-edge" aria-hidden="true">║</span>
+              <section class="system-cell system-display" aria-label="CRT controls">
+                <button type="button" class="text-control display-toggle" id="displaySettingsToggle" aria-expanded="false" aria-controls="displaySettings">CRT CONTROLS</button>
+              </section>
+              <span class="system-frame-edge" aria-hidden="true">║</span>
+            </div>
+            <div class="system-frame-line" aria-hidden="true">╚═════════════════════════════════════════╩════════════════════════════════════════════════╩══════════════════════╩════════════════╝</div>
+            <span class="visually-hidden inventory-state" id="inventoryState" aria-live="polite"></span>
+          </header>
+
+          <section class="display-settings bloom-border" id="displaySettings" hidden aria-labelledby="displaySettingsTitle">
+            <div class="display-settings-heading">
+              <h2 id="displaySettingsTitle">DISPLAY CALIBRATION</h2>
+              <div>
+                <button type="button" class="text-control" id="resetDisplaySettings">Reset</button>
+                <button type="button" class="text-control" id="closeDisplaySettings">Close</button>
+              </div>
+            </div>
+            <div class="display-controls">
+              <label class="display-control phosphor-control" for="phosphorControl">
+                <span>PHOSPHOR</span>
+                <select id="phosphorControl">
+                  <option value="amber">Amber</option>
+                  <option value="green">Green</option>
+                  <option value="white">White</option>
+                </select>
+              </label>
+              <label class="display-control" for="brightnessControl">
+                <span>BRIGHTNESS</span>
+                <input id="brightnessControl" type="range" min="0" max="100" step="1" value="44">
+                <output id="brightnessValue" for="brightnessControl">44%</output>
+              </label>
+              <label class="display-control" for="contrastControl">
+                <span>CONTRAST</span>
+                <input id="contrastControl" type="range" min="0" max="100" step="1" value="38">
+                <output id="contrastValue" for="contrastControl">38%</output>
+              </label>
+              <label class="display-control" for="bloomControl">
+                <span>BLOOM</span>
+                <input id="bloomControl" type="range" min="0" max="200" step="1" value="14">
+                <output id="bloomValue" for="bloomControl">14%</output>
+              </label>
+              <label class="display-control" for="scanlineControl">
+                <span>SCANLINES</span>
+                <input id="scanlineControl" type="range" min="0" max="100" step="1" value="45">
+                <output id="scanlineValue" for="scanlineControl">45%</output>
+              </label>
+              <label class="display-control" for="vignetteControl">
+                <span>VIGNETTE</span>
+                <input id="vignetteControl" type="range" min="0" max="100" step="1" value="52">
+                <output id="vignetteValue" for="vignetteControl">52%</output>
+              </label>
+              <label class="display-control" for="verticalFocusControl">
+                <span>VERTICAL FOCUS</span>
+                <input id="verticalFocusControl" type="range" min="0" max="100" step="1" value="30">
+                <output id="verticalFocusValue" for="verticalFocusControl">30%</output>
+              </label>
+              <label class="display-control" for="horizontalFocusControl">
+                <span>HORIZONTAL FOCUS</span>
+                <input id="horizontalFocusControl" type="range" min="0" max="100" step="1" value="30">
+                <output id="horizontalFocusValue" for="horizontalFocusControl">30%</output>
+              </label>
+              <label class="display-control" for="redrawControl">
+                <span>REDRAW</span>
+                <input id="redrawControl" type="range" min="0" max="1500" step="25" value="150">
+                <output id="redrawValue" for="redrawControl">150 ms</output>
+              </label>
+            </div>
+          </section>
+
+          <section class="masthead" aria-labelledby="site-title">
+            <h1 id="site-title" class="visually-hidden">Obojima Potion Almanac</h1>
+            <pre class="ascii-logo" aria-hidden="true">                                  ▒███████ ▒████████  ▒███████    ▒█████▒████▒██     ▒██  ▒█████
+                                 ▒██    ▒██▒██    ▒██▒██    ▒██      ▒██ ▒██ ▒███   ▒███ ▒██  ▒██
+                                 ▒██    ▒██▒████████ ▒██    ▒██      ▒██ ▒██ ▒████ ▒████▒█████████
+                                 ▒██    ▒██▒██    ▒██▒██    ▒██▒██   ▒██ ▒██ ▒██ ▒██ ▒██▒██    ▒██
+                                  ▒███████ ▒████████  ▒███████  ▒██████ ▒████▒██     ▒██▒██    ▒██
+
+                                      ▒████████  ▒███████ ▒████████▒████ ▒███████ ▒███   ▒██
+                                      ▒██    ▒██▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒████  ▒██
+                                      ▒████████ ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██▒███▒██
+                                      ▒██       ▒██    ▒██   ▒██    ▒██ ▒██    ▒██▒██  ▒████
+                                      ▒██        ▒███████    ▒██   ▒████ ▒███████ ▒██   ▒███
+
+                                ▒█████  ▒██      ▒██     ▒██  ▒█████  ▒██    ▒██  ▒█████   ▒███████
+                               ▒██  ▒██ ▒██      ▒███   ▒███ ▒██  ▒██ ▒████  ▒██ ▒██  ▒██ ▒██    ▒██
+                              ▒█████████▒██      ▒████ ▒████▒█████████▒██▒███▒██▒█████████▒██       
+                              ▒██    ▒██▒██      ▒██ ▒██ ▒██▒██    ▒██▒██  ▒████▒██    ▒██▒██    ▒██
+                              ▒██    ▒██▒████████▒██     ▒██▒██    ▒██▒██    ▒██▒██    ▒██ ▒███████</pre>
+          </section>
+
+          <nav class="main-nav" aria-label="Primary tools">
+            <button class="terminal-tab is-active bloom-border" type="button" aria-current="page">RECIPE GENERATOR</button>
+            <button class="terminal-tab bloom-border preview-tool" type="button" data-preview-tool aria-disabled="true" title="Not included in this prototype">INGREDIENT FINDER</button>
+            <button class="terminal-tab bloom-border preview-tool" type="button" data-preview-tool aria-disabled="true" title="Not included in this prototype">FORAGING AID</button>
+          </nav>
+
+          <main id="workspace">
+            <p class="visually-hidden" id="selectionHelp">Select the ingredients in your inventory.</p>
+
+            <section class="generate-row" aria-label="Primary recipe command">
+              <button type="button" class="terminal-command primary-command bloom-border" id="generateRecipes">GENERATE RECIPES</button>
+            </section>
+
+            <section class="ingredient-panel bloom-border" aria-describedby="selectionHelp">
+              <div class="ingredient-column" data-rarity="common">
+                <h2>COMMON INGREDIENTS</h2>
+                <div class="ingredient-list" id="commonList"></div>
+              </div>
+              <div class="ingredient-column" data-rarity="uncommon">
+                <h2>UNCOMMON INGREDIENTS</h2>
+                <div class="ingredient-list" id="uncommonList"></div>
+              </div>
+              <div class="ingredient-column" data-rarity="rare">
+                <h2>RARE INGREDIENTS</h2>
+                <div class="ingredient-list" id="rareList"></div>
+              </div>
+            </section>
+
+            <section class="inventory-drawer bloom-border" id="inventoryDrawer" hidden aria-labelledby="inventoryDrawerTitle">
+              <div class="drawer-heading">
+                <h2 id="inventoryDrawerTitle">CURRENT INVENTORY</h2>
+                <button type="button" class="text-control" id="closeInventory">Close</button>
+              </div>
+              <ol id="inventorySummary"></ol>
+            </section>
+
+            <section class="results-panel bloom-border" id="resultsPanel" aria-labelledby="resultsTitle" hidden>
+              <div class="results-heading">
+                <h2 id="resultsTitle">BREWABLE POTIONS</h2>
+                <p id="resultSummary"></p>
+              </div>
+              <div id="recipeResults" class="recipe-results"></div>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewport-effects" id="viewportEffects" aria-hidden="true">
+    <div class="contrast-layer"></div>
+    <div class="scanline-layer"></div>
+    <div class="glass-layer"></div>
+    <div class="edge-focus-layer edge-focus-layer--vertical" aria-hidden="true">
+      <div class="edge-focus-pass edge-focus-pass--vertical edge-focus-soft"></div>
+      <div class="edge-focus-pass edge-focus-pass--vertical edge-focus-medium"></div>
+      <div class="edge-focus-pass edge-focus-pass--vertical edge-focus-strong"></div>
+    </div>
+    <div class="edge-focus-layer edge-focus-layer--horizontal" aria-hidden="true">
+      <div class="edge-focus-pass edge-focus-pass--horizontal edge-focus-soft"></div>
+      <div class="edge-focus-pass edge-focus-pass--horizontal edge-focus-medium"></div>
+      <div class="edge-focus-pass edge-focus-pass--horizontal edge-focus-strong"></div>
+    </div>
+    <div class="redraw-sweep" id="redrawSweep"></div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
