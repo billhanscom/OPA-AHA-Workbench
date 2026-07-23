@@ -2169,3 +2169,68 @@ body {
   border: 0 !important;
   box-shadow: none !important;
 }
+
+
+/* v34-border-only: stable CSS-drawn double frame -------------------------
+   The interactive content remains on the established 132-column grid. The
+   frame is a single overlay, so outer rules and dividers share one geometry. */
+.system-bar {
+  position: relative !important;
+  display: block !important;
+  width: 132ch !important;
+  height: calc(var(--terminal-row) * 3) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+.system-frame-line,
+.system-frame-edge {
+  display: none !important;
+}
+.system-border-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  border: 3px double var(--phosphor);
+  pointer-events: none;
+}
+.system-border-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 3px double var(--phosphor);
+  transform: translateX(-1.5px);
+}
+.system-border-divider--one { left: 42ch; }
+.system-border-divider--two { left: 91ch; }
+.system-border-divider--three { left: 114ch; }
+.system-bar-row {
+  position: absolute !important;
+  inset: var(--terminal-row) 0 auto 0 !important;
+  z-index: 1 !important;
+  display: grid !important;
+  grid-template-columns: 42ch 49ch 23ch 18ch !important;
+  width: 132ch !important;
+  height: var(--terminal-row) !important;
+  min-height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.system-cell {
+  display: flex !important;
+  height: var(--terminal-row) !important;
+  min-height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  align-items: center !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
