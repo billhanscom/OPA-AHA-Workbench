@@ -42,7 +42,7 @@ input[type="range"]::-moz-range-track {
           <div class="system-identification" aria-label="System identification">
             <span class="system-identification-title">AHA SAMPLE REPOSITORY DATABASE</span>
             <span class="system-identification-terminal">TERMINAL ID: <span id="terminalId">____-____</span></span>
-            <span class="system-identification-build">Build v.0.9.3</span>
+            <span class="system-identification-build">Build v.0.9.4</span>
           </div>
           <header class="system-bar" aria-label="System controls">
             <div class="system-border-overlay" aria-hidden="true">
@@ -127,6 +127,11 @@ input[type="range"]::-moz-range-track {
                 <span>OVERALL FOCUS</span>
                 <input id="overallFocusControl" type="range" min="0" max="100" step="1" value="0">
                 <output id="overallFocusValue" for="overallFocusControl">0%</output>
+              </label>
+              <label class="display-control" for="reverseTintControl">
+                <span>REVERSE TINT</span>
+                <input id="reverseTintControl" type="range" min="0" max="20" step="1" value="10">
+                <output id="reverseTintValue" for="reverseTintControl">10%</output>
               </label>
               <label class="display-control" for="verticalFocusControl">
                 <span>VERTICAL FOCUS</span>

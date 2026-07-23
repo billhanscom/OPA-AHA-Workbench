@@ -53,6 +53,7 @@
     brightnessControl: document.getElementById("brightnessControl"),
     contrastControl: document.getElementById("contrastControl"),
     overallFocusControl: document.getElementById("overallFocusControl"),
+    reverseTintControl: document.getElementById("reverseTintControl"),
     verticalFocusControl: document.getElementById("verticalFocusControl"),
     horizontalFocusControl: document.getElementById("horizontalFocusControl"),
     redrawControl: document.getElementById("redrawControl"),
@@ -62,6 +63,7 @@
     brightnessValue: document.getElementById("brightnessValue"),
     contrastValue: document.getElementById("contrastValue"),
     overallFocusValue: document.getElementById("overallFocusValue"),
+    reverseTintValue: document.getElementById("reverseTintValue"),
     verticalFocusValue: document.getElementById("verticalFocusValue"),
     horizontalFocusValue: document.getElementById("horizontalFocusValue"),
     redrawValue: document.getElementById("redrawValue"),
@@ -193,6 +195,7 @@
     scanlines: 45,
     vignette: 52,
     overallFocus: 0,
+    reverseTint: 10,
     verticalFocus: 30,
     horizontalFocus: 30,
     redraw: 150
@@ -205,6 +208,7 @@
     scanlines: [0, 100],
     vignette: [0, 100],
     overallFocus: [0, 100],
+    reverseTint: [0, 20],
     verticalFocus: [0, 100],
     horizontalFocus: [0, 100],
     redraw: [0, 1500]
@@ -217,6 +221,7 @@
     scanlines: [els.scanlineControl, els.scanlineValue, "%"],
     vignette: [els.vignetteControl, els.vignetteValue, "%"],
     overallFocus: [els.overallFocusControl, els.overallFocusValue, "%"],
+    reverseTint: [els.reverseTintControl, els.reverseTintValue, "%"],
     verticalFocus: [els.verticalFocusControl, els.verticalFocusValue, "%"],
     horizontalFocus: [els.horizontalFocusControl, els.horizontalFocusValue, "%"],
     redraw: [els.redrawControl, els.redrawValue, " ms"]
@@ -336,10 +341,6 @@
     setRootProperty("--bloom-wide-radius", `${1.2 + energy * 15}px`);
     setRootProperty("--bloom-wide-opacity", String(Math.min(0.34, energy * 0.14)));
 
-    // Keep reverse-video lettering slightly phosphor-tinted so the dark glyphs
-    // feel embedded in the luminous field rather than perfectly digital black.
-    setRootProperty("--reverse-text-tint", "10%");
-    setRootProperty("--reverse-bloom-source-tint", "10%");
   }
 
   function applyDisplaySetting(name, value, save = true) {
@@ -370,6 +371,12 @@
         // shallow range keeps the control useful for calibration rather than
         // turning the interface into an unreadable Gaussian blur.
         setRootProperty("--overall-focus-blur", `${decimal * 2.25}px`);
+        break;
+      case "reverseTint":
+        // Tint reverse-video lettering with a restrained amount of the active
+        // phosphor color. The control is capped at 20% to preserve contrast.
+        setRootProperty("--reverse-text-tint", `${numeric}%`);
+        setRootProperty("--reverse-bloom-source-tint", `${numeric}%`);
         break;
       case "verticalFocus":
         setRootProperty("--vertical-focus-soft-blur", `${decimal * 1.8}px`);
@@ -901,6 +908,7 @@
     bindDisplayControl(els.brightnessControl, "brightness");
     bindDisplayControl(els.contrastControl, "contrast");
     bindDisplayControl(els.overallFocusControl, "overallFocus");
+    bindDisplayControl(els.reverseTintControl, "reverseTint");
     bindDisplayControl(els.verticalFocusControl, "verticalFocus");
     bindDisplayControl(els.horizontalFocusControl, "horizontalFocus");
     bindDisplayControl(els.redrawControl, "redraw");
