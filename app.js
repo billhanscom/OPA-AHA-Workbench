@@ -52,6 +52,7 @@
     scanlineControl: document.getElementById("scanlineControl"),
     brightnessControl: document.getElementById("brightnessControl"),
     contrastControl: document.getElementById("contrastControl"),
+    overallFocusControl: document.getElementById("overallFocusControl"),
     verticalFocusControl: document.getElementById("verticalFocusControl"),
     horizontalFocusControl: document.getElementById("horizontalFocusControl"),
     redrawControl: document.getElementById("redrawControl"),
@@ -60,6 +61,7 @@
     scanlineValue: document.getElementById("scanlineValue"),
     brightnessValue: document.getElementById("brightnessValue"),
     contrastValue: document.getElementById("contrastValue"),
+    overallFocusValue: document.getElementById("overallFocusValue"),
     verticalFocusValue: document.getElementById("verticalFocusValue"),
     horizontalFocusValue: document.getElementById("horizontalFocusValue"),
     redrawValue: document.getElementById("redrawValue"),
@@ -190,6 +192,7 @@
     bloom: 14,
     scanlines: 45,
     vignette: 52,
+    overallFocus: 0,
     verticalFocus: 30,
     horizontalFocus: 30,
     redraw: 150
@@ -201,6 +204,7 @@
     bloom: [0, 200],
     scanlines: [0, 100],
     vignette: [0, 100],
+    overallFocus: [0, 100],
     verticalFocus: [0, 100],
     horizontalFocus: [0, 100],
     redraw: [0, 1500]
@@ -212,6 +216,7 @@
     bloom: [els.bloomControl, els.bloomValue, "%"],
     scanlines: [els.scanlineControl, els.scanlineValue, "%"],
     vignette: [els.vignetteControl, els.vignetteValue, "%"],
+    overallFocus: [els.overallFocusControl, els.overallFocusValue, "%"],
     verticalFocus: [els.verticalFocusControl, els.verticalFocusValue, "%"],
     horizontalFocus: [els.horizontalFocusControl, els.horizontalFocusValue, "%"],
     redraw: [els.redrawControl, els.redrawValue, " ms"]
@@ -361,6 +366,13 @@
         break;
       case "vignette":
         setRootProperty("--vignette-strength", String(decimal));
+        break;
+      case "overallFocus":
+        // Uniformly defocus the complete terminal image without changing
+        // phosphor hue, luminance, or bloom opacity. The deliberately
+        // shallow range keeps the control useful for calibration rather than
+        // turning the interface into an unreadable Gaussian blur.
+        setRootProperty("--overall-focus-blur", `${decimal * 2.25}px`);
         break;
       case "verticalFocus":
         setRootProperty("--vertical-focus-soft-blur", `${decimal * 1.8}px`);
@@ -891,6 +903,7 @@
     bindDisplayControl(els.scanlineControl, "scanlines");
     bindDisplayControl(els.brightnessControl, "brightness");
     bindDisplayControl(els.contrastControl, "contrast");
+    bindDisplayControl(els.overallFocusControl, "overallFocus");
     bindDisplayControl(els.verticalFocusControl, "verticalFocus");
     bindDisplayControl(els.horizontalFocusControl, "horizontalFocus");
     bindDisplayControl(els.redrawControl, "redraw");

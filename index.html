@@ -42,7 +42,7 @@ input[type="range"]::-moz-range-track {
           <div class="system-identification" aria-label="System identification">
             <span class="system-identification-title">AHA SAMPLE REPOSITORY DATABASE</span>
             <span class="system-identification-terminal">TERMINAL ID: <span id="terminalId">____-____</span></span>
-            <span class="system-identification-build">Build v.0.9.1</span>
+            <span class="system-identification-build">Build v.0.9.2</span>
           </div>
           <header class="system-bar" aria-label="System controls">
             <div class="system-border-overlay" aria-hidden="true">
@@ -122,6 +122,11 @@ input[type="range"]::-moz-range-track {
                 <span>VIGNETTE</span>
                 <input id="vignetteControl" type="range" min="0" max="100" step="1" value="52">
                 <output id="vignetteValue" for="vignetteControl">52%</output>
+              </label>
+              <label class="display-control" for="overallFocusControl">
+                <span>OVERALL FOCUS</span>
+                <input id="overallFocusControl" type="range" min="0" max="100" step="1" value="0">
+                <output id="overallFocusValue" for="overallFocusControl">0%</output>
               </label>
               <label class="display-control" for="verticalFocusControl">
                 <span>VERTICAL FOCUS</span>

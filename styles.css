@@ -1047,15 +1047,15 @@ body::after {
 
 .phosphor-bloom-pass--tight {
   opacity: var(--bloom-tight-opacity);
-  filter: blur(var(--bloom-tight-radius));
+  filter: blur(calc(var(--bloom-tight-radius) + var(--overall-focus-blur)));
 }
 .phosphor-bloom-pass--mid {
   opacity: var(--bloom-mid-opacity);
-  filter: blur(var(--bloom-mid-radius));
+  filter: blur(calc(var(--bloom-mid-radius) + var(--overall-focus-blur)));
 }
 .phosphor-bloom-pass--wide {
   opacity: var(--bloom-wide-opacity);
-  filter: blur(var(--bloom-wide-radius));
+  filter: blur(calc(var(--bloom-wide-radius) + var(--overall-focus-blur)));
 }
 
 /* Turn each clone into a transparent luminance source. Borders and glyphs
@@ -1324,6 +1324,7 @@ body::after {
    horizontal masks are anchored to the left and right edges of the 132ch
    viewport-effects container. */
 :root {
+  --overall-focus-blur: 0px;
   --vertical-focus-soft-blur: .54px;
   --vertical-focus-medium-blur: 1.26px;
   --vertical-focus-strong-blur: 2.4px;
@@ -2332,6 +2333,14 @@ body {
   max-width: var(--content-width) !important;
   margin-left: var(--content-side-gutter) !important;
   margin-right: var(--content-side-gutter) !important;
+}
+
+/* Overall Focus applies only to the live terminal. Bloom copies retain their
+   own composite blur radii, with the same focus amount added explicitly below. */
+#terminal {
+  filter: blur(var(--overall-focus-blur));
+  transform: translateZ(0);
+  transform-origin: center;
 }
 
 .phosphor-bloom-stack {
