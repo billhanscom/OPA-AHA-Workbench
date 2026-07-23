@@ -169,9 +169,9 @@ h1, h2, h3, p { font: inherit; }
 .system-cell + .system-cell { border-left: 2px solid currentColor; }
 .system-label { letter-spacing: 0; }
 .inventory-state { display: inline-block; width: 5ch; }
-.system-current { min-width: 0; color: var(--phosphor); }
+.system-current { min-width: 0; color: var(--phosphor); padding-left: 2ch; }
 .system-current #currentInventory { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.system-values { justify-content: flex-start; }
+.system-values { justify-content: flex-start; padding-left: 2ch; }
 
 .text-control, .value-option { border: 0; padding: 0 .2ch; background: transparent; cursor: pointer; text-decoration: none; }
 .text-control:hover, .text-control:focus-visible, .value-option:hover, .value-option:focus-visible { background: var(--phosphor); color: var(--screen-deep); outline: none; text-shadow: none; box-shadow: 0 0 var(--bloom-radius) rgb(var(--phosphor-rgb) / var(--bloom-border-alpha)); }
@@ -507,13 +507,13 @@ body {
   padding: .45em 1ch;
 }
 .system-cell + .system-cell { border-left-width: 1px; }
-.system-inventory { justify-content: flex-start; }
+.system-inventory { justify-content: flex-start; padding-left: 2ch; }
 .system-inventory,
 .system-current,
 .system-values { padding-left: 3ch; }
 .system-inventory .inventory-state { display: none; }
 .system-current #currentInventory { flex: 1 1 auto; }
-.system-values { justify-content: flex-start; }
+.system-values { justify-content: flex-start; padding-left: 2ch; }
 .system-display { justify-content: center; padding-inline: .5ch; }
 .display-toggle { width: 100%; white-space: nowrap; text-align: center; }
 
@@ -1251,7 +1251,7 @@ body::after {
   outline: none;
 }
 .current-inventory-window.is-scrolling { text-overflow: clip; }
-.system-values { justify-content: flex-start; }
+.system-values { justify-content: flex-start; padding-left: 2ch; }
 .system-display { justify-content: center; }
 .system-display .display-toggle { padding: 0; }
 .save-state { width: 5ch; padding: 0 !important; text-align: left; }
