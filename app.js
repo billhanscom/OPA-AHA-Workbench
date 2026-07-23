@@ -21,7 +21,6 @@
   const potionNames = window.OBOJIMA_POTION_NAMES || {};
 
   const state = {
-    phosphor: "amber",
     ruleset: "2024",
     selected: new Set(),
     generated: false,
@@ -157,14 +156,14 @@
       body: "radial-gradient(ellipse at center, #0b2111 0%, #040a05 72%, #010301 100%)"
     },
     white: {
-      rgb: "216 222 236",
-      phosphor: "#d8deec",
-      bright: "#d8deec",
-      dim: "#9299aa",
-      faint: "#596171",
-      screen: "#10151a",
-      deep: "#0b0f12",
-      body: "radial-gradient(ellipse at center, #182029 0%, #0b0f12 72%, #030507 100%)"
+      rgb: "232 239 232",
+      phosphor: "#e8efe8",
+      bright: "#f7fff7",
+      dim: "#99a399",
+      faint: "#5d665d",
+      screen: "#111411",
+      deep: "#080a08",
+      body: "radial-gradient(ellipse at center, #1b201b 0%, #080a08 72%, #020302 100%)"
     }
   };
 
@@ -234,7 +233,6 @@
   function applyPhosphor(name, save = true) {
     const key = phosphors[name] ? name : "amber";
     const palette = phosphors[key];
-    state.phosphor = key;
 
     setRootProperty("--phosphor-rgb", palette.rgb);
     setRootProperty("--phosphor", palette.phosphor);
@@ -249,10 +247,6 @@
     els.screenFrame.style.background = "transparent";
     els.phosphorControl.value = key;
 
-    // Reapply luminance after a phosphor change so brightness never retains
-    // values calculated for the previous phosphor palette.
-    if (els.brightnessControl) applyBrightness(Number(els.brightnessControl.value));
-
     if (save) {
       writeStorage(`${DISPLAY_STORAGE_PREFIX}-phosphor`, key);
     }
@@ -266,55 +260,23 @@
     return 50 + (numeric / 100) * 130;
   }
 
-  function hslToRgb(hue, saturation, lightness) {
-    const s = saturation / 100;
-    const l = lightness / 100;
-    const chroma = (1 - Math.abs(2 * l - 1)) * s;
-    const sector = ((hue % 360) + 360) % 360 / 60;
-    const x = chroma * (1 - Math.abs((sector % 2) - 1));
-    let r = 0;
-    let g = 0;
-    let b = 0;
-
-    if (sector < 1) [r, g] = [chroma, x];
-    else if (sector < 2) [r, g] = [x, chroma];
-    else if (sector < 3) [g, b] = [chroma, x];
-    else if (sector < 4) [g, b] = [x, chroma];
-    else if (sector < 5) [r, b] = [x, chroma];
-    else [r, b] = [chroma, x];
-
-    const match = l - chroma / 2;
-    return [r, g, b].map((channel) => Math.round((channel + match) * 255));
-  }
-
   function applyBrightness(numeric) {
     const legacyValue = mapBrightnessToLegacy(numeric);
-    const normalized = Math.max(0, Math.min(1, numeric / 100));
+    const below = Math.min(legacyValue, 100) / 100;
+    const above = Math.max(0, legacyValue - 100) / 100;
+    const contentOpacity = legacyValue <= 100
+      ? 0.10 + Math.pow(below, 1.35) * 0.90
+      : 1;
 
-    // Scale phosphor emission without changing the selected palette. The same
-    // gain is applied to the sharp terminal and the unified bloom composite,
-    // so Brightness cannot suppress or replace Bloom.
-    const emissionGain = 0.18 + Math.pow(normalized, 1.08) * 2.42;
-    const belowNeutral = Math.min(1, legacyValue / 100);
-
-    setRootProperty("--content-opacity", "1");
-    setRootProperty("--emission-gain", emissionGain.toFixed(3));
-
-    // Keep the phosphor hue and saturation fixed at the selected palette.
-    const palette = phosphors[state.phosphor] || phosphors.amber;
-    setRootProperty("--phosphor-rgb", palette.rgb);
-    setRootProperty("--phosphor", palette.phosphor);
-    setRootProperty("--phosphor-bright", palette.bright);
-
-    // Disable all legacy brightness-as-bloom and white-hot paths.
+    setRootProperty("--content-opacity", String(contentOpacity));
     setRootProperty("--display-brightness", "1");
-    setRootProperty("--brightness-boost-alpha", "0");
+    setRootProperty("--brightness-boost-alpha", String(Math.pow(above, 1.15) * 0.82));
     setRootProperty("--brightness-white-alpha", "0");
-    setRootProperty("--brightness-overdrive-alpha", "0");
-    setRootProperty("--brightness-halo-radius", "0px");
-    setRootProperty("--brightness-halo-alpha", "0");
-    setRootProperty("--page-brighten-alpha", "0");
-    setRootProperty("--page-dim-alpha", String((1 - belowNeutral) * 0.62));
+    setRootProperty("--brightness-overdrive-alpha", String(Math.pow(above, 1.25) * 0.72));
+    setRootProperty("--brightness-halo-radius", `${0.4 + Math.pow(above, 1.15) * 17}px`);
+    setRootProperty("--brightness-halo-alpha", String(0.06 + Math.pow(above, 1.1) * 0.86));
+    setRootProperty("--page-brighten-alpha", String(Math.pow(above, 1.3) * 0.30));
+    setRootProperty("--page-dim-alpha", String((1 - below) * 0.72));
   }
 
   function applyContrast(numeric) {
@@ -354,11 +316,8 @@
 
     // Reverse-video lettering stays nearly black at low bloom, then gains a
     // restrained phosphor tint as emission increases. The cap prevents washout.
-    const bloomRatio = Math.max(0, Math.min(1, numeric / 200));
-    const reverseTint = Math.min(18, Math.pow(bloomRatio, 1.35) * 18);
-    const reverseBloomSourceTint = Math.min(30, Math.pow(bloomRatio, 1.15) * 30);
+    const reverseTint = Math.min(9, Math.pow(numeric / 200, 1.25) * 9);
     setRootProperty("--reverse-text-tint", `${reverseTint.toFixed(2)}%`);
-    setRootProperty("--reverse-bloom-source-tint", `${reverseBloomSourceTint.toFixed(2)}%`);
   }
 
   function applyDisplaySetting(name, value, save = true) {
@@ -495,15 +454,10 @@
     } catch (error) {}
   }
 
-  function updateDisplaySettingsToggle(open) {
-    els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
-    els.displaySettingsToggle.classList.toggle("is-open", open);
-  }
-
   function restoreDisplaySettingsVisibility() {
     const open = readStorage(DISPLAY_PANEL_STORAGE_KEY, "false") === "true";
     els.displaySettings.hidden = !open;
-    updateDisplaySettingsToggle(open);
+    els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
   }
 
   function toggleDisplaySettings(forceOpen) {
@@ -511,7 +465,7 @@
       ? forceOpen
       : els.displaySettings.hidden;
     els.displaySettings.hidden = !open;
-    updateDisplaySettingsToggle(open);
+    els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
     writeStorage(DISPLAY_PANEL_STORAGE_KEY, String(open));
   }
 
