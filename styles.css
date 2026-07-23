@@ -2005,7 +2005,7 @@ body {
    lines remain literal rows in the PRE; only one row separates it from nav. */
 .masthead {
   margin-top: calc(var(--terminal-row) * 4) !important;
-  margin-bottom: var(--terminal-row) !important;
+  margin-bottom: 0 !important;
   padding: 0 !important;
 }
 .ascii-logo {
