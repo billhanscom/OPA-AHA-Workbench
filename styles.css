@@ -1519,3 +1519,179 @@ body::after {
 .viewport-effects .contrast-layer {
   display: none !important;
 }
+
+
+/* v28: canonical terminal spacing, seamless screen surround, and reverse-video tint */
+:root {
+  --reverse-text-tint: 0%;
+  --edge-extension-alpha: calc(var(--vignette-strength) * .90);
+}
+
+/* The complete screen field uses one continuous substrate. The 132-column
+   terminal is content, not a separately painted panel. */
+html,
+body,
+.crt-shell,
+.screen-frame,
+.screen-surface,
+.terminal {
+  background-color: var(--page-background) !important;
+}
+.screen-frame,
+.screen-surface,
+.terminal {
+  background: transparent !important;
+}
+
+/* Full-viewport scanlines and vertical glass keep the surround continuous.
+   Horizontal effects remain anchored to the terminal container. */
+.viewport-effects {
+  left: 0 !important;
+  right: 0 !important;
+  overflow: hidden;
+}
+.viewport-effects::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / var(--edge-extension-alpha)) 0 var(--screen-left),
+    transparent var(--screen-left) calc(100% - var(--screen-right)),
+    rgb(0 0 0 / var(--edge-extension-alpha)) calc(100% - var(--screen-right)) 100%
+  );
+}
+.scanline-layer { inset: 0 !important; }
+.glass-layer {
+  inset: 0 !important;
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .70)) 0%,
+      transparent 13%,
+      transparent 86%,
+      rgb(0 0 0 / calc(var(--vignette-strength) * .70)) 100%
+    ) !important;
+  box-shadow: inset 0 0 7rem rgb(0 0 0 / calc(var(--vignette-strength) * .18)) !important;
+}
+.glass-layer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--screen-left);
+  right: var(--screen-right);
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / calc(var(--vignette-strength) * .90)) 0%,
+    rgb(0 0 0 / calc(var(--vignette-strength) * .34)) 5%,
+    transparent 14%,
+    transparent 86%,
+    rgb(0 0 0 / calc(var(--vignette-strength) * .34)) 95%,
+    rgb(0 0 0 / calc(var(--vignette-strength) * .90)) 100%
+  );
+}
+.edge-focus-layer--vertical {
+  left: 0 !important;
+  right: 0 !important;
+}
+.edge-focus-layer--horizontal {
+  left: var(--screen-left) !important;
+  right: var(--screen-right) !important;
+}
+
+/* Canonical three-row double-line header. Literal box glyphs guarantee the
+   exact 132-character geometry and restore the original vertical rhythm. */
+.system-bar {
+  width: 132ch !important;
+  border: 0 !important;
+  overflow: visible !important;
+  line-height: 1 !important;
+}
+.system-frame-line {
+  display: block !important;
+  width: 132ch !important;
+  height: 1em !important;
+  line-height: 1 !important;
+  white-space: pre !important;
+}
+.system-frame-edge {
+  display: inline-block !important;
+  width: 1ch !important;
+  text-align: center !important;
+}
+.system-bar-row {
+  display: grid !important;
+  grid-template-columns: 1ch 41ch 1ch 48ch 1ch 22ch 1ch 16ch 1ch !important;
+  width: 132ch !important;
+  min-height: 1em !important;
+  height: 1em !important;
+  line-height: 1 !important;
+  align-items: center !important;
+}
+.system-cell {
+  height: 1em !important;
+  min-height: 1em !important;
+  padding: 0 2ch !important;
+  gap: 2ch !important;
+  border: 0 !important;
+  line-height: 1 !important;
+}
+.system-cell:not(:last-of-type) { border-right: 0 !important; }
+.system-inventory .system-label,
+.system-current .system-label,
+.system-values .system-label { margin-right: 1ch !important; }
+
+/* Exact spacing supplied for the upper screen composition. */
+.system-identification {
+  width: 132ch !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 0 3ch !important;
+  line-height: 1 !important;
+  height: 1em;
+}
+.masthead {
+  width: 132ch !important;
+  padding: 0 !important;
+  margin: 4em 0 2em !important;
+}
+.main-nav {
+  margin-top: 0 !important;
+  margin-bottom: 2em !important;
+}
+.generate-row {
+  margin-top: 0 !important;
+  margin-bottom: 2em !important;
+}
+.ingredient-list { padding-top: 1em; }
+
+/* The calibration panel must not occlude the bloom clone behind it. */
+.display-settings {
+  background: transparent !important;
+}
+
+/* Reverse video keeps dark, legible lettering, but its darkness is gently
+   phosphor-tinted as bloom increases. */
+.ingredient-item.is-selected,
+.value-option.is-active,
+.text-control:hover,
+.text-control:focus-visible,
+.terminal-tab:hover:not(:disabled),
+.terminal-tab:focus-visible:not(:disabled),
+.terminal-tab.is-reversed:not(:disabled),
+.terminal-command:hover,
+.terminal-command:focus-visible,
+.terminal-command.is-reversed {
+  color: color-mix(
+    in srgb,
+    var(--phosphor) var(--reverse-text-tint),
+    var(--screen-deep)
+  ) !important;
+}
+
+/* The removed Clear Selection / Filter utility row leaves no residual space. */
+.command-row,
+.filter-control { display: none !important; }

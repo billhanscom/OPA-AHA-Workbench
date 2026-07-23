@@ -38,7 +38,6 @@
     terminalId: document.getElementById("terminalId"),
     inventoryState: document.getElementById("inventoryState"),
     saveInventory: document.getElementById("saveInventory"),
-    filter: document.getElementById("ingredientFilter"),
     drawer: document.getElementById("inventoryDrawer"),
     inventorySummary: document.getElementById("inventorySummary"),
     resultsPanel: document.getElementById("resultsPanel"),
@@ -314,6 +313,11 @@
     setRootProperty("--bloom-mid-opacity", String(Math.min(0.54, energy * 0.24)));
     setRootProperty("--bloom-wide-radius", `${1.2 + energy * 15}px`);
     setRootProperty("--bloom-wide-opacity", String(Math.min(0.34, energy * 0.14)));
+
+    // Reverse-video lettering stays nearly black at low bloom, then gains a
+    // restrained phosphor tint as emission increases. The cap prevents washout.
+    const reverseTint = Math.min(9, Math.pow(numeric / 200, 1.25) * 9);
+    setRootProperty("--reverse-text-tint", `${reverseTint.toFixed(2)}%`);
   }
 
   function applyDisplaySetting(name, value, save = true) {
@@ -738,16 +742,6 @@
     els.recipeResults.appendChild(article);
   }
 
-  function filterIngredients(query) {
-    const normalized = query.trim().toLocaleLowerCase();
-
-    document.querySelectorAll(".ingredient-item").forEach((button) => {
-      button.hidden = Boolean(
-        normalized && !button.dataset.name.toLocaleLowerCase().includes(normalized)
-      );
-    });
-  }
-
   function bindDisplayControl(control, name) {
     control.addEventListener("input", (event) => {
       applyDisplaySetting(name, event.target.value);
@@ -841,7 +835,6 @@
 
   function bindEvents() {
     document.getElementById("clearInventory").addEventListener("click", clearSelection);
-    document.getElementById("clearSelection").addEventListener("click", clearSelection);
     document.getElementById("saveInventory").addEventListener("click", saveInventory);
     document.getElementById("loadInventory").addEventListener("click", loadInventory);
     document.getElementById("viewInventory").addEventListener("click", () => {
@@ -878,7 +871,6 @@
     document.querySelectorAll(".value-option").forEach((button) => {
       button.addEventListener("click", () => setRuleset(button.dataset.ruleset));
     });
-    els.filter.addEventListener("input", (event) => filterIngredients(event.target.value));
 
     document.querySelectorAll("[data-preview-tool]").forEach((button) => {
       button.addEventListener("click", (event) => event.preventDefault());

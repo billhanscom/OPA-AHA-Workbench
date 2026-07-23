@@ -31,3 +31,10 @@ v10 display-control changes
 - Expanded brightness to 20-200% with a much stronger dimming/emission range.
 - Renamed Edge Distortion to Edge Focus and made it an obvious perimeter blur.
 - Removed curvature scaling/perspective so the control no longer zooms the interface.
+
+Build v0.8.0 changes:
+- Restored canonical 132-column header and upper-screen spacing.
+- Extended the terminal edge appearance into the outer viewport.
+- Included CRT calibration content in the unified bloom treatment.
+- Added bloom-linked reverse-video text tint.
+- Removed Clear Selection and Filter controls.
