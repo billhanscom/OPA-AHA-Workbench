@@ -2290,15 +2290,15 @@ body {
   width: 1ch;
 }
 
-/* v34.4: 140-column CRT field with bloom locked to the 132-column image ---
+/* v34.5: 144-column CRT field with bloom locked to the 132-column image ---
    The CRT field gains four empty character cells on each side. The live
    terminal and every bloom pass share the same fixed 132ch origin at 4ch,
    avoiding percentage transforms and keeping all glow geometry registered. */
 :root {
-  --screen-columns: 140;
-  --screen-width: 140ch;
+  --screen-columns: 144;
+  --screen-width: 144ch;
   --content-width: 132ch;
-  --content-side-gutter: 4ch;
+  --content-side-gutter: 6ch;
 }
 
 html,
