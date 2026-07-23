@@ -23,7 +23,7 @@
           <div class="system-identification" aria-label="System identification">
             <span class="system-identification-title">AHA SAMPLE REPOSITORY DATABASE</span>
             <span class="system-identification-terminal">TERMINAL ID: <span id="terminalId">____-____</span></span>
-            <span class="system-identification-build">Build v.0.10.6</span>
+            <span class="system-identification-build">Build v.0.10.5</span>
           </div>
           <header class="system-bar" aria-label="System controls">
             <div class="system-border-overlay" aria-hidden="true">
@@ -133,7 +133,7 @@
 </div>
           </section>
 
-          <section class="masthead scroll-redraw-target" aria-labelledby="site-title">
+          <section class="masthead" aria-labelledby="site-title">
             <h1 id="site-title" class="visually-hidden">Obojima Potion Almanac</h1>
             <pre class="ascii-logo" aria-hidden="true">                                  ░███████ ░████████  ░███████    ░█████░████░██     ░██  ░█████
                                  ░██    ░██░██    ░██░██    ░██      ░██ ░██ ░███   ░███ ░██  ░██
@@ -167,7 +167,7 @@
               <button type="button" class="terminal-command primary-command bloom-border" id="generateRecipes">GENERATE RECIPES</button>
             </section>
 
-            <section class="ingredient-panel bloom-border scroll-redraw-target" aria-describedby="selectionHelp">
+            <section class="ingredient-panel bloom-border" aria-describedby="selectionHelp">
               <div class="ingredient-column" data-rarity="common">
                 <h2>COMMON INGREDIENTS</h2>
                 <div class="ingredient-list" id="commonList"></div>
@@ -216,6 +216,7 @@
       <div class="edge-focus-pass edge-focus-pass--horizontal edge-focus-medium"></div>
       <div class="edge-focus-pass edge-focus-pass--horizontal edge-focus-strong"></div>
     </div>
+    <div class="redraw-sweep" id="redrawSweep"></div>
   </div>
 
   <script src="data.js"></script>

@@ -74,7 +74,8 @@
     screenFrame: document.getElementById("screenFrame"),
     screenSurface: document.getElementById("screenSurface"),
     terminal: document.getElementById("terminal"),
-    viewportEffects: document.getElementById("viewportEffects")
+    viewportEffects: document.getElementById("viewportEffects"),
+    redrawSweep: document.getElementById("redrawSweep")
   };
 
   let bloomStack = null;
@@ -505,6 +506,28 @@
     setRootProperty("--screen-right", `${Math.max(0, window.innerWidth - rect.right)}px`);
   }
 
+  function redraw() {
+    const duration = Number(els.redrawControl?.value || 0);
+    if (duration <= 0 || !els.redrawSweep) return;
+
+    updateViewportEffectsBounds();
+    els.redrawSweep.style.setProperty("--active-redraw-ms", `${duration}ms`);
+    els.redrawSweep.classList.remove("is-active");
+    void els.redrawSweep.offsetWidth;
+    els.redrawSweep.classList.add("is-active");
+    window.setTimeout(() => {
+      els.redrawSweep.classList.remove("is-active");
+    }, duration + 80);
+  }
+
+  function scrollToResultsAndRedraw() {
+    els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Allow the smooth scroll to begin, then run the same viewport-wide
+    // raster reveal used by the earlier build. No content is hidden or
+    // observed, so this cannot disrupt page layout or interaction.
+    window.setTimeout(redraw, 320);
+  }
+
   function persistActiveSelection() {
     writeStorage(ACTIVE_SELECTION_STORAGE_KEY, JSON.stringify([...state.selected]));
   }
@@ -742,7 +765,7 @@
       els.recipeResults.appendChild(message);
       els.resultSummary.textContent = "0 RECIPES FOUND FOR 0 POTIONS";
       if (persist) persistResultsState();
-      if (scroll) els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (scroll) scrollToResultsAndRedraw();
       return;
     }
 
@@ -790,7 +813,7 @@
     );
     els.resultSummary.textContent = `${totalRecipes} RECIPE${totalRecipes === 1 ? "" : "S"} FOUND FOR ${sortedGroups.length} POTION${sortedGroups.length === 1 ? "" : "S"}`;
     if (persist) persistResultsState();
-    if (scroll) els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (scroll) scrollToResultsAndRedraw();
   }
 
   function renderRecipeColumns(groups) {
@@ -826,7 +849,7 @@
     const groupKey = `${group.type}:${group.number}`;
     const initiallyExpanded = state.expandedPotions.has(groupKey);
     const article = document.createElement("article");
-    article.className = "potion-group scroll-redraw-target";
+    article.className = "potion-group";
     article.classList.toggle("is-expanded", initiallyExpanded);
 
     const summary = document.createElement("button");
@@ -1000,71 +1023,6 @@
     });
   }
 
-  let scrollRedrawObserver = null;
-  let scrollRedrawMutationObserver = null;
-
-  function revealScrollTarget(target) {
-    if (!target || target.dataset.redrawRevealed === "true") return;
-    target.dataset.redrawRevealed = "true";
-    target.classList.remove("is-redraw-pending");
-    target.classList.add("is-redrawing");
-    const duration = Number(els.redrawControl?.value || displayDefaults.redraw);
-    window.setTimeout(() => {
-      target.classList.remove("is-redrawing");
-      target.classList.add("is-redraw-complete");
-    }, duration + 80);
-  }
-
-  function registerScrollRedrawTargets(root = document) {
-    if (!scrollRedrawObserver) return;
-    const targets = [];
-    if (root.matches?.(".scroll-redraw-target")) targets.push(root);
-    root.querySelectorAll?.(".scroll-redraw-target").forEach((target) => targets.push(target));
-
-    targets.forEach((target) => {
-      if (target.dataset.redrawRegistered === "true") return;
-      target.dataset.redrawRegistered = "true";
-      const rect = target.getBoundingClientRect();
-      const initiallyVisible = rect.bottom > 0 && rect.top < window.innerHeight;
-      if (initiallyVisible) {
-        target.dataset.redrawRevealed = "true";
-        target.classList.add("is-redraw-complete");
-      } else {
-        target.classList.add("is-redraw-pending");
-        scrollRedrawObserver.observe(target);
-      }
-    });
-  }
-
-  function initializeScrollRedraw() {
-    if (!("IntersectionObserver" in window)) {
-      document.querySelectorAll(".scroll-redraw-target").forEach((target) => {
-        target.dataset.redrawRevealed = "true";
-        target.classList.add("is-redraw-complete");
-      });
-      return;
-    }
-
-    scrollRedrawObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        scrollRedrawObserver.unobserve(entry.target);
-        revealScrollTarget(entry.target);
-      });
-    }, { root: null, threshold: 0.08, rootMargin: "0px 0px -4% 0px" });
-
-    registerScrollRedrawTargets(document);
-
-    scrollRedrawMutationObserver = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) registerScrollRedrawTargets(node);
-        });
-      });
-    });
-    scrollRedrawMutationObserver.observe(els.terminal, { childList: true, subtree: true });
-  }
-
   function bindEvents() {
     document.getElementById("clearInventory").addEventListener("click", clearSelection);
     document.getElementById("saveInventory").addEventListener("click", saveInventory);
@@ -1136,7 +1094,6 @@
     initializeCurrentNameScroll();
     initializeReverseVideoButtons();
     initializeBloomComposite();
-    initializeScrollRedraw();
     updateViewportEffectsBounds();
     restoreResultsIfCurrent();
   }
