@@ -2362,3 +2362,34 @@ body {
   margin: 0 !important;
   transform: translateZ(0) !important;
 }
+
+
+/* v0.9.5: reverse-video emissive bloom ---------------------------------- */
+:root {
+  --reverse-emission-alpha: 0.17;
+}
+
+/* The live reverse-video lettering remains nearly black. Only the cloned
+   bloom passes receive an extra phosphor emission, allowing their blur to
+   soften and color the dark glyphs without making the sharp text look gray. */
+.phosphor-bloom-pass .ingredient-item.is-selected,
+.phosphor-bloom-pass .ingredient-item.is-selected *,
+.phosphor-bloom-pass .value-option.is-active,
+.phosphor-bloom-pass .value-option.is-active *,
+.phosphor-bloom-pass .display-toggle.is-open,
+.phosphor-bloom-pass .display-toggle.is-open *,
+.phosphor-bloom-pass .display-toggle[aria-expanded="true"],
+.phosphor-bloom-pass .display-toggle[aria-expanded="true"] *,
+.phosphor-bloom-pass .terminal-tab.is-reversed,
+.phosphor-bloom-pass .terminal-tab.is-reversed *,
+.phosphor-bloom-pass .terminal-command.is-reversed,
+.phosphor-bloom-pass .terminal-command.is-reversed * {
+  color: color-mix(
+    in srgb,
+    var(--phosphor) var(--reverse-bloom-source-tint),
+    var(--screen-deep)
+  ) !important;
+  text-shadow:
+    0 0 0.35px rgb(var(--phosphor-rgb) / var(--reverse-emission-alpha)),
+    0 0 0.9px rgb(var(--phosphor-rgb) / calc(var(--reverse-emission-alpha) * 0.72)) !important;
+}

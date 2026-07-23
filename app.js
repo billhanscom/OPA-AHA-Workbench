@@ -372,12 +372,19 @@
         // turning the interface into an unreadable Gaussian blur.
         setRootProperty("--overall-focus-blur", `${decimal * 2.25}px`);
         break;
-      case "reverseTint":
-        // Tint reverse-video lettering with a restrained amount of the active
-        // phosphor color. The control is capped at 20% to preserve contrast.
+      case "reverseTint": {
+        // Keep the visible lettering nearly black, while giving the bloom-only
+        // copies a stronger emissive contribution. This lets phosphor light
+        // bleed gently into reverse-video glyphs without washing out the live
+        // text. The 0-20 control range maps to 0-20% visible tint and 0-65%
+        // bloom-source tint.
+        const emissiveTint = (numeric / 20) * 65;
+        const emissiveAlpha = (numeric / 20) * 0.34;
         setRootProperty("--reverse-text-tint", `${numeric}%`);
-        setRootProperty("--reverse-bloom-source-tint", `${numeric}%`);
+        setRootProperty("--reverse-bloom-source-tint", `${emissiveTint}%`);
+        setRootProperty("--reverse-emission-alpha", String(emissiveAlpha));
         break;
+      }
       case "verticalFocus":
         setRootProperty("--vertical-focus-soft-blur", `${decimal * 1.8}px`);
         setRootProperty("--vertical-focus-medium-blur", `${decimal * 4.2}px`);
