@@ -525,6 +525,13 @@
   function renderSaveState() {
     els.saveInventory.textContent = state.dirty ? "Save*" : "Saved";
     els.inventoryState.textContent = state.dirty ? "Inventory modified" : "Inventory saved";
+
+    // The bloom passes are DOM snapshots. Refresh them immediately when the
+    // fixed-width Save*/Saved label changes so the previous word cannot remain
+    // visible for a frame as a ghost beneath the current label.
+    if (bloomStack) {
+      rebuildBloomComposite();
+    }
   }
 
   function markUnsaved() {
