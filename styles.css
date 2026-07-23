@@ -2431,3 +2431,183 @@ input[type="range"]::-moz-range-track {
 .masthead {
   margin-top: var(--nav-logo-gap) !important;
 }
+
+
+/* v0.10.0: three-column terminal recipe results --------------------------- */
+.results-panel {
+  width: 132ch;
+  margin-top: calc(var(--terminal-row) * 2);
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+.results-heading {
+  display: flex;
+  width: 132ch;
+  min-height: calc(var(--terminal-row) * 3);
+  margin: 0;
+  padding: 0 2ch;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--phosphor);
+  box-shadow:
+    inset 0 0 calc(var(--border-bloom-radius) * 2.4) rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
+    0 0 var(--border-bloom-radius) rgb(var(--phosphor-rgb) / var(--border-bloom-alpha));
+  text-align: center;
+}
+.results-heading h2 {
+  width: 100%;
+  margin: 0;
+  color: var(--phosphor-bright);
+  text-align: center;
+  text-transform: uppercase;
+}
+.results-heading::before,
+.results-heading::after { content: none; }
+.recipe-results {
+  display: grid;
+  grid-template-columns: 44ch 44ch 44ch;
+  width: 132ch;
+  gap: 0;
+  padding: 0;
+  margin-top: var(--terminal-row);
+  border: 1px solid var(--phosphor);
+  box-shadow:
+    inset 0 0 calc(var(--border-bloom-radius) * 2.4) rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
+    0 0 var(--border-bloom-radius) rgb(var(--phosphor-rgb) / var(--border-bloom-alpha));
+  align-items: start;
+}
+.recipe-column {
+  min-width: 0;
+  border: 0;
+}
+.recipe-column + .recipe-column { border-left: 1px solid var(--phosphor); }
+.recipe-column-heading {
+  display: flex;
+  min-height: calc(var(--terminal-row) * 3);
+  margin: 0;
+  padding: 0 1ch;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--phosphor);
+  color: var(--phosphor-bright);
+  text-align: center;
+  text-transform: uppercase;
+}
+.potion-stack { width: 100%; }
+.potion-group {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--phosphor);
+}
+.potion-group:first-child { border-top: 0; }
+.potion-summary {
+  display: block;
+  width: 100%;
+  min-height: calc(var(--terminal-row) * 4);
+  margin: 0;
+  padding: calc(var(--terminal-row) * .5) 2ch;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  color: var(--phosphor);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.potion-summary:hover,
+.potion-summary:focus-visible {
+  color: var(--phosphor-bright);
+  background: rgb(var(--phosphor-rgb) / .08);
+}
+.potion-title-line,
+.potion-count-line { display: block; }
+.potion-title-line {
+  color: inherit;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.potion-count-line {
+  display: flex;
+  margin-top: calc(var(--terminal-row) * .35);
+  align-items: center;
+  justify-content: space-between;
+  color: inherit;
+}
+.potion-toggle { margin-left: 2ch; }
+.potion-group.is-expanded > .potion-summary {
+  color: color-mix(in srgb, var(--phosphor) var(--reverse-text-tint), var(--screen-deep));
+  background: var(--phosphor);
+  text-shadow: none !important;
+  box-shadow:
+    inset 0 0 calc(var(--reverse-bloom-radius) * .8) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha)),
+    0 0 var(--reverse-bloom-radius) rgb(var(--phosphor-rgb) / var(--reverse-bloom-alpha));
+}
+.potion-group.is-expanded > .potion-summary * {
+  color: inherit;
+  text-shadow: none !important;
+}
+.potion-recipes { width: 100%; }
+.potion-recipes[hidden] { display: none; }
+.recipe-entry {
+  width: 100%;
+  min-height: calc(var(--terminal-row) * 5);
+  padding: calc(var(--terminal-row) * .6) 2ch calc(var(--terminal-row) * .75);
+  color: var(--phosphor);
+}
+.recipe-entry + .recipe-entry { border-top: 1px dashed var(--phosphor-dim); }
+.recipe-entry-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2ch;
+  margin-bottom: calc(var(--terminal-row) * .35);
+}
+.brew-control {
+  min-width: 5ch;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: var(--phosphor-bright);
+  background: transparent;
+  text-align: right;
+  cursor: pointer;
+}
+.brew-control:hover,
+.brew-control:focus-visible {
+  color: color-mix(in srgb, var(--phosphor) var(--reverse-text-tint), var(--screen-deep));
+  background: var(--phosphor);
+  text-shadow: none !important;
+}
+.recipe-ingredient {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.column-empty,
+.empty-output {
+  margin: 0;
+  padding: calc(var(--terminal-row) * 1.5) 2ch;
+  color: var(--phosphor-dim);
+}
+.empty-output { grid-column: 1 / -1; }
+
+/* Keep the results interface in the same unified bloom pipeline. */
+.phosphor-bloom-pass--tight .results-heading,
+.phosphor-bloom-pass--tight .recipe-results,
+.phosphor-bloom-pass--tight .recipe-column,
+.phosphor-bloom-pass--tight .recipe-column-heading,
+.phosphor-bloom-pass--tight .potion-group {
+  box-shadow:
+    inset 0 0 .8px rgb(var(--phosphor-rgb) / .75),
+    0 0 .8px rgb(var(--phosphor-rgb) / .75) !important;
+}
+.phosphor-bloom-pass--mid .potion-group.is-expanded > .potion-summary,
+.phosphor-bloom-pass--wide .potion-group.is-expanded > .potion-summary {
+  box-shadow: none !important;
+}

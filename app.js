@@ -19,6 +19,7 @@
     ? [...window.OBOJIMA_INGREDIENTS].sort((a, b) => a.name.localeCompare(b.name))
     : [];
   const potionNames = window.OBOJIMA_POTION_NAMES || {};
+  const ingredientByName = new Map(ingredients.map((ingredient) => [ingredient.name, ingredient]));
 
   const state = {
     ruleset: "2024",
@@ -715,19 +716,17 @@
       message.className = "empty-output";
       message.textContent = "At least three ingredients are required to calculate a recipe.";
       els.recipeResults.appendChild(message);
-      els.resultSummary.textContent = `${selected.length} ingredient${selected.length === 1 ? "" : "s"} available`;
+      els.resultSummary.textContent = "0 RECIPES FOUND FOR 0 POTIONS";
       els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
       redraw();
       return;
     }
 
     const groups = new Map();
-    let combinationCount = 0;
 
     for (let i = 0; i < selected.length - 2; i++) {
       for (let j = i + 1; j < selected.length - 1; j++) {
         for (let k = j + 1; k < selected.length; k++) {
-          combinationCount += 1;
           const trio = [selected[i], selected[j], selected[k]];
 
           POTION_TYPES.forEach((type) => {
@@ -758,38 +757,122 @@
       message.textContent = "No valid potion results were produced from the selected inventory.";
       els.recipeResults.appendChild(message);
     } else {
-      sortedGroups.forEach(renderPotionGroup);
+      renderRecipeColumns(sortedGroups);
     }
 
     const totalRecipes = sortedGroups.reduce(
       (sum, group) => sum + group.recipes.length,
       0
     );
-    els.resultSummary.textContent = `${sortedGroups.length} potion${sortedGroups.length === 1 ? "" : "s"} / ${totalRecipes} recipes / ${combinationCount} combinations`;
+    els.resultSummary.textContent = `${totalRecipes} RECIPE${totalRecipes === 1 ? "" : "S"} FOUND FOR ${sortedGroups.length} POTION${sortedGroups.length === 1 ? "" : "S"}`;
     els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
     redraw();
   }
 
-  function renderPotionGroup(group) {
+  function renderRecipeColumns(groups) {
+    POTION_TYPES.forEach((type) => {
+      const column = document.createElement("section");
+      column.className = `recipe-column recipe-column--${type}`;
+      column.setAttribute("aria-label", `${type} potions`);
+
+      const heading = document.createElement("h3");
+      heading.className = "recipe-column-heading";
+      heading.textContent = `${type.toUpperCase()} POTIONS`;
+      column.appendChild(heading);
+
+      const stack = document.createElement("div");
+      stack.className = "potion-stack";
+      groups.filter((group) => group.type === type).forEach((group) => {
+        stack.appendChild(createPotionGroup(group));
+      });
+
+      if (!stack.childElementCount) {
+        const empty = document.createElement("p");
+        empty.className = "column-empty";
+        empty.textContent = "No potions found.";
+        stack.appendChild(empty);
+      }
+
+      column.appendChild(stack);
+      els.recipeResults.appendChild(column);
+    });
+  }
+
+  function createPotionGroup(group) {
     const article = document.createElement("article");
     article.className = "potion-group";
 
-    const title = document.createElement("div");
-    title.className = "potion-title";
-    title.innerHTML = `<span class="potion-type">${group.type.toUpperCase()}</span><span class="potion-number">${group.number}</span><span class="potion-name"></span>`;
-    title.querySelector(".potion-name").textContent = potionLabel(group.type, group.number);
-    article.appendChild(title);
+    const summary = document.createElement("button");
+    summary.type = "button";
+    summary.className = "potion-summary";
+    summary.setAttribute("aria-expanded", "false");
 
-    const list = document.createElement("ol");
-    list.className = "recipe-list";
-    group.recipes.forEach((recipe) => {
-      const item = document.createElement("li");
-      item.textContent = recipe.join(" + ");
-      list.appendChild(item);
+    const titleLine = document.createElement("span");
+    titleLine.className = "potion-title-line";
+    titleLine.textContent = `${group.number}. ${potionLabel(group.type, group.number).toUpperCase()}`;
+
+    const countLine = document.createElement("span");
+    countLine.className = "potion-count-line";
+    const count = document.createElement("span");
+    count.textContent = `${group.recipes.length} Recipe${group.recipes.length === 1 ? "" : "s"}`;
+    const toggle = document.createElement("span");
+    toggle.className = "potion-toggle";
+    toggle.textContent = "[+]";
+    countLine.append(count, toggle);
+    summary.append(titleLine, countLine);
+
+    const recipes = document.createElement("div");
+    recipes.className = "potion-recipes";
+    recipes.hidden = true;
+    group.recipes.forEach((recipe, index) => {
+      recipes.appendChild(createRecipeEntry(recipe, index));
     });
 
-    article.appendChild(list);
-    els.recipeResults.appendChild(article);
+    summary.addEventListener("click", () => {
+      const expanded = summary.getAttribute("aria-expanded") === "true";
+      summary.setAttribute("aria-expanded", String(!expanded));
+      article.classList.toggle("is-expanded", !expanded);
+      toggle.textContent = expanded ? "[+]" : "[-]";
+      recipes.hidden = expanded;
+      redraw(article);
+    });
+
+    article.append(summary, recipes);
+    return article;
+  }
+
+  function createRecipeEntry(recipe, index) {
+    const entry = document.createElement("section");
+    entry.className = "recipe-entry";
+    if (index > 0) entry.classList.add("recipe-entry--continued");
+
+    const ingredientsForRecipe = recipe.map((name) => ingredientByName.get(name)).filter(Boolean);
+    const totals = POTION_TYPES.map((type) => ingredientsForRecipe.reduce(
+      (sum, ingredient) => sum + Number(ingredient.values?.[state.ruleset]?.[type] || 0),
+      0
+    ));
+
+    const heading = document.createElement("div");
+    heading.className = "recipe-entry-heading";
+    const formula = document.createElement("span");
+    formula.textContent = `[${totals.join("-")}] Recipe`;
+    const brew = document.createElement("button");
+    brew.type = "button";
+    brew.className = "brew-control";
+    brew.textContent = "BREW";
+    brew.setAttribute("aria-label", `Brew recipe ${index + 1}`);
+    heading.append(formula, brew);
+    entry.appendChild(heading);
+
+    ingredientsForRecipe.forEach((ingredient, ingredientIndex) => {
+      const line = document.createElement("div");
+      line.className = "recipe-ingredient";
+      const values = POTION_TYPES.map((type) => ingredient.values?.[state.ruleset]?.[type] || 0);
+      line.textContent = `${ingredient.name} [${values.join("-")}]${ingredientIndex < ingredientsForRecipe.length - 1 ? " +" : ""}`;
+      entry.appendChild(line);
+    });
+
+    return entry;
   }
 
   function bindDisplayControl(control, name) {
