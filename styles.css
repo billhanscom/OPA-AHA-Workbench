@@ -2657,3 +2657,32 @@ input[type="range"]::-moz-range-track {
   border-top: 0;
   border-bottom: 1px solid var(--phosphor);
 }
+
+
+/* Scroll redraw -----------------------------------------------------------
+   REDRAW controls how quickly off-screen terminal content is painted as it
+   enters the viewport. Already-visible content is never hidden on load. */
+.scroll-redraw-target.is-redraw-pending {
+  visibility: hidden;
+  clip-path: inset(0 0 100% 0);
+}
+.scroll-redraw-target.is-redrawing {
+  visibility: visible;
+  animation: terminal-scroll-redraw var(--redraw-ms, 850ms) steps(18, end) both;
+}
+.scroll-redraw-target.is-redraw-complete {
+  visibility: visible;
+  clip-path: none;
+}
+@keyframes terminal-scroll-redraw {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-redraw-target.is-redraw-pending,
+  .scroll-redraw-target.is-redrawing {
+    visibility: visible;
+    clip-path: none;
+    animation: none;
+  }
+}

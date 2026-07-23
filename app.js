@@ -60,6 +60,7 @@
     reverseTintControl: document.getElementById("reverseTintControl"),
     verticalFocusControl: document.getElementById("verticalFocusControl"),
     horizontalFocusControl: document.getElementById("horizontalFocusControl"),
+    redrawControl: document.getElementById("redrawControl"),
     bloomValue: document.getElementById("bloomValue"),
     vignetteValue: document.getElementById("vignetteValue"),
     scanlineValue: document.getElementById("scanlineValue"),
@@ -69,6 +70,7 @@
     reverseTintValue: document.getElementById("reverseTintValue"),
     verticalFocusValue: document.getElementById("verticalFocusValue"),
     horizontalFocusValue: document.getElementById("horizontalFocusValue"),
+    redrawValue: document.getElementById("redrawValue"),
     screenFrame: document.getElementById("screenFrame"),
     screenSurface: document.getElementById("screenSurface"),
     terminal: document.getElementById("terminal"),
@@ -198,7 +200,8 @@
     overallFocus: 0,
     reverseTint: 10,
     verticalFocus: 30,
-    horizontalFocus: 30
+    horizontalFocus: 30,
+    redraw: 850
   };
 
   const displayLimits = {
@@ -210,7 +213,8 @@
     overallFocus: [0, 100],
     reverseTint: [0, 20],
     verticalFocus: [0, 100],
-    horizontalFocus: [0, 100]
+    horizontalFocus: [0, 100],
+    redraw: [150, 1500]
   };
 
   const displayControls = {
@@ -222,7 +226,8 @@
     overallFocus: [els.overallFocusControl, els.overallFocusValue, "%"],
     reverseTint: [els.reverseTintControl, els.reverseTintValue, "%"],
     verticalFocus: [els.verticalFocusControl, els.verticalFocusValue, "%"],
-    horizontalFocus: [els.horizontalFocusControl, els.horizontalFocusValue, "%"]
+    horizontalFocus: [els.horizontalFocusControl, els.horizontalFocusValue, "%"],
+    redraw: [els.redrawControl, els.redrawValue, " ms"]
   };
 
   function setRootProperty(name, value) {
@@ -435,6 +440,9 @@
         setRootProperty("--horizontal-focus-soft-opacity", String(decimal * 0.72));
         setRootProperty("--horizontal-focus-medium-opacity", String(decimal * 0.58));
         setRootProperty("--horizontal-focus-strong-opacity", String(decimal * 0.44));
+        break;
+      case "redraw":
+        setRootProperty("--redraw-ms", `${numeric}ms`);
         break;
       default:
         return;
@@ -818,7 +826,7 @@
     const groupKey = `${group.type}:${group.number}`;
     const initiallyExpanded = state.expandedPotions.has(groupKey);
     const article = document.createElement("article");
-    article.className = "potion-group";
+    article.className = "potion-group scroll-redraw-target";
     article.classList.toggle("is-expanded", initiallyExpanded);
 
     const summary = document.createElement("button");
@@ -992,6 +1000,71 @@
     });
   }
 
+  let scrollRedrawObserver = null;
+  let scrollRedrawMutationObserver = null;
+
+  function revealScrollTarget(target) {
+    if (!target || target.dataset.redrawRevealed === "true") return;
+    target.dataset.redrawRevealed = "true";
+    target.classList.remove("is-redraw-pending");
+    target.classList.add("is-redrawing");
+    const duration = Number(els.redrawControl?.value || displayDefaults.redraw);
+    window.setTimeout(() => {
+      target.classList.remove("is-redrawing");
+      target.classList.add("is-redraw-complete");
+    }, duration + 80);
+  }
+
+  function registerScrollRedrawTargets(root = document) {
+    if (!scrollRedrawObserver) return;
+    const targets = [];
+    if (root.matches?.(".scroll-redraw-target")) targets.push(root);
+    root.querySelectorAll?.(".scroll-redraw-target").forEach((target) => targets.push(target));
+
+    targets.forEach((target) => {
+      if (target.dataset.redrawRegistered === "true") return;
+      target.dataset.redrawRegistered = "true";
+      const rect = target.getBoundingClientRect();
+      const initiallyVisible = rect.bottom > 0 && rect.top < window.innerHeight;
+      if (initiallyVisible) {
+        target.dataset.redrawRevealed = "true";
+        target.classList.add("is-redraw-complete");
+      } else {
+        target.classList.add("is-redraw-pending");
+        scrollRedrawObserver.observe(target);
+      }
+    });
+  }
+
+  function initializeScrollRedraw() {
+    if (!("IntersectionObserver" in window)) {
+      document.querySelectorAll(".scroll-redraw-target").forEach((target) => {
+        target.dataset.redrawRevealed = "true";
+        target.classList.add("is-redraw-complete");
+      });
+      return;
+    }
+
+    scrollRedrawObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        scrollRedrawObserver.unobserve(entry.target);
+        revealScrollTarget(entry.target);
+      });
+    }, { root: null, threshold: 0.08, rootMargin: "0px 0px -4% 0px" });
+
+    registerScrollRedrawTargets(document);
+
+    scrollRedrawMutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) registerScrollRedrawTargets(node);
+        });
+      });
+    });
+    scrollRedrawMutationObserver.observe(els.terminal, { childList: true, subtree: true });
+  }
+
   function bindEvents() {
     document.getElementById("clearInventory").addEventListener("click", clearSelection);
     document.getElementById("saveInventory").addEventListener("click", saveInventory);
@@ -1027,6 +1100,7 @@
     bindDisplayControl(els.reverseTintControl, "reverseTint");
     bindDisplayControl(els.verticalFocusControl, "verticalFocus");
     bindDisplayControl(els.horizontalFocusControl, "horizontalFocus");
+    bindDisplayControl(els.redrawControl, "redraw");
 
     document.querySelectorAll(".value-option").forEach((button) => {
       button.addEventListener("click", () => setRuleset(button.dataset.ruleset));
@@ -1062,6 +1136,7 @@
     initializeCurrentNameScroll();
     initializeReverseVideoButtons();
     initializeBloomComposite();
+    initializeScrollRedraw();
     updateViewportEffectsBounds();
     restoreResultsIfCurrent();
   }
