@@ -2231,3 +2231,49 @@ body {
 .phosphor-bloom-pass .system-frame-stroke {
   stroke: currentColor !important;
 }
+
+/* v35: terminal-row header rhythm, medium text weight, and independent
+   luminance/bloom emission ----------------------------------------------- */
+:root {
+  --header-row: 1.42em;
+  --emission-gain: 1;
+}
+
+body,
+button,
+input,
+select,
+output {
+  font-weight: 500 !important;
+}
+
+/* The frame rules sit at the visual centers of rows 1 and 3, matching a
+   three-line terminal record rather than hugging the element's outer edges. */
+.system-bar {
+  height: calc(var(--header-row) * 3) !important;
+  line-height: var(--header-row) !important;
+}
+.system-bar-row {
+  top: var(--header-row) !important;
+  height: var(--header-row) !important;
+  min-height: var(--header-row) !important;
+  line-height: var(--header-row) !important;
+}
+.system-cell,
+.system-cell:last-of-type {
+  height: var(--header-row) !important;
+  min-height: var(--header-row) !important;
+  line-height: var(--header-row) !important;
+}
+
+/* Brightness scales the completed sharp phosphor image and every bloom pass
+   by the same emission gain. Bloom spread/opacity remain owned by Bloom. */
+.terminal,
+.phosphor-bloom-stack {
+  filter: brightness(var(--emission-gain));
+}
+
+/* Fine strokes retain a strong tight bloom source at high settings. */
+.phosphor-bloom-pass--tight {
+  mix-blend-mode: screen;
+}

@@ -157,14 +157,14 @@
       body: "radial-gradient(ellipse at center, #0b2111 0%, #040a05 72%, #010301 100%)"
     },
     white: {
-      rgb: "232 239 232",
-      phosphor: "#e8efe8",
-      bright: "#f7fff7",
-      dim: "#99a399",
-      faint: "#5d665d",
-      screen: "#111411",
-      deep: "#080a08",
-      body: "radial-gradient(ellipse at center, #1b201b 0%, #080a08 72%, #020302 100%)"
+      rgb: "216 222 236",
+      phosphor: "#d8deec",
+      bright: "#d8deec",
+      dim: "#9299aa",
+      faint: "#596171",
+      screen: "#10151a",
+      deep: "#0b0f12",
+      body: "radial-gradient(ellipse at center, #182029 0%, #0b0f12 72%, #030507 100%)"
     }
   };
 
@@ -289,34 +289,24 @@
 
   function applyBrightness(numeric) {
     const legacyValue = mapBrightnessToLegacy(numeric);
-    const neutralLegacy = 100;
-    const belowNeutral = Math.min(1, legacyValue / neutralLegacy);
-    const aboveNeutral = Math.max(0, (legacyValue - neutralLegacy) / 100);
+    const normalized = Math.max(0, Math.min(1, numeric / 100));
 
-    // Dim by reducing emission opacity. Brighten by raising lightness while
-    // holding the phosphor hue and saturation constant. No blur, halo, white
-    // overlay, or bloom radius is changed by this control.
-    const contentOpacity = legacyValue <= neutralLegacy
-      ? 0.08 + Math.pow(belowNeutral, 1.25) * 0.92
-      : 1;
+    // Scale phosphor emission without changing the selected palette. The same
+    // gain is applied to the sharp terminal and the unified bloom composite,
+    // so Brightness cannot suppress or replace Bloom.
+    const emissionGain = 0.18 + Math.pow(normalized, 1.08) * 2.42;
+    const belowNeutral = Math.min(1, legacyValue / 100);
 
-    const hueProfiles = {
-      amber: { h: 41.4, s: 100, baseL: 50, maxL: 68 },
-      green: { h: 135, s: 100, baseL: 60, maxL: 76 },
-      white: { h: 120, s: 18, baseL: 92, maxL: 98 }
-    };
-    const profile = hueProfiles[state.phosphor] || hueProfiles.amber;
-    const lightness = profile.baseL + Math.pow(aboveNeutral, 0.82) * (profile.maxL - profile.baseL);
-    const [red, green, blue] = hslToRgb(profile.h, profile.s, lightness);
-    const rendered = `hsl(${profile.h} ${profile.s}% ${lightness.toFixed(2)}%)`;
+    setRootProperty("--content-opacity", "1");
+    setRootProperty("--emission-gain", emissionGain.toFixed(3));
 
-    setRootProperty("--content-opacity", String(contentOpacity));
-    setRootProperty("--phosphor", rendered);
-    setRootProperty("--phosphor-bright", rendered);
-    setRootProperty("--phosphor-rgb", `${red} ${green} ${blue}`);
+    // Keep the phosphor hue and saturation fixed at the selected palette.
+    const palette = phosphors[state.phosphor] || phosphors.amber;
+    setRootProperty("--phosphor-rgb", palette.rgb);
+    setRootProperty("--phosphor", palette.phosphor);
+    setRootProperty("--phosphor-bright", palette.bright);
 
-    // Disable every legacy brightness-as-bloom path. Bloom remains controlled
-    // exclusively by the Bloom slider.
+    // Disable all legacy brightness-as-bloom and white-hot paths.
     setRootProperty("--display-brightness", "1");
     setRootProperty("--brightness-boost-alpha", "0");
     setRootProperty("--brightness-white-alpha", "0");
@@ -324,7 +314,7 @@
     setRootProperty("--brightness-halo-radius", "0px");
     setRootProperty("--brightness-halo-alpha", "0");
     setRootProperty("--page-brighten-alpha", "0");
-    setRootProperty("--page-dim-alpha", String((1 - belowNeutral) * 0.72));
+    setRootProperty("--page-dim-alpha", String((1 - belowNeutral) * 0.62));
   }
 
   function applyContrast(numeric) {
