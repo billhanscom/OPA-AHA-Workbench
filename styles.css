@@ -2235,70 +2235,21 @@ body {
   box-shadow: none !important;
 }
 
-/* v34.1: canonical 132-column navigation text spacing --------------------
-   Drawn frame geometry is unchanged. Each interactive label is anchored to
-   the exact character column used by the reference text layout. */
+/* v34.1: top-nav line spacing only ---------------------------------------
+   Match the compact three-line rhythm of the canonical TXT reference without
+   changing any horizontal spacing, labels, controls, or divider positions. */
+.system-bar {
+  --nav-row: calc(1em * var(--line));
+  height: calc(var(--nav-row) * 3) !important;
+}
 .system-bar-row {
-  display: block !important;
-  overflow: visible !important;
+  inset: var(--nav-row) 0 auto 0 !important;
+  height: var(--nav-row) !important;
+  min-height: var(--nav-row) !important;
+  line-height: var(--nav-row) !important;
 }
-.system-bar-row > .system-frame-edge {
-  display: none !important;
-}
-.system-cell {
-  position: absolute !important;
-  top: 0 !important;
-  display: block !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-}
-.system-inventory { left: 0 !important; width: 42ch !important; }
-.system-current   { left: 42ch !important; width: 49ch !important; }
-.system-values    { left: 91ch !important; width: 23ch !important; }
-.system-display   { left: 114ch !important; width: 18ch !important; }
-
-.system-cell > * {
-  position: absolute !important;
-  top: 0 !important;
-  height: var(--terminal-row) !important;
-  line-height: var(--terminal-row) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  white-space: nowrap !important;
-}
-
-/* Cell 1: ║  INVENTORY   Clear  Save*  Load  View   ║ */
-.system-inventory .system-label   { left: 3ch !important; }
-.system-inventory #clearInventory { left: 15ch !important; }
-.system-inventory #saveInventory  { left: 22ch !important; }
-.system-inventory #loadInventory  { left: 29ch !important; }
-.system-inventory #viewInventory  { left: 35ch !important; }
-
-/* Cell 2: ║  CURRENT   <inventory name>  ║ */
-.system-current .system-label { left: 3ch !important; }
-.system-current .current-inventory-window {
-  left: 13ch !important;
-  width: 34ch !important;
-  max-width: 34ch !important;
-  overflow: hidden !important;
-  text-overflow: clip !important;
-}
-
-/* Cell 3: ║  VALUES  2024  2014  ║ */
-.system-values .system-label { left: 3ch !important; }
-.system-values .value-option[data-ruleset="2024"] { left: 11ch !important; }
-.system-values .value-option[data-ruleset="2014"] { left: 17ch !important; }
-
-/* Cell 4: ║  CRT CONTROLS  ║ */
-.system-display #displaySettingsToggle { left: 3ch !important; }
-
-/* Preserve exact text-cell widths during hover/reverse-video states. */
-.system-bar-row .text-control,
-.system-bar-row .value-option {
-  width: auto !important;
-  min-width: 0 !important;
-  border: 0 !important;
-  box-sizing: content-box !important;
+.system-bar .system-cell {
+  height: var(--nav-row) !important;
+  min-height: var(--nav-row) !important;
+  line-height: var(--nav-row) !important;
 }
