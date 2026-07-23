@@ -2326,3 +2326,61 @@ body {
   margin-left: auto !important;
   margin-right: auto !important;
 }
+
+/* v34.3: true 140-column CRT surface with centered 132-column content ------
+   The previous patch widened only the outer frame while leaving the actual
+   screen surface at 132ch. This makes the phosphor/glass field itself 140ch,
+   keeps the application at 132ch, and centers the 132ch bloom source exactly
+   over the sharp content. */
+:root {
+  --screen-columns: 140;
+  --screen-width: 140ch;
+  --content-width: 132ch;
+  --content-side-gutter: 4ch;
+}
+
+html,
+body {
+  min-width: var(--screen-width) !important;
+}
+
+.screen-frame {
+  box-sizing: border-box !important;
+  width: var(--screen-width) !important;
+  min-width: var(--screen-width) !important;
+  max-width: var(--screen-width) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.screen-surface {
+  box-sizing: border-box !important;
+  width: var(--screen-width) !important;
+  min-width: var(--screen-width) !important;
+  max-width: var(--screen-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.terminal {
+  width: var(--content-width) !important;
+  min-width: var(--content-width) !important;
+  max-width: var(--content-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.phosphor-bloom-stack {
+  width: var(--content-width) !important;
+  min-width: var(--content-width) !important;
+  max-width: var(--content-width) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
+
+.phosphor-bloom-pass {
+  width: var(--content-width) !important;
+  min-width: var(--content-width) !important;
+  max-width: var(--content-width) !important;
+}
