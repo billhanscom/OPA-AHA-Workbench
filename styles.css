@@ -225,6 +225,7 @@ h1, h2, h3, p { font: inherit; }
 .recipe-results { display: grid; gap: 1em; padding-top: 1em; }
 .potion-group { border-top: 1px solid var(--phosphor-faint); padding-top: .8em; }
 .potion-group:first-child { border-top: 0; }
+.potion-group:last-child { border-bottom: 0; }
 .potion-title { display: flex; gap: 1.5ch; align-items: baseline; margin-bottom: .45em; }
 .potion-type { min-width: 9ch; color: var(--phosphor-bright); }
 .potion-number { color: var(--phosphor-dim); }
@@ -2475,10 +2476,13 @@ input[type="range"]::-moz-range-track {
   box-shadow:
     inset 0 0 calc(var(--border-bloom-radius) * 2.4) rgb(var(--phosphor-rgb) / var(--inner-glow-alpha)),
     0 0 var(--border-bloom-radius) rgb(var(--phosphor-rgb) / var(--border-bloom-alpha));
-  align-items: start;
+  align-items: stretch;
 }
 .recipe-column {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  min-height: 100%;
   border: 0;
 }
 .recipe-column + .recipe-column { border-left: 1px solid var(--phosphor); }
@@ -2494,7 +2498,7 @@ input[type="range"]::-moz-range-track {
   text-align: center;
   text-transform: uppercase;
 }
-.potion-stack { width: 100%; }
+.potion-stack { width: 100%; flex: 1 1 auto; }
 .potion-group {
   width: 100%;
   margin: 0;

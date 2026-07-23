@@ -6,6 +6,8 @@
   const ACTIVE_SELECTION_STORAGE_KEY = `${STORAGE_PREFIX}-active-selection`;
   const DISPLAY_PANEL_STORAGE_KEY = `${DISPLAY_STORAGE_PREFIX}-panel-open`;
   const TERMINAL_ID_STORAGE_KEY = `${STORAGE_PREFIX}-terminal-id`;
+  const RESULTS_STATE_STORAGE_KEY = `${STORAGE_PREFIX}-results-state`;
+  const EXPANDED_POTIONS_STORAGE_KEY = `${STORAGE_PREFIX}-expanded-potions`;
   const DISPLAY_SCALE_VERSION = "2";
   const POTION_TYPES = ["combat", "utility", "whimsy"];
   const TYPE_ORDER = { combat: 0, utility: 1, whimsy: 2 };
@@ -25,6 +27,7 @@
     ruleset: "2024",
     selected: new Set(),
     generated: false,
+    expandedPotions: new Set(),
     dirty: true,
     currentName: "No Inventory Loaded"
   };
@@ -245,6 +248,43 @@
     try {
       localStorage.setItem(key, value);
     } catch (error) {}
+  }
+
+  function currentResultsSignature() {
+    return JSON.stringify({
+      ruleset: state.ruleset,
+      selected: [...state.selected].sort((a, b) => a.localeCompare(b))
+    });
+  }
+
+  function persistResultsState() {
+    writeStorage(RESULTS_STATE_STORAGE_KEY, currentResultsSignature());
+  }
+
+  function clearPersistedResultsState() {
+    try {
+      localStorage.removeItem(RESULTS_STATE_STORAGE_KEY);
+    } catch (error) {}
+  }
+
+  function restoreExpandedPotions() {
+    try {
+      const saved = JSON.parse(readStorage(EXPANDED_POTIONS_STORAGE_KEY, "[]"));
+      state.expandedPotions = new Set(Array.isArray(saved) ? saved : []);
+    } catch (error) {
+      state.expandedPotions = new Set();
+    }
+  }
+
+  function persistExpandedPotions() {
+    writeStorage(EXPANDED_POTIONS_STORAGE_KEY, JSON.stringify([...state.expandedPotions]));
+  }
+
+  function restoreResultsIfCurrent() {
+    const savedSignature = readStorage(RESULTS_STATE_STORAGE_KEY);
+    if (savedSignature && savedSignature === currentResultsSignature()) {
+      generateRecipes({ scroll: false, animate: false, persist: false });
+    }
   }
 
   function clamp(value, minimum, maximum) {
@@ -640,6 +680,7 @@
     markUnsaved();
     updateInventoryDisplay();
     els.resultsPanel.hidden = true;
+    clearPersistedResultsState();
   }
 
   function saveInventory() {
@@ -705,7 +746,8 @@
     return potionNames[NAME_KEYS[type]]?.[String(number)] || "Unknown Potion";
   }
 
-  function generateRecipes() {
+  function generateRecipes(options = {}) {
+    const { scroll = true, animate = true, persist = true } = options;
     const selected = getSelectedIngredients();
     els.recipeResults.replaceChildren();
     els.resultsPanel.hidden = false;
@@ -717,8 +759,9 @@
       message.textContent = "At least three ingredients are required to calculate a recipe.";
       els.recipeResults.appendChild(message);
       els.resultSummary.textContent = "0 RECIPES FOUND FOR 0 POTIONS";
-      els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-      redraw();
+      if (persist) persistResultsState();
+      if (scroll) els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
+      if (animate) redraw();
       return;
     }
 
@@ -765,8 +808,9 @@
       0
     );
     els.resultSummary.textContent = `${totalRecipes} RECIPE${totalRecipes === 1 ? "" : "S"} FOUND FOR ${sortedGroups.length} POTION${sortedGroups.length === 1 ? "" : "S"}`;
-    els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-    redraw();
+    if (persist) persistResultsState();
+    if (scroll) els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
+    if (animate) redraw();
   }
 
   function renderRecipeColumns(groups) {
@@ -799,13 +843,16 @@
   }
 
   function createPotionGroup(group) {
+    const groupKey = `${group.type}:${group.number}`;
+    const initiallyExpanded = state.expandedPotions.has(groupKey);
     const article = document.createElement("article");
     article.className = "potion-group";
+    article.classList.toggle("is-expanded", initiallyExpanded);
 
     const summary = document.createElement("button");
     summary.type = "button";
     summary.className = "potion-summary";
-    summary.setAttribute("aria-expanded", "false");
+    summary.setAttribute("aria-expanded", String(initiallyExpanded));
 
     const titleLine = document.createElement("span");
     titleLine.className = "potion-title-line";
@@ -817,24 +864,31 @@
     count.textContent = `${group.recipes.length} Recipe${group.recipes.length === 1 ? "" : "s"}`;
     const toggle = document.createElement("span");
     toggle.className = "potion-toggle";
-    toggle.textContent = "[+]";
+    toggle.textContent = initiallyExpanded ? "[-]" : "[+]";
     countLine.append(count, toggle);
     summary.append(titleLine, countLine);
 
     const recipes = document.createElement("div");
     recipes.className = "potion-recipes";
-    recipes.hidden = true;
+    recipes.hidden = !initiallyExpanded;
     group.recipes.forEach((recipe, index) => {
       recipes.appendChild(createRecipeEntry(recipe, index));
     });
 
     summary.addEventListener("click", () => {
       const expanded = summary.getAttribute("aria-expanded") === "true";
-      summary.setAttribute("aria-expanded", String(!expanded));
-      article.classList.toggle("is-expanded", !expanded);
-      toggle.textContent = expanded ? "[+]" : "[-]";
-      recipes.hidden = expanded;
-      redraw(article);
+      const nextExpanded = !expanded;
+      summary.setAttribute("aria-expanded", String(nextExpanded));
+      article.classList.toggle("is-expanded", nextExpanded);
+      toggle.textContent = nextExpanded ? "[-]" : "[+]";
+      recipes.hidden = !nextExpanded;
+
+      if (nextExpanded) {
+        state.expandedPotions.add(groupKey);
+      } else {
+        state.expandedPotions.delete(groupKey);
+      }
+      persistExpandedPotions();
     });
 
     article.append(summary, recipes);
@@ -976,7 +1030,7 @@
     document.getElementById("closeInventory").addEventListener("click", () => {
       els.drawer.hidden = true;
     });
-    document.getElementById("generateRecipes").addEventListener("click", generateRecipes);
+    document.getElementById("generateRecipes").addEventListener("click", () => generateRecipes());
 
     els.displaySettingsToggle.addEventListener("click", () => toggleDisplaySettings());
     document.getElementById("closeDisplaySettings").addEventListener("click", () => {
@@ -1028,6 +1082,7 @@
     loadDisplaySettings();
     restoreDisplaySettingsVisibility();
     restoreActiveSelection();
+    restoreExpandedPotions();
     renderIngredients();
     syncButtons();
     updateInventoryDisplay();
@@ -1037,6 +1092,7 @@
     initializeReverseVideoButtons();
     initializeBloomComposite();
     updateViewportEffectsBounds();
+    restoreResultsIfCurrent();
     window.requestAnimationFrame(() => redraw());
   }
 
