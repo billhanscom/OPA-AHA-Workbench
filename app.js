@@ -60,7 +60,6 @@
     reverseTintControl: document.getElementById("reverseTintControl"),
     verticalFocusControl: document.getElementById("verticalFocusControl"),
     horizontalFocusControl: document.getElementById("horizontalFocusControl"),
-    redrawControl: document.getElementById("redrawControl"),
     bloomValue: document.getElementById("bloomValue"),
     vignetteValue: document.getElementById("vignetteValue"),
     scanlineValue: document.getElementById("scanlineValue"),
@@ -70,12 +69,10 @@
     reverseTintValue: document.getElementById("reverseTintValue"),
     verticalFocusValue: document.getElementById("verticalFocusValue"),
     horizontalFocusValue: document.getElementById("horizontalFocusValue"),
-    redrawValue: document.getElementById("redrawValue"),
     screenFrame: document.getElementById("screenFrame"),
     screenSurface: document.getElementById("screenSurface"),
     terminal: document.getElementById("terminal"),
-    viewportEffects: document.getElementById("viewportEffects"),
-    redrawSweep: document.getElementById("redrawSweep")
+    viewportEffects: document.getElementById("viewportEffects")
   };
 
   let bloomStack = null;
@@ -201,8 +198,7 @@
     overallFocus: 0,
     reverseTint: 10,
     verticalFocus: 30,
-    horizontalFocus: 30,
-    redraw: 150
+    horizontalFocus: 30
   };
 
   const displayLimits = {
@@ -214,8 +210,7 @@
     overallFocus: [0, 100],
     reverseTint: [0, 20],
     verticalFocus: [0, 100],
-    horizontalFocus: [0, 100],
-    redraw: [0, 1500]
+    horizontalFocus: [0, 100]
   };
 
   const displayControls = {
@@ -227,8 +222,7 @@
     overallFocus: [els.overallFocusControl, els.overallFocusValue, "%"],
     reverseTint: [els.reverseTintControl, els.reverseTintValue, "%"],
     verticalFocus: [els.verticalFocusControl, els.verticalFocusValue, "%"],
-    horizontalFocus: [els.horizontalFocusControl, els.horizontalFocusValue, "%"],
-    redraw: [els.redrawControl, els.redrawValue, " ms"]
+    horizontalFocus: [els.horizontalFocusControl, els.horizontalFocusValue, "%"]
   };
 
   function setRootProperty(name, value) {
@@ -442,9 +436,6 @@
         setRootProperty("--horizontal-focus-medium-opacity", String(decimal * 0.58));
         setRootProperty("--horizontal-focus-strong-opacity", String(decimal * 0.44));
         break;
-      case "redraw":
-        setRootProperty("--redraw-ms", `${numeric}ms`);
-        break;
       default:
         return;
     }
@@ -504,21 +495,6 @@
     const rect = els.screenFrame.getBoundingClientRect();
     setRootProperty("--screen-left", `${Math.max(0, rect.left)}px`);
     setRootProperty("--screen-right", `${Math.max(0, window.innerWidth - rect.right)}px`);
-  }
-
-  function redraw() {
-    const duration = Number(els.redrawControl.value || 0);
-    if (duration <= 0 || !els.redrawSweep) return;
-
-    updateViewportEffectsBounds();
-    els.redrawSweep.style.setProperty("--active-redraw-ms", `${duration}ms`);
-    els.redrawSweep.classList.remove("is-active");
-    void els.redrawSweep.offsetWidth;
-    els.redrawSweep.classList.add("is-active");
-    window.setTimeout(
-      () => els.redrawSweep.classList.remove("is-active"),
-      duration + 80
-    );
   }
 
   function persistActiveSelection() {
@@ -712,7 +688,6 @@
       syncButtons();
       markSaved();
       updateInventoryDisplay();
-      redraw();
     } catch (error) {
       state.currentName = "Unable to Load Inventory";
       updateInventoryDisplay();
@@ -735,7 +710,6 @@
       generateRecipes();
     }
 
-    redraw();
   }
 
   function getSelectedIngredients() {
@@ -747,7 +721,7 @@
   }
 
   function generateRecipes(options = {}) {
-    const { scroll = true, animate = true, persist = true } = options;
+    const { scroll = true, persist = true } = options;
     const selected = getSelectedIngredients();
     els.recipeResults.replaceChildren();
     els.resultsPanel.hidden = false;
@@ -761,7 +735,6 @@
       els.resultSummary.textContent = "0 RECIPES FOUND FOR 0 POTIONS";
       if (persist) persistResultsState();
       if (scroll) els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-      if (animate) redraw();
       return;
     }
 
@@ -810,7 +783,6 @@
     els.resultSummary.textContent = `${totalRecipes} RECIPE${totalRecipes === 1 ? "" : "S"} FOUND FOR ${sortedGroups.length} POTION${sortedGroups.length === 1 ? "" : "S"}`;
     if (persist) persistResultsState();
     if (scroll) els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
-    if (animate) redraw();
   }
 
   function renderRecipeColumns(groups) {
@@ -1055,7 +1027,6 @@
     bindDisplayControl(els.reverseTintControl, "reverseTint");
     bindDisplayControl(els.verticalFocusControl, "verticalFocus");
     bindDisplayControl(els.horizontalFocusControl, "horizontalFocus");
-    bindDisplayControl(els.redrawControl, "redraw");
 
     document.querySelectorAll(".value-option").forEach((button) => {
       button.addEventListener("click", () => setRuleset(button.dataset.ruleset));
@@ -1093,7 +1064,6 @@
     initializeBloomComposite();
     updateViewportEffectsBounds();
     restoreResultsIfCurrent();
-    window.requestAnimationFrame(() => redraw());
   }
 
   initialize();

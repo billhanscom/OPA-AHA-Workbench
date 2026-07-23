@@ -2615,3 +2615,39 @@ input[type="range"]::-moz-range-track {
 .phosphor-bloom-pass--wide .potion-group.is-expanded > .potion-summary {
   box-shadow: none !important;
 }
+
+
+/* v0.10.2: Potion Results polish ----------------------------------------- */
+.results-heading h2 {
+  display: inline-block;
+  width: auto;
+  padding: 0 1ch;
+  color: color-mix(in srgb, var(--phosphor) var(--reverse-text-tint), var(--screen-deep));
+  background: var(--phosphor);
+  text-shadow: none !important;
+}
+
+.recipe-results {
+  overflow: hidden;
+}
+
+.potion-stack > .potion-group:last-child {
+  border-bottom: 0;
+}
+
+.brew-control {
+  display: inline-flex;
+  min-width: 6ch;
+  height: var(--terminal-row);
+  padding: 0 .5ch;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.brew-control:hover,
+.brew-control:focus-visible {
+  box-shadow: none !important;
+}
