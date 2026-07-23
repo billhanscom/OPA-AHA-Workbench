@@ -38,6 +38,7 @@
     terminalId: document.getElementById("terminalId"),
     inventoryState: document.getElementById("inventoryState"),
     saveInventory: document.getElementById("saveInventory"),
+    saveStateChar: document.getElementById("saveStateChar"),
     drawer: document.getElementById("inventoryDrawer"),
     inventorySummary: document.getElementById("inventorySummary"),
     resultsPanel: document.getElementById("resultsPanel"),
@@ -535,7 +536,8 @@
   }
 
   function renderSaveState() {
-    els.saveInventory.textContent = state.dirty ? "Save*" : "Saved";
+    els.saveStateChar.textContent = state.dirty ? "*" : "d";
+    els.saveInventory.setAttribute("aria-label", state.dirty ? "Save*" : "Saved");
     els.inventoryState.textContent = state.dirty ? "Inventory modified" : "Inventory saved";
 
   }

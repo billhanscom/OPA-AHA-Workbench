@@ -2278,7 +2278,14 @@ body {
 }
 
 #terminal > .system-bar .save-state:not(:hover):not(:focus-visible) {
-  text-shadow:
-    0 0 var(--bloom-tight-radius) rgb(var(--bloom-rgb) / var(--bloom-tight-opacity)),
-    0 0 var(--bloom-mid-radius) rgb(var(--bloom-rgb) / calc(var(--bloom-mid-opacity) * .55)) !important;
+  text-shadow: 0 0 var(--bloom-tight-radius) rgb(var(--bloom-rgb) / calc(var(--bloom-tight-opacity) * .72)) !important;
+}
+
+.save-state-stem,
+.save-state-char {
+  display: inline-block;
+}
+
+.save-state-char {
+  width: 1ch;
 }
