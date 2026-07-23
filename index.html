@@ -202,7 +202,11 @@ input[type="range"]::-moz-range-track {
     <div class="contrast-layer"></div>
     <div class="scanline-layer"></div>
     <div class="glass-layer"></div>
-    <div class="edge-layer"></div>
+    <div class="edge-layer" aria-hidden="true">
+      <div class="edge-focus-pass edge-focus-soft"></div>
+      <div class="edge-focus-pass edge-focus-medium"></div>
+      <div class="edge-focus-pass edge-focus-strong"></div>
+    </div>
     <div class="redraw-sweep" id="redrawSweep"></div>
   </div>
 

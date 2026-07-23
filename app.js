@@ -330,10 +330,16 @@
         setRootProperty("--vignette-strength", String(decimal));
         break;
       case "bezel":
+        // Edge focus is a rounded, brightness-neutral focus falloff. Three
+        // progressively tighter masks create a gradual transition while a
+        // broad horizontal clarity band remains sharp across the full width.
         setRootProperty("--edge-strength", String(decimal));
-        setRootProperty("--edge-blur", `${decimal * 7}px`);
-        setRootProperty("--edge-darkness", String(decimal * 0.28));
-        setRootProperty("--edge-band-size", `${5 + decimal * 11}%`);
+        setRootProperty("--edge-soft-blur", `${decimal * 1.8}px`);
+        setRootProperty("--edge-medium-blur", `${decimal * 4.2}px`);
+        setRootProperty("--edge-strong-blur", `${decimal * 8}px`);
+        setRootProperty("--edge-soft-opacity", String(decimal * 0.72));
+        setRootProperty("--edge-medium-opacity", String(decimal * 0.58));
+        setRootProperty("--edge-strong-opacity", String(decimal * 0.44));
         break;
       case "redraw":
         setRootProperty("--redraw-ms", `${numeric}ms`);

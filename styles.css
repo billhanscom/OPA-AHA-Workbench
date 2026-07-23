@@ -1087,3 +1087,112 @@ body::after {
 @media print {
   .phosphor-bloom-stack { display: none !important; }
 }
+
+/* v25: rounded, gradual, brightness-neutral edge focus --------------------
+   The focus effect is made from three masked backdrop-blur passes. The masks
+   are viewport-relative vertically and container-relative horizontally because
+   .viewport-effects already spans exactly that combined coordinate space.
+
+   Each mask uses an oversized ellipse. At the vertical midpoint the ellipse
+   extends beyond both side edges, leaving a broad, nearly blur-free clarity
+   band across the full 132-column width. Moving toward the top or bottom
+   gradually exposes the rounded blur field, including the corners and sides.
+   No color or dark overlay is used here; vignette alone controls luminance. */
+:root {
+  --edge-soft-blur: .54px;
+  --edge-medium-blur: 1.26px;
+  --edge-strong-blur: 2.4px;
+  --edge-soft-opacity: .216;
+  --edge-medium-opacity: .174;
+  --edge-strong-opacity: .132;
+}
+
+.edge-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+.edge-layer::before,
+.edge-layer::after {
+  content: none !important;
+  display: none !important;
+}
+
+.edge-focus-pass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: transparent;
+  will-change: backdrop-filter, opacity;
+}
+
+.edge-focus-soft {
+  opacity: var(--edge-soft-opacity);
+  backdrop-filter: blur(var(--edge-soft-blur));
+  -webkit-backdrop-filter: blur(var(--edge-soft-blur));
+  mask-image: radial-gradient(
+    ellipse 136% 68% at 50% 50%,
+    transparent 0 48%,
+    rgb(0 0 0 / .16) 60%,
+    rgb(0 0 0 / .48) 76%,
+    #000 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 136% 68% at 50% 50%,
+    transparent 0 48%,
+    rgb(0 0 0 / .16) 60%,
+    rgb(0 0 0 / .48) 76%,
+    #000 100%
+  );
+}
+
+.edge-focus-medium {
+  opacity: var(--edge-medium-opacity);
+  backdrop-filter: blur(var(--edge-medium-blur));
+  -webkit-backdrop-filter: blur(var(--edge-medium-blur));
+  mask-image: radial-gradient(
+    ellipse 126% 56% at 50% 50%,
+    transparent 0 52%,
+    rgb(0 0 0 / .12) 62%,
+    rgb(0 0 0 / .56) 78%,
+    #000 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 126% 56% at 50% 50%,
+    transparent 0 52%,
+    rgb(0 0 0 / .12) 62%,
+    rgb(0 0 0 / .56) 78%,
+    #000 100%
+  );
+}
+
+.edge-focus-strong {
+  opacity: var(--edge-strong-opacity);
+  backdrop-filter: blur(var(--edge-strong-blur));
+  -webkit-backdrop-filter: blur(var(--edge-strong-blur));
+  mask-image: radial-gradient(
+    ellipse 116% 46% at 50% 50%,
+    transparent 0 58%,
+    rgb(0 0 0 / .10) 68%,
+    rgb(0 0 0 / .62) 84%,
+    #000 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 116% 46% at 50% 50%,
+    transparent 0 58%,
+    rgb(0 0 0 / .10) 68%,
+    rgb(0 0 0 / .62) 84%,
+    #000 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edge-focus-pass { will-change: auto; }
+}
