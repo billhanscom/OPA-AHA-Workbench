@@ -2013,3 +2013,90 @@ body {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+
+/* v32: stable header geometry, restored logo spacing, balanced reverse video,
+   and restrained slider bloom -------------------------------------------- */
+
+/* Draw the top navigation as one CSS frame. The outer rule and all three
+   dividers are part of the same grid, so no box-drawing glyph can drift from
+   the interactive middle row. */
+.system-bar {
+  position: relative !important;
+  width: 132ch !important;
+  height: calc(var(--terminal-row) * 3) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.system-frame-line,
+.system-frame-edge {
+  display: none !important;
+}
+.system-bar-row {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 42ch 49ch 23ch 18ch !important;
+  width: 132ch !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+  box-shadow:
+    inset 0 0 0 1px var(--phosphor),
+    inset 0 0 1px rgb(var(--phosphor-rgb) / .65) !important;
+}
+.system-cell {
+  display: flex !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  align-items: center !important;
+  border-right: 1px solid var(--phosphor) !important;
+  box-shadow: inset -1px 0 0 rgb(var(--phosphor-rgb) / .24) !important;
+}
+.system-cell:last-of-type {
+  border-right: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Restore the compact internal leading shown in the accepted logo reference,
+   while returning two complete terminal rows beneath it. */
+.ascii-logo {
+  line-height: var(--line) !important;
+}
+.masthead {
+  margin-top: calc(var(--terminal-row) * 4) !important;
+  margin-bottom: calc(var(--terminal-row) * 2) !important;
+}
+
+/* Tint every glyph inside reverse-video fields, including child spans whose
+   older rules explicitly forced them back to screen black. */
+.ingredient-item.is-selected,
+.ingredient-item.is-selected *,
+.value-option.is-active,
+.value-option.is-active *,
+.display-toggle.is-open,
+.display-toggle.is-open *,
+.display-toggle[aria-expanded="true"],
+.display-toggle[aria-expanded="true"] *,
+.terminal-tab.is-reversed,
+.terminal-tab.is-reversed *,
+.terminal-command.is-reversed,
+.terminal-command.is-reversed * {
+  color: color-mix(
+    in srgb,
+    var(--phosphor) var(--reverse-text-tint),
+    var(--screen-deep)
+  ) !important;
+}
+
+/* Native range controls contain large solid luminous shapes. Keep only a
+   restrained tight contribution and remove them from the medium/wide passes
+   so their thumbs and tracks cannot overpower text and rules. */
+.phosphor-bloom-pass--tight input[type="range"] {
+  opacity: .22 !important;
+  filter: none !important;
+}
+.phosphor-bloom-pass--mid input[type="range"],
+.phosphor-bloom-pass--wide input[type="range"] {
+  visibility: hidden !important;
+}

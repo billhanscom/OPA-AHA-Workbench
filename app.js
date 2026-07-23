@@ -317,8 +317,8 @@
     // Reverse-video lettering stays nearly black at low bloom, then gains a
     // restrained phosphor tint as emission increases. The cap prevents washout.
     const bloomRatio = Math.max(0, Math.min(1, numeric / 200));
-    const reverseTint = Math.min(12, Math.pow(bloomRatio, 1.35) * 12);
-    const reverseBloomSourceTint = Math.min(24, Math.pow(bloomRatio, 1.15) * 24);
+    const reverseTint = Math.min(18, Math.pow(bloomRatio, 1.35) * 18);
+    const reverseBloomSourceTint = Math.min(30, Math.pow(bloomRatio, 1.15) * 30);
     setRootProperty("--reverse-text-tint", `${reverseTint.toFixed(2)}%`);
     setRootProperty("--reverse-bloom-source-tint", `${reverseBloomSourceTint.toFixed(2)}%`);
   }
