@@ -2100,3 +2100,72 @@ body {
 .phosphor-bloom-pass--wide input[type="range"] {
   visibility: hidden !important;
 }
+
+/* v33: restore the canonical literal three-row double-line top frame. */
+.system-bar {
+  position: relative !important;
+  display: block !important;
+  width: 132ch !important;
+  height: calc(var(--terminal-row) * 3) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+.system-frame-line {
+  display: block !important;
+  width: 132ch !important;
+  height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  white-space: pre !important;
+  overflow: visible !important;
+  font-family: "Source Code Pro", monospace !important;
+  font-size: inherit !important;
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0, "calt" 0 !important;
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+  text-rendering: geometricPrecision;
+}
+.system-bar-row {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 1ch 41ch 1ch 48ch 1ch 22ch 1ch 16ch 1ch !important;
+  width: 132ch !important;
+  height: var(--terminal-row) !important;
+  min-height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: center !important;
+  overflow: visible !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.system-frame-edge {
+  display: block !important;
+  width: 1ch !important;
+  height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  font-family: "Source Code Pro", monospace !important;
+  font-size: inherit !important;
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0, "calt" 0 !important;
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+}
+.system-cell {
+  display: flex !important;
+  height: var(--terminal-row) !important;
+  min-height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  align-items: center !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
