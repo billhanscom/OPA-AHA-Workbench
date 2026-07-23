@@ -336,13 +336,10 @@
     setRootProperty("--bloom-wide-radius", `${1.2 + energy * 15}px`);
     setRootProperty("--bloom-wide-opacity", String(Math.min(0.34, energy * 0.14)));
 
-    // Reverse-video lettering stays nearly black at low bloom, then gains a
-    // restrained phosphor tint as emission increases. The cap prevents washout.
-    const bloomRatio = Math.max(0, Math.min(1, numeric / 200));
-    const reverseTint = Math.min(18, Math.pow(bloomRatio, 1.35) * 18);
-    const reverseBloomSourceTint = Math.min(30, Math.pow(bloomRatio, 1.15) * 30);
-    setRootProperty("--reverse-text-tint", `${reverseTint.toFixed(2)}%`);
-    setRootProperty("--reverse-bloom-source-tint", `${reverseBloomSourceTint.toFixed(2)}%`);
+    // Keep reverse-video lettering slightly phosphor-tinted so the dark glyphs
+    // feel embedded in the luminous field rather than perfectly digital black.
+    setRootProperty("--reverse-text-tint", "10%");
+    setRootProperty("--reverse-bloom-source-tint", "10%");
   }
 
   function applyDisplaySetting(name, value, save = true) {

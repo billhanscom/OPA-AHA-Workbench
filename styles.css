@@ -1525,7 +1525,7 @@ body::after {
 
 /* v28: canonical terminal spacing, seamless screen surround, and reverse-video tint */
 :root {
-  --reverse-text-tint: 0%;
+  --reverse-text-tint: 10%;
   --edge-extension-alpha: calc(var(--vignette-strength) * .90);
 }
 
@@ -1701,8 +1701,8 @@ body,
 /* v29: terminal-row geometry, literal 132-column header, and reverse-video bloom */
 :root {
   --terminal-row: 1.48em;
-  --reverse-text-tint: 0%;
-  --reverse-bloom-source-tint: 0%;
+  --reverse-text-tint: 10%;
+  --reverse-bloom-source-tint: 10%;
 }
 
 body {
