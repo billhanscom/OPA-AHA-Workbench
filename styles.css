@@ -2253,3 +2253,12 @@ body {
   min-height: var(--nav-row) !important;
   line-height: var(--nav-row) !important;
 }
+
+/* Inner spacing correction: shift the complete contents of the first three
+   top-nav cells one character to the right without changing cell widths,
+   dividers, line spacing, or CRT CONTROLS. */
+.system-inventory > *,
+.system-current > *,
+.system-values > * {
+  transform: translateX(1ch) !important;
+}
