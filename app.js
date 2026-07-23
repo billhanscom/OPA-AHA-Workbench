@@ -21,7 +21,6 @@
   const potionNames = window.OBOJIMA_POTION_NAMES || {};
 
   const state = {
-    phosphor: "amber",
     ruleset: "2024",
     selected: new Set(),
     generated: false,
@@ -234,7 +233,6 @@
   function applyPhosphor(name, save = true) {
     const key = phosphors[name] ? name : "amber";
     const palette = phosphors[key];
-    state.phosphor = key;
 
     setRootProperty("--phosphor-rgb", palette.rgb);
     setRootProperty("--phosphor", palette.phosphor);
@@ -249,10 +247,6 @@
     els.screenFrame.style.background = "transparent";
     els.phosphorControl.value = key;
 
-    // Reapply luminance after a phosphor change so brightness never retains
-    // values calculated for the previous phosphor palette.
-    if (els.brightnessControl) applyBrightness(Number(els.brightnessControl.value));
-
     if (save) {
       writeStorage(`${DISPLAY_STORAGE_PREFIX}-phosphor`, key);
     }
@@ -266,65 +260,23 @@
     return 50 + (numeric / 100) * 130;
   }
 
-  function hslToRgb(hue, saturation, lightness) {
-    const s = saturation / 100;
-    const l = lightness / 100;
-    const chroma = (1 - Math.abs(2 * l - 1)) * s;
-    const sector = ((hue % 360) + 360) % 360 / 60;
-    const x = chroma * (1 - Math.abs((sector % 2) - 1));
-    let r = 0;
-    let g = 0;
-    let b = 0;
-
-    if (sector < 1) [r, g] = [chroma, x];
-    else if (sector < 2) [r, g] = [x, chroma];
-    else if (sector < 3) [g, b] = [chroma, x];
-    else if (sector < 4) [g, b] = [x, chroma];
-    else if (sector < 5) [r, b] = [x, chroma];
-    else [r, b] = [chroma, x];
-
-    const match = l - chroma / 2;
-    return [r, g, b].map((channel) => Math.round((channel + match) * 255));
-  }
-
   function applyBrightness(numeric) {
     const legacyValue = mapBrightnessToLegacy(numeric);
-    const neutralLegacy = 100;
-    const belowNeutral = Math.min(1, legacyValue / neutralLegacy);
-    const aboveNeutral = Math.max(0, (legacyValue - neutralLegacy) / 100);
-
-    // Dim by reducing emission opacity. Brighten by raising lightness while
-    // holding the phosphor hue and saturation constant. No blur, halo, white
-    // overlay, or bloom radius is changed by this control.
-    const contentOpacity = legacyValue <= neutralLegacy
-      ? 0.08 + Math.pow(belowNeutral, 1.25) * 0.92
+    const below = Math.min(legacyValue, 100) / 100;
+    const above = Math.max(0, legacyValue - 100) / 100;
+    const contentOpacity = legacyValue <= 100
+      ? 0.10 + Math.pow(below, 1.35) * 0.90
       : 1;
 
-    const hueProfiles = {
-      amber: { h: 41.4, s: 100, baseL: 50, maxL: 68 },
-      green: { h: 135, s: 100, baseL: 60, maxL: 76 },
-      white: { h: 120, s: 18, baseL: 92, maxL: 98 }
-    };
-    const profile = hueProfiles[state.phosphor] || hueProfiles.amber;
-    const lightness = profile.baseL + Math.pow(aboveNeutral, 0.82) * (profile.maxL - profile.baseL);
-    const [red, green, blue] = hslToRgb(profile.h, profile.s, lightness);
-    const rendered = `hsl(${profile.h} ${profile.s}% ${lightness.toFixed(2)}%)`;
-
     setRootProperty("--content-opacity", String(contentOpacity));
-    setRootProperty("--phosphor", rendered);
-    setRootProperty("--phosphor-bright", rendered);
-    setRootProperty("--phosphor-rgb", `${red} ${green} ${blue}`);
-
-    // Disable every legacy brightness-as-bloom path. Bloom remains controlled
-    // exclusively by the Bloom slider.
     setRootProperty("--display-brightness", "1");
-    setRootProperty("--brightness-boost-alpha", "0");
+    setRootProperty("--brightness-boost-alpha", String(Math.pow(above, 1.15) * 0.82));
     setRootProperty("--brightness-white-alpha", "0");
-    setRootProperty("--brightness-overdrive-alpha", "0");
-    setRootProperty("--brightness-halo-radius", "0px");
-    setRootProperty("--brightness-halo-alpha", "0");
-    setRootProperty("--page-brighten-alpha", "0");
-    setRootProperty("--page-dim-alpha", String((1 - belowNeutral) * 0.72));
+    setRootProperty("--brightness-overdrive-alpha", String(Math.pow(above, 1.25) * 0.72));
+    setRootProperty("--brightness-halo-radius", `${0.4 + Math.pow(above, 1.15) * 17}px`);
+    setRootProperty("--brightness-halo-alpha", String(0.06 + Math.pow(above, 1.1) * 0.86));
+    setRootProperty("--page-brighten-alpha", String(Math.pow(above, 1.3) * 0.30));
+    setRootProperty("--page-dim-alpha", String((1 - below) * 0.72));
   }
 
   function applyContrast(numeric) {
