@@ -5,6 +5,7 @@
   const DISPLAY_STORAGE_PREFIX = `${STORAGE_PREFIX}-display`;
   const ACTIVE_SELECTION_STORAGE_KEY = `${STORAGE_PREFIX}-active-selection`;
   const DISPLAY_PANEL_STORAGE_KEY = `${DISPLAY_STORAGE_PREFIX}-panel-open`;
+  const TERMINAL_ID_STORAGE_KEY = `${STORAGE_PREFIX}-terminal-id`;
   const DISPLAY_SCALE_VERSION = "2";
   const POTION_TYPES = ["combat", "utility", "whimsy"];
   const TYPE_ORDER = { combat: 0, utility: 1, whimsy: 2 };
@@ -34,6 +35,7 @@
       rare: document.getElementById("rareList")
     },
     currentInventory: document.getElementById("currentInventory"),
+    terminalId: document.getElementById("terminalId"),
     inventoryState: document.getElementById("inventoryState"),
     saveInventory: document.getElementById("saveInventory"),
     filter: document.getElementById("ingredientFilter"),
@@ -753,6 +755,32 @@
   }
 
 
+  function createTerminalId() {
+    const bytes = new Uint8Array(4);
+    if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+      window.crypto.getRandomValues(bytes);
+    } else {
+      for (let index = 0; index < bytes.length; index += 1) {
+        bytes[index] = Math.floor(Math.random() * 256);
+      }
+    }
+
+    const hex = Array.from(bytes, (value) => value.toString(16).padStart(2, "0").toUpperCase()).join("");
+    return `${hex.slice(0, 4)}-${hex.slice(4)}`;
+  }
+
+  function initializeTerminalId() {
+    if (!els.terminalId) return;
+
+    let terminalId = readStorage(TERMINAL_ID_STORAGE_KEY);
+    if (!/^[0-9A-F]{4}-[0-9A-F]{4}$/.test(terminalId || "")) {
+      terminalId = createTerminalId();
+      writeStorage(TERMINAL_ID_STORAGE_KEY, terminalId);
+    }
+
+    els.terminalId.textContent = terminalId;
+  }
+
   function initializeCurrentNameScroll() {
     const target = els.currentInventory;
     let startTimer = 0;
@@ -877,6 +905,7 @@
     syncButtons();
     updateInventoryDisplay();
     renderSaveState();
+    initializeTerminalId();
     initializeCurrentNameScroll();
     initializeReverseVideoButtons();
     initializeBloomComposite();

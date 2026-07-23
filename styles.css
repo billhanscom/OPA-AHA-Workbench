@@ -1388,3 +1388,134 @@ body::after {
   mask-image: linear-gradient(to right, #000 0%, rgb(0 0 0 / .72) 3%, transparent 9%, transparent 91%, rgb(0 0 0 / .72) 97%, #000 100%);
   -webkit-mask-image: linear-gradient(to right, #000 0%, rgb(0 0 0 / .72) 3%, transparent 9%, transparent 91%, rgb(0 0 0 / .72) 97%, #000 100%);
 }
+
+
+/* v27: system identification, exact header geometry, and calibrated surround */
+:root {
+  --frame-gutter: 3ch;
+}
+
+html,
+body {
+  min-width: calc(132ch + 6ch);
+}
+
+.crt-shell {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.screen-frame {
+  box-sizing: border-box;
+  width: calc(132ch + 6ch) !important;
+  padding-left: 3ch !important;
+  padding-right: 3ch !important;
+}
+
+.system-identification {
+  width: 132ch;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 3ch;
+  margin: 0 0 1em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--phosphor);
+}
+.system-identification-title { justify-self: start; }
+.system-identification-terminal { justify-self: center; }
+.system-identification-build { justify-self: end; }
+
+/* Use one CSS-drawn double frame so the horizontal rules and vertical dividers
+   share the same geometry. This avoids fallback-font width differences in the
+   box-drawing junction glyphs while preserving the exact 132ch footprint. */
+.system-bar {
+  width: 132ch !important;
+  display: block !important;
+  border: 3px double currentColor !important;
+  overflow: hidden !important;
+  line-height: 1 !important;
+}
+.system-frame-line,
+.system-frame-edge {
+  display: none !important;
+}
+.system-bar-row {
+  display: grid !important;
+  grid-template-columns: 42ch 49ch 23ch 18ch !important;
+  width: 132ch !important;
+  min-height: 1em;
+  align-items: stretch;
+  line-height: 1;
+}
+.system-cell {
+  min-width: 0;
+  height: 1.65em !important;
+  min-height: 1.65em !important;
+  padding: 0 2ch !important;
+  align-items: center;
+  overflow: hidden;
+}
+.system-cell:not(:last-of-type) {
+  border-right: 3px double currentColor !important;
+}
+.system-cell + .system-cell {
+  border-left: 0 !important;
+}
+.system-inventory,
+.system-current,
+.system-values {
+  transform: none !important;
+}
+.system-inventory > *,
+.system-current > *,
+.system-values > * {
+  transform: none !important;
+}
+.system-cell {
+  gap: 2ch !important;
+}
+.system-inventory .system-label,
+.system-current .system-label,
+.system-values .system-label {
+  margin-right: 1ch !important;
+}
+.system-display {
+  justify-content: center;
+}
+
+/* Apply the restored contrast wash and dimming/brightening to the complete
+   browser field, not just the 132-column terminal, so the surround remains
+   visually continuous with the screen. */
+body::before {
+  z-index: 89 !important;
+  background:
+    linear-gradient(
+      rgb(0 0 0 / var(--contrast-overlay-alpha)),
+      rgb(0 0 0 / var(--contrast-overlay-alpha))
+    ),
+    linear-gradient(
+      rgb(var(--phosphor-rgb) / var(--contrast-wash-alpha)),
+      rgb(var(--phosphor-rgb) / var(--contrast-wash-alpha))
+    ) !important;
+}
+body::after {
+  z-index: 89 !important;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgb(var(--phosphor-rgb) / var(--page-brighten-alpha)),
+      transparent 76%
+    ),
+    linear-gradient(
+      rgb(0 0 0 / var(--page-dim-alpha)),
+      rgb(0 0 0 / var(--page-dim-alpha))
+    ) !important;
+}
+
+/* The global calibration layers now provide contrast across both the terminal
+   and its surround; disable the container-only duplicate to avoid double gain. */
+.viewport-effects .contrast-layer {
+  display: none !important;
+}
