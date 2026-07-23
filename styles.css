@@ -2299,6 +2299,7 @@ body {
   --screen-width: 144ch;
   --content-width: 132ch;
   --content-side-gutter: 6ch;
+  --screen-top-gutter: calc(var(--terminal-row) * 3);
 }
 
 html,
@@ -2321,6 +2322,7 @@ body {
   min-width: var(--screen-width) !important;
   max-width: var(--screen-width) !important;
   margin-inline: auto !important;
+  padding-top: var(--screen-top-gutter) !important;
 }
 
 .terminal {
@@ -2334,7 +2336,7 @@ body {
 
 .phosphor-bloom-stack {
   box-sizing: border-box !important;
-  inset: 0 auto auto var(--content-side-gutter) !important;
+  inset: var(--screen-top-gutter) auto auto var(--content-side-gutter) !important;
   width: var(--content-width) !important;
   min-width: var(--content-width) !important;
   max-width: var(--content-width) !important;
