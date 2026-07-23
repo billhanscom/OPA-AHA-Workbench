@@ -38,7 +38,7 @@ body {
   color: var(--phosphor);
   font-family: "Source Code Pro", monospace;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: var(--line);
 }
 button, input, select, output { font: inherit; }
