@@ -23,6 +23,7 @@
     ruleset: "2024",
     selected: new Set(),
     generated: false,
+    dirty: true,
     currentName: "No Inventory Loaded"
   };
 
@@ -34,6 +35,7 @@
     },
     currentInventory: document.getElementById("currentInventory"),
     inventoryState: document.getElementById("inventoryState"),
+    saveInventory: document.getElementById("saveInventory"),
     filter: document.getElementById("ingredientFilter"),
     drawer: document.getElementById("inventoryDrawer"),
     inventorySummary: document.getElementById("inventorySummary"),
@@ -48,14 +50,16 @@
     scanlineControl: document.getElementById("scanlineControl"),
     brightnessControl: document.getElementById("brightnessControl"),
     contrastControl: document.getElementById("contrastControl"),
-    bezelControl: document.getElementById("bezelControl"),
+    verticalFocusControl: document.getElementById("verticalFocusControl"),
+    horizontalFocusControl: document.getElementById("horizontalFocusControl"),
     redrawControl: document.getElementById("redrawControl"),
     bloomValue: document.getElementById("bloomValue"),
     vignetteValue: document.getElementById("vignetteValue"),
     scanlineValue: document.getElementById("scanlineValue"),
     brightnessValue: document.getElementById("brightnessValue"),
     contrastValue: document.getElementById("contrastValue"),
-    bezelValue: document.getElementById("bezelValue"),
+    verticalFocusValue: document.getElementById("verticalFocusValue"),
+    horizontalFocusValue: document.getElementById("horizontalFocusValue"),
     redrawValue: document.getElementById("redrawValue"),
     screenFrame: document.getElementById("screenFrame"),
     screenSurface: document.getElementById("screenSurface"),
@@ -169,7 +173,8 @@
     bloom: 14,
     scanlines: 45,
     vignette: 52,
-    bezel: 30,
+    verticalFocus: 30,
+    horizontalFocus: 30,
     redraw: 150
   };
 
@@ -179,7 +184,8 @@
     bloom: [0, 200],
     scanlines: [0, 100],
     vignette: [0, 100],
-    bezel: [0, 100],
+    verticalFocus: [0, 100],
+    horizontalFocus: [0, 100],
     redraw: [0, 1500]
   };
 
@@ -189,7 +195,8 @@
     bloom: [els.bloomControl, els.bloomValue, "%"],
     scanlines: [els.scanlineControl, els.scanlineValue, "%"],
     vignette: [els.vignetteControl, els.vignetteValue, "%"],
-    bezel: [els.bezelControl, els.bezelValue, "%"],
+    verticalFocus: [els.verticalFocusControl, els.verticalFocusValue, "%"],
+    horizontalFocus: [els.horizontalFocusControl, els.horizontalFocusValue, "%"],
     redraw: [els.redrawControl, els.redrawValue, " ms"]
   };
 
@@ -329,17 +336,21 @@
       case "vignette":
         setRootProperty("--vignette-strength", String(decimal));
         break;
-      case "bezel":
-        // Edge focus is a rounded, brightness-neutral focus falloff. Three
-        // progressively tighter masks create a gradual transition while a
-        // broad horizontal clarity band remains sharp across the full width.
-        setRootProperty("--edge-strength", String(decimal));
-        setRootProperty("--edge-soft-blur", `${decimal * 1.8}px`);
-        setRootProperty("--edge-medium-blur", `${decimal * 4.2}px`);
-        setRootProperty("--edge-strong-blur", `${decimal * 8}px`);
-        setRootProperty("--edge-soft-opacity", String(decimal * 0.72));
-        setRootProperty("--edge-medium-opacity", String(decimal * 0.58));
-        setRootProperty("--edge-strong-opacity", String(decimal * 0.44));
+      case "verticalFocus":
+        setRootProperty("--vertical-focus-soft-blur", `${decimal * 1.8}px`);
+        setRootProperty("--vertical-focus-medium-blur", `${decimal * 4.2}px`);
+        setRootProperty("--vertical-focus-strong-blur", `${decimal * 8}px`);
+        setRootProperty("--vertical-focus-soft-opacity", String(decimal * 0.72));
+        setRootProperty("--vertical-focus-medium-opacity", String(decimal * 0.58));
+        setRootProperty("--vertical-focus-strong-opacity", String(decimal * 0.44));
+        break;
+      case "horizontalFocus":
+        setRootProperty("--horizontal-focus-soft-blur", `${decimal * 1.8}px`);
+        setRootProperty("--horizontal-focus-medium-blur", `${decimal * 4.2}px`);
+        setRootProperty("--horizontal-focus-strong-blur", `${decimal * 8}px`);
+        setRootProperty("--horizontal-focus-soft-opacity", String(decimal * 0.72));
+        setRootProperty("--horizontal-focus-medium-opacity", String(decimal * 0.58));
+        setRootProperty("--horizontal-focus-strong-opacity", String(decimal * 0.44));
         break;
       case "redraw":
         setRootProperty("--redraw-ms", `${numeric}ms`);
@@ -375,7 +386,10 @@
     Object.keys(displayDefaults)
       .filter((name) => name !== "phosphor")
       .forEach((name) => {
-        const stored = readStorage(`${DISPLAY_STORAGE_PREFIX}-${name}`);
+        let stored = readStorage(`${DISPLAY_STORAGE_PREFIX}-${name}`);
+        if ((name === "verticalFocus" || name === "horizontalFocus") && stored === null) {
+          stored = readStorage(`${DISPLAY_STORAGE_PREFIX}-bezel`);
+        }
         let value = stored !== null && stored !== ""
           ? Number(stored)
           : displayDefaults[name];
@@ -490,8 +504,19 @@
     });
   }
 
+  function renderSaveState() {
+    els.saveInventory.textContent = state.dirty ? "Save*" : "Saved";
+    els.inventoryState.textContent = state.dirty ? "Inventory modified" : "Inventory saved";
+  }
+
   function markUnsaved() {
-    els.inventoryState.textContent = "";
+    state.dirty = true;
+    renderSaveState();
+  }
+
+  function markSaved() {
+    state.dirty = false;
+    renderSaveState();
   }
 
   function toggleIngredient(name, button) {
@@ -522,6 +547,8 @@
   function updateInventoryDisplay() {
     els.currentInventory.textContent = state.currentName;
     els.currentInventory.title = state.currentName;
+    els.currentInventory.scrollLeft = 0;
+    els.currentInventory.classList.remove("is-scrolling");
     renderInventorySummary();
 
     if (state.generated) {
@@ -564,7 +591,7 @@
       localStorage.setItem(`${STORAGE_PREFIX}-ruleset`, state.ruleset);
       localStorage.setItem(`${STORAGE_PREFIX}-inventory-name`, "Saved Inventory");
       state.currentName = "Saved Inventory";
-      els.inventoryState.textContent = "Saved";
+      markSaved();
       updateInventoryDisplay();
     } catch (error) {
       els.inventoryState.textContent = "Error";
@@ -585,7 +612,7 @@
 
       persistActiveSelection();
       syncButtons();
-      els.inventoryState.textContent = "";
+      markSaved();
       updateInventoryDisplay();
       redraw();
     } catch (error) {
@@ -725,6 +752,65 @@
     });
   }
 
+
+  function initializeCurrentNameScroll() {
+    const target = els.currentInventory;
+    let startTimer = 0;
+    let stepTimer = 0;
+    let endTimer = 0;
+
+    const stop = () => {
+      window.clearTimeout(startTimer);
+      window.clearInterval(stepTimer);
+      window.clearTimeout(endTimer);
+      target.classList.remove("is-scrolling");
+      target.scrollLeft = 0;
+    };
+
+    const start = () => {
+      stop();
+      if (target.scrollWidth <= target.clientWidth + 1) return;
+      startTimer = window.setTimeout(() => {
+        target.classList.add("is-scrolling");
+        const probe = document.createElement("span");
+        probe.textContent = "0";
+        probe.style.cssText = "position:absolute;visibility:hidden;font:inherit";
+        document.body.appendChild(probe);
+        const cellWidth = probe.getBoundingClientRect().width || 8;
+        probe.remove();
+        stepTimer = window.setInterval(() => {
+          const next = Math.min(target.scrollLeft + cellWidth, target.scrollWidth - target.clientWidth);
+          target.scrollLeft = next;
+          if (next >= target.scrollWidth - target.clientWidth - 1) {
+            window.clearInterval(stepTimer);
+            endTimer = window.setTimeout(() => {
+              target.scrollLeft = 0;
+              target.classList.remove("is-scrolling");
+            }, 900);
+          }
+        }, 150);
+      }, 650);
+    };
+
+    target.addEventListener("mouseenter", start);
+    target.addEventListener("mouseleave", stop);
+    target.addEventListener("focus", start);
+    target.addEventListener("blur", stop);
+  }
+
+  function initializeReverseVideoButtons() {
+    document.querySelectorAll(".terminal-tab, .terminal-command").forEach((button) => {
+      const sync = () => button.classList.toggle(
+        "is-reversed",
+        button.matches(":hover") || button.matches(":focus-visible")
+      );
+      button.addEventListener("mouseenter", sync);
+      button.addEventListener("mouseleave", sync);
+      button.addEventListener("focus", sync);
+      button.addEventListener("blur", sync);
+    });
+  }
+
   function bindEvents() {
     document.getElementById("clearInventory").addEventListener("click", clearSelection);
     document.getElementById("clearSelection").addEventListener("click", clearSelection);
@@ -757,7 +843,8 @@
     bindDisplayControl(els.scanlineControl, "scanlines");
     bindDisplayControl(els.brightnessControl, "brightness");
     bindDisplayControl(els.contrastControl, "contrast");
-    bindDisplayControl(els.bezelControl, "bezel");
+    bindDisplayControl(els.verticalFocusControl, "verticalFocus");
+    bindDisplayControl(els.horizontalFocusControl, "horizontalFocus");
     bindDisplayControl(els.redrawControl, "redraw");
 
     document.querySelectorAll(".value-option").forEach((button) => {
@@ -789,6 +876,9 @@
     renderIngredients();
     syncButtons();
     updateInventoryDisplay();
+    renderSaveState();
+    initializeCurrentNameScroll();
+    initializeReverseVideoButtons();
     initializeBloomComposite();
     updateViewportEffectsBounds();
     window.requestAnimationFrame(() => redraw());

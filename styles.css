@@ -1196,3 +1196,195 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .edge-focus-pass { will-change: auto; }
 }
+
+
+/* v26: exact 132-column header, separate focus axes, and perceptual bloom ---- */
+.system-bar {
+  display: block;
+  width: 132ch;
+  color: var(--phosphor-bright);
+  border: 0 !important;
+  line-height: 1;
+  overflow: visible;
+}
+.system-frame-line {
+  width: 132ch;
+  height: 1em;
+  white-space: pre;
+  line-height: 1;
+}
+.system-bar-row {
+  display: grid;
+  grid-template-columns: 1ch 41ch 1ch 48ch 1ch 22ch 1ch 16ch 1ch;
+  width: 132ch;
+  min-height: 1em;
+  align-items: center;
+  line-height: 1;
+}
+.system-frame-edge { width: 1ch; text-align: center; }
+.system-cell {
+  box-sizing: border-box;
+  min-height: 1em;
+  height: 1em;
+  display: flex;
+  align-items: center;
+  gap: 2ch;
+  padding: 0 2ch !important;
+  white-space: nowrap;
+  overflow: hidden;
+  transform: none !important;
+  border: 0 !important;
+}
+.system-cell > * { transform: none !important; }
+.system-inventory .system-label,
+.system-current .system-label,
+.system-values .system-label { margin-right: 1ch; }
+.system-current { min-width: 0; }
+.current-inventory-window {
+  display: block;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  scroll-behavior: auto;
+  outline: none;
+}
+.current-inventory-window.is-scrolling { text-overflow: clip; }
+.system-values { justify-content: flex-start; }
+.system-display { justify-content: center; }
+.system-display .display-toggle { padding: 0; }
+.save-state { width: 5ch; padding: 0 !important; text-align: left; }
+
+/* Keep the original amber/green outline stable and reverse only the interior. */
+.terminal-tab,
+.terminal-command {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+  border-color: var(--phosphor) !important;
+  box-shadow: none !important;
+}
+.terminal-tab::before,
+.terminal-command::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  background: transparent;
+  pointer-events: none;
+}
+.terminal-tab:hover:not(:disabled),
+.terminal-tab:focus-visible:not(:disabled),
+.terminal-tab.is-reversed:not(:disabled),
+.terminal-command:hover,
+.terminal-command:focus-visible,
+.terminal-command.is-reversed {
+  color: var(--screen-deep) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+.terminal-tab:hover:not(:disabled)::before,
+.terminal-tab:focus-visible:not(:disabled)::before,
+.terminal-tab.is-reversed:not(:disabled)::before,
+.terminal-command:hover::before,
+.terminal-command:focus-visible::before,
+.terminal-command.is-reversed::before { background: var(--phosphor); }
+
+/* Fine glyphs and one-cell rules receive a high-gain tight pass. The medium
+   and broad passes remain common to the complete terminal composite. */
+.phosphor-bloom-pass--tight,
+.phosphor-bloom-pass--tight * {
+  text-shadow:
+    0 0 .45px rgb(var(--phosphor-rgb) / .85),
+    0 0 .9px rgb(var(--phosphor-rgb) / .58) !important;
+}
+.phosphor-bloom-pass--tight .system-frame-line,
+.phosphor-bloom-pass--tight .system-frame-edge,
+.phosphor-bloom-pass--tight .ingredient-panel,
+.phosphor-bloom-pass--tight .ingredient-column,
+.phosphor-bloom-pass--tight .ingredient-column h2,
+.phosphor-bloom-pass--tight .display-settings,
+.phosphor-bloom-pass--tight .inventory-drawer,
+.phosphor-bloom-pass--tight .results-panel,
+.phosphor-bloom-pass--tight .terminal-tab,
+.phosphor-bloom-pass--tight .terminal-command {
+  box-shadow:
+    inset 0 0 .8px rgb(var(--phosphor-rgb) / .75),
+    0 0 .8px rgb(var(--phosphor-rgb) / .75) !important;
+}
+/* Reverse-video button fills feed only the tight pass, preventing the broad
+   rectangular haze while retaining a restrained phosphor edge. */
+.phosphor-bloom-pass--mid .is-reversed::before,
+.phosphor-bloom-pass--wide .is-reversed::before { display: none !important; }
+
+/* Focus is brightness-neutral. Vertical masks are viewport-relative; the
+   horizontal masks are anchored to the left and right edges of the 132ch
+   viewport-effects container. */
+:root {
+  --vertical-focus-soft-blur: .54px;
+  --vertical-focus-medium-blur: 1.26px;
+  --vertical-focus-strong-blur: 2.4px;
+  --vertical-focus-soft-opacity: .216;
+  --vertical-focus-medium-opacity: .174;
+  --vertical-focus-strong-opacity: .132;
+  --horizontal-focus-soft-blur: .54px;
+  --horizontal-focus-medium-blur: 1.26px;
+  --horizontal-focus-strong-blur: 2.4px;
+  --horizontal-focus-soft-opacity: .216;
+  --horizontal-focus-medium-opacity: .174;
+  --horizontal-focus-strong-opacity: .132;
+}
+.edge-layer { display: none !important; }
+.edge-focus-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent !important;
+}
+.edge-focus-pass { position: absolute; inset: 0; pointer-events: none; background: transparent; }
+.edge-focus-pass--vertical.edge-focus-soft {
+  opacity: var(--vertical-focus-soft-opacity);
+  backdrop-filter: blur(var(--vertical-focus-soft-blur));
+  -webkit-backdrop-filter: blur(var(--vertical-focus-soft-blur));
+  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / .55) 12%, transparent 30%, transparent 70%, rgb(0 0 0 / .55) 88%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / .55) 12%, transparent 30%, transparent 70%, rgb(0 0 0 / .55) 88%, #000 100%);
+}
+.edge-focus-pass--vertical.edge-focus-medium {
+  opacity: var(--vertical-focus-medium-opacity);
+  backdrop-filter: blur(var(--vertical-focus-medium-blur));
+  -webkit-backdrop-filter: blur(var(--vertical-focus-medium-blur));
+  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / .62) 8%, transparent 23%, transparent 77%, rgb(0 0 0 / .62) 92%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / .62) 8%, transparent 23%, transparent 77%, rgb(0 0 0 / .62) 92%, #000 100%);
+}
+.edge-focus-pass--vertical.edge-focus-strong {
+  opacity: var(--vertical-focus-strong-opacity);
+  backdrop-filter: blur(var(--vertical-focus-strong-blur));
+  -webkit-backdrop-filter: blur(var(--vertical-focus-strong-blur));
+  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / .72) 5%, transparent 16%, transparent 84%, rgb(0 0 0 / .72) 95%, #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / .72) 5%, transparent 16%, transparent 84%, rgb(0 0 0 / .72) 95%, #000 100%);
+}
+.edge-focus-pass--horizontal.edge-focus-soft {
+  opacity: var(--horizontal-focus-soft-opacity);
+  backdrop-filter: blur(var(--horizontal-focus-soft-blur));
+  -webkit-backdrop-filter: blur(var(--horizontal-focus-soft-blur));
+  mask-image: linear-gradient(to right, #000 0%, rgb(0 0 0 / .55) 7%, transparent 18%, transparent 82%, rgb(0 0 0 / .55) 93%, #000 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 0%, rgb(0 0 0 / .55) 7%, transparent 18%, transparent 82%, rgb(0 0 0 / .55) 93%, #000 100%);
+}
+.edge-focus-pass--horizontal.edge-focus-medium {
+  opacity: var(--horizontal-focus-medium-opacity);
+  backdrop-filter: blur(var(--horizontal-focus-medium-blur));
+  -webkit-backdrop-filter: blur(var(--horizontal-focus-medium-blur));
+  mask-image: linear-gradient(to right, #000 0%, rgb(0 0 0 / .62) 5%, transparent 13%, transparent 87%, rgb(0 0 0 / .62) 95%, #000 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 0%, rgb(0 0 0 / .62) 5%, transparent 13%, transparent 87%, rgb(0 0 0 / .62) 95%, #000 100%);
+}
+.edge-focus-pass--horizontal.edge-focus-strong {
+  opacity: var(--horizontal-focus-strong-opacity);
+  backdrop-filter: blur(var(--horizontal-focus-strong-blur));
+  -webkit-backdrop-filter: blur(var(--horizontal-focus-strong-blur));
+  mask-image: linear-gradient(to right, #000 0%, rgb(0 0 0 / .72) 3%, transparent 9%, transparent 91%, rgb(0 0 0 / .72) 97%, #000 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 0%, rgb(0 0 0 / .72) 3%, transparent 9%, transparent 91%, rgb(0 0 0 / .72) 97%, #000 100%);
+}
