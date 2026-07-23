@@ -76,6 +76,18 @@
   function sanitizeBloomClone(root, passClass) {
     root.classList.add("phosphor-bloom-pass", passClass);
     root.setAttribute("aria-hidden", "true");
+
+    // The Save*/Saved control is the only text node whose wording changes in
+    // place. Native button text was being rendered independently in each
+    // blurred DOM copy, producing overlapping letter-shaped ghosts. Keep its
+    // fixed-width slot in every copy, but let the live control supply a single
+    // local phosphor halo instead.
+    const clonedSaveControl = root.querySelector("#saveInventory");
+    if (clonedSaveControl) {
+      clonedSaveControl.textContent = "";
+      clonedSaveControl.classList.add("bloom-slot-only");
+    }
+
     root.removeAttribute("id");
 
     root.querySelectorAll("[id], [name], [for], [aria-labelledby], [aria-describedby]").forEach((node) => {
@@ -526,12 +538,6 @@
     els.saveInventory.textContent = state.dirty ? "Save*" : "Saved";
     els.inventoryState.textContent = state.dirty ? "Inventory modified" : "Inventory saved";
 
-    // The bloom passes are DOM snapshots. Refresh them immediately when the
-    // fixed-width Save*/Saved label changes so the previous word cannot remain
-    // visible for a frame as a ghost beneath the current label.
-    if (bloomStack) {
-      rebuildBloomComposite();
-    }
   }
 
   function markUnsaved() {

@@ -2263,3 +2263,22 @@ body {
 .system-values > * {
   transform: translateX(1ch) !important;
 }
+
+
+/* Save-state bloom correction ---------------------------------------------
+   The mutable Save*/Saved label is omitted from the three DOM bloom copies.
+   A single local halo on the live glyphs prevents overlapping letterforms
+   while still responding to the unified Bloom control. */
+.phosphor-bloom-pass .save-state,
+.phosphor-bloom-pass .save-state * {
+  color: transparent !important;
+  text-shadow: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#terminal > .system-bar .save-state:not(:hover):not(:focus-visible) {
+  text-shadow:
+    0 0 var(--bloom-tight-radius) rgb(var(--bloom-rgb) / var(--bloom-tight-opacity)),
+    0 0 var(--bloom-mid-radius) rgb(var(--bloom-rgb) / calc(var(--bloom-mid-opacity) * .55)) !important;
+}
