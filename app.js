@@ -536,8 +536,8 @@
 
   function valueString(ingredient) {
     const values = ingredient.values?.[state.ruleset] || {};
-    const pad = (value) => String(Number(value || 0)).padStart(2, "0");
-    return `[${pad(values.combat)}-${pad(values.utility)}-${pad(values.whimsy)}]`;
+    const number = (value) => String(Number(value || 0));
+    return `[${number(values.combat)}-${number(values.utility)}-${number(values.whimsy)}]`;
   }
 
   function renderIngredients() {
@@ -734,7 +734,7 @@
       els.recipeResults.appendChild(message);
       els.resultSummary.textContent = "0 RECIPES FOUND FOR 0 POTIONS";
       if (persist) persistResultsState();
-      if (scroll) els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
+      if (scroll) els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
 
@@ -782,7 +782,7 @@
     );
     els.resultSummary.textContent = `${totalRecipes} RECIPE${totalRecipes === 1 ? "" : "S"} FOUND FOR ${sortedGroups.length} POTION${sortedGroups.length === 1 ? "" : "S"}`;
     if (persist) persistResultsState();
-    if (scroll) els.resultsPanel.scrollIntoView({ behavior: "auto", block: "start" });
+    if (scroll) els.resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function renderRecipeColumns(groups) {
