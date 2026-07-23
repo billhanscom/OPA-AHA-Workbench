@@ -2384,3 +2384,74 @@ body {
   min-width: var(--content-width) !important;
   max-width: var(--content-width) !important;
 }
+
+/* v34.4: make the complete CRT field use the 140-column geometry ----------
+   The application and bloom source remain centered at 132ch. Only the glass,
+   vignette, horizontal focus, scanlines, and screen substrate extend through
+   the four additional character cells on each side. */
+:root {
+  --screen-columns: 140;
+  --screen-width: 140ch;
+  --content-width: 132ch;
+  --content-side-gutter: 4ch;
+}
+
+html,
+body,
+.crt-shell {
+  min-width: var(--screen-width) !important;
+}
+
+.screen-frame,
+.screen-surface {
+  box-sizing: border-box !important;
+  width: var(--screen-width) !important;
+  min-width: var(--screen-width) !important;
+  max-width: var(--screen-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.screen-frame {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.terminal {
+  box-sizing: border-box !important;
+  width: var(--content-width) !important;
+  min-width: var(--content-width) !important;
+  max-width: var(--content-width) !important;
+  margin-left: var(--content-side-gutter) !important;
+  margin-right: var(--content-side-gutter) !important;
+}
+
+/* Bloom must stay registered to the sharp 132-column application image. */
+.phosphor-bloom-stack,
+.phosphor-bloom-pass {
+  box-sizing: border-box !important;
+  width: var(--content-width) !important;
+  min-width: var(--content-width) !important;
+  max-width: var(--content-width) !important;
+}
+
+.phosphor-bloom-stack {
+  left: var(--content-side-gutter) !important;
+  right: auto !important;
+  transform: none !important;
+}
+
+/* These layers use the measured edges of the 140-column screenSurface. */
+.edge-focus-layer--horizontal,
+.glass-layer::before {
+  left: var(--screen-left) !important;
+  right: var(--screen-right) !important;
+}
+
+/* Keep the vertical treatment viewport-wide. */
+.edge-focus-layer--vertical,
+.scanline-layer,
+.glass-layer {
+  left: 0 !important;
+  right: 0 !important;
+}
