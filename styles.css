@@ -2631,9 +2631,6 @@ input[type="range"]::-moz-range-track {
   overflow: hidden;
 }
 
-.potion-stack > .potion-group:last-child {
-  border-bottom: 0;
-}
 
 .brew-control {
   display: inline-flex;
