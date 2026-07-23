@@ -2393,3 +2393,41 @@ body {
     0 0 0.35px rgb(var(--phosphor-rgb) / var(--reverse-emission-alpha)),
     0 0 0.9px rgb(var(--phosphor-rgb) / calc(var(--reverse-emission-alpha) * 0.72)) !important;
 }
+
+
+/* CRT slider phosphor styling -------------------------------------------- */
+:root {
+  --slider-track: color-mix(in srgb, var(--phosphor) 22%, var(--screen-deep));
+  --slider-border: color-mix(in srgb, var(--phosphor) 58%, var(--screen-deep));
+}
+
+input[type="range"] {
+  accent-color: var(--phosphor);
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--slider-track);
+  border: 1px solid var(--slider-border);
+}
+
+input[type="range"]::-moz-range-track {
+  background: var(--slider-track);
+  border: 1px solid var(--slider-border);
+}
+
+
+/* Canonical outer and masthead spacing ------------------------------------
+   These are the sole final controls for the two visible gaps calibrated in
+   this build. The CRT's internal top gutter remains unchanged. */
+:root {
+  --page-top-padding: 1.125rem; /* 25% less than the prior 1.5rem */
+  --nav-logo-gap: calc(var(--terminal-row) * 3); /* one row less than 4lh */
+}
+
+.crt-shell {
+  padding-top: var(--page-top-padding) !important;
+}
+
+.masthead {
+  margin-top: var(--nav-logo-gap) !important;
+}
