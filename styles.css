@@ -225,7 +225,6 @@ h1, h2, h3, p { font: inherit; }
 .recipe-results { display: grid; gap: 1em; padding-top: 1em; }
 .potion-group { border-top: 1px solid var(--phosphor-faint); padding-top: .8em; }
 .potion-group:first-child { border-top: 0; }
-.potion-group:last-child { border-bottom: 0; }
 .potion-title { display: flex; gap: 1.5ch; align-items: baseline; margin-bottom: .45em; }
 .potion-type { min-width: 9ch; color: var(--phosphor-bright); }
 .potion-number { color: var(--phosphor-dim); }
@@ -2647,4 +2646,14 @@ input[type="range"]::-moz-range-track {
 .brew-control:hover,
 .brew-control:focus-visible {
   box-shadow: none !important;
+}
+
+
+/* v0.10.4: authoritative potion-card borders ------------------------------ */
+.recipe-results .potion-stack > .potion-group,
+.recipe-results .potion-stack > .potion-group:first-child,
+.recipe-results .potion-stack > .potion-group:last-child {
+  padding-top: 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--phosphor);
 }
