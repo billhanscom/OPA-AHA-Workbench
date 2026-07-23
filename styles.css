@@ -2290,15 +2290,15 @@ body {
   width: 1ch;
 }
 
-/* 140-column screen shell --------------------------------------------------
-   The CRT surface is 140 character cells wide. The established 132-column
-   application grid remains centered within it, leaving four empty screen
-   columns at both the left and right edges. */
+/* v34.2: 140-column screen shell with centered 132-column content ---------
+   Add four empty character columns on each side of the established content
+   grid. The sharp terminal and every composite bloom pass remain 132ch wide,
+   so the added columns receive only the surrounding CRT treatment and cannot
+   displace or duplicate luminous content. */
 :root {
   --screen-columns: 140;
   --screen-width: 140ch;
-  --content-width: 132ch;
-  --screen-side-columns: 4ch;
+  --content-side-gutter: 4ch;
 }
 
 html,
@@ -2307,47 +2307,22 @@ body {
 }
 
 .screen-frame {
-  box-sizing: border-box !important;
   width: var(--screen-width) !important;
-  min-width: var(--screen-width) !important;
-  max-width: var(--screen-width) !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  padding-left: var(--content-side-gutter) !important;
+  padding-right: var(--content-side-gutter) !important;
 }
 
-.screen-surface {
-  box-sizing: border-box !important;
-  width: var(--screen-width) !important;
-  min-width: var(--screen-width) !important;
-  max-width: var(--screen-width) !important;
+.screen-surface,
+.terminal,
+.phosphor-bloom-stack,
+.phosphor-bloom-pass {
+  width: 132ch !important;
+  min-width: 132ch !important;
+  max-width: 132ch !important;
+}
+
+.screen-surface,
+.terminal {
   margin-left: auto !important;
   margin-right: auto !important;
-}
-
-.terminal {
-  width: var(--content-width) !important;
-  min-width: var(--content-width) !important;
-  max-width: var(--content-width) !important;
-  margin-left: var(--screen-side-columns) !important;
-  margin-right: var(--screen-side-columns) !important;
-}
-
-.phosphor-bloom-stack {
-  left: var(--screen-side-columns) !important;
-  right: auto !important;
-  width: var(--content-width) !important;
-  min-width: var(--content-width) !important;
-  max-width: var(--content-width) !important;
-}
-
-.phosphor-bloom-pass {
-  width: var(--content-width) !important;
-  min-width: var(--content-width) !important;
-  max-width: var(--content-width) !important;
-}
-
-@media (max-width: 1400px) {
-  body {
-    min-width: var(--screen-width) !important;
-  }
 }
