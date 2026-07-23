@@ -137,6 +137,7 @@
   const phosphors = {
     amber: {
       rgb: "255 176 0",
+      bloomRgb: "255 176 0",
       phosphor: "#ffb000",
       bright: "#ffb000",
       dim: "#a87300",
@@ -147,6 +148,7 @@
     },
     green: {
       rgb: "51 255 102",
+      bloomRgb: "51 255 102",
       phosphor: "#33ff66",
       bright: "#33ff66",
       dim: "#20a843",
@@ -156,9 +158,10 @@
       body: "radial-gradient(ellipse at center, #0b2111 0%, #040a05 72%, #010301 100%)"
     },
     white: {
-      rgb: "232 239 232",
-      phosphor: "#e8efe8",
-      bright: "#f7fff7",
+      rgb: "238 247 255",
+      bloomRgb: "216 236 255",
+      phosphor: "#eef7ff",
+      bright: "#eef7ff",
       dim: "#99a399",
       faint: "#5d665d",
       screen: "#111411",
@@ -235,6 +238,7 @@
     const palette = phosphors[key];
 
     setRootProperty("--phosphor-rgb", palette.rgb);
+    setRootProperty("--bloom-rgb", palette.bloomRgb || palette.rgb);
     setRootProperty("--phosphor", palette.phosphor);
     setRootProperty("--phosphor-bright", palette.bright);
     setRootProperty("--phosphor-dim", palette.dim);

@@ -1,5 +1,6 @@
 :root {
   --phosphor-rgb: 255 176 0;
+  --bloom-rgb: 255 176 0;
   --phosphor: #ffb000;
   --phosphor-bright: #ffb000;
   --phosphor-dim: #a87300;
@@ -1039,7 +1040,7 @@ body::after {
   pointer-events: none !important;
   transform: translateZ(0);
   transform-origin: center;
-  color: rgb(var(--phosphor-rgb)) !important;
+  color: rgb(var(--bloom-rgb)) !important;
   background: transparent !important;
   will-change: filter, opacity;
 }
@@ -1061,9 +1062,9 @@ body::after {
    retain their geometry; only genuinely luminous reverse-video fills remain. */
 .phosphor-bloom-pass,
 .phosphor-bloom-pass * {
-  color: rgb(var(--phosphor-rgb)) !important;
-  border-color: rgb(var(--phosphor-rgb)) !important;
-  outline-color: rgb(var(--phosphor-rgb)) !important;
+  color: rgb(var(--bloom-rgb)) !important;
+  border-color: rgb(var(--bloom-rgb)) !important;
+  outline-color: rgb(var(--bloom-rgb)) !important;
   background-color: transparent !important;
   background-image: none !important;
   text-shadow: none !important;
@@ -1077,11 +1078,11 @@ body::after {
 .phosphor-bloom-pass .terminal-tab:hover,
 .phosphor-bloom-pass .terminal-command:hover {
   color: transparent !important;
-  background: rgb(var(--phosphor-rgb)) !important;
+  background: rgb(var(--bloom-rgb)) !important;
 }
 
 .phosphor-bloom-pass input[type="range"] {
-  accent-color: rgb(var(--phosphor-rgb)) !important;
+  accent-color: rgb(var(--bloom-rgb)) !important;
 }
 
 @media print {
