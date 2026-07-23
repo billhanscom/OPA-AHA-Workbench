@@ -1695,3 +1695,144 @@ body,
 /* The removed Clear Selection / Filter utility row leaves no residual space. */
 .command-row,
 .filter-control { display: none !important; }
+
+/* v29: terminal-row geometry, literal 132-column header, and reverse-video bloom */
+:root {
+  --terminal-row: 1.48em;
+  --reverse-text-tint: 0%;
+  --reverse-bloom-source-tint: 0%;
+}
+
+body {
+  line-height: var(--terminal-row);
+}
+
+/* The status line and navigation occupy literal terminal rows. */
+.system-identification {
+  height: var(--terminal-row) !important;
+  min-height: var(--terminal-row) !important;
+  margin: 0 !important;
+  padding: 0 3ch !important;
+  line-height: var(--terminal-row) !important;
+}
+
+.system-bar {
+  display: block !important;
+  width: 132ch !important;
+  border: 0 !important;
+  overflow: visible !important;
+  line-height: var(--terminal-row) !important;
+}
+
+.system-frame-line {
+  display: block !important;
+  width: 132ch !important;
+  height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  white-space: pre !important;
+}
+
+.system-frame-edge {
+  display: inline-block !important;
+  width: 1ch !important;
+  height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  text-align: center !important;
+}
+
+.system-bar-row {
+  display: grid !important;
+  grid-template-columns: 1ch 41ch 1ch 48ch 1ch 22ch 1ch 16ch 1ch !important;
+  width: 132ch !important;
+  height: var(--terminal-row) !important;
+  min-height: var(--terminal-row) !important;
+  line-height: var(--terminal-row) !important;
+  align-items: center !important;
+}
+
+.system-cell {
+  display: flex !important;
+  height: var(--terminal-row) !important;
+  min-height: var(--terminal-row) !important;
+  padding: 0 2ch !important;
+  gap: 2ch !important;
+  border: 0 !important;
+  line-height: var(--terminal-row) !important;
+  align-items: center !important;
+}
+
+.system-cell:not(:last-of-type) { border-right: 0 !important; }
+
+/* Match the row rhythm of the canonical text layout. */
+.masthead {
+  margin: calc(var(--terminal-row) * 4) 0 calc(var(--terminal-row) * 4) !important;
+  padding: 0 !important;
+}
+
+.ascii-logo {
+  line-height: var(--terminal-row) !important;
+}
+
+.main-nav {
+  margin-top: 0 !important;
+  margin-bottom: calc(var(--terminal-row) * 2) !important;
+}
+
+.generate-row {
+  margin-top: 0 !important;
+  margin-bottom: calc(var(--terminal-row) * 2) !important;
+}
+
+/* Ingredient rows occupy two terminal rows, with the first selection touching
+   the header rule instead of leaving an unused blank strip. */
+.ingredient-list {
+  padding-top: 0 !important;
+}
+
+.ingredient-column h2 {
+  min-height: calc(var(--terminal-row) * 2) !important;
+  height: calc(var(--terminal-row) * 2) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.ingredient-item {
+  min-height: calc(var(--terminal-row) * 2) !important;
+  height: calc(var(--terminal-row) * 2) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  align-items: center !important;
+}
+
+/* Keep the sharp reverse-video lettering dark, but allow a restrained
+   phosphor tint to rise with Bloom. */
+.ingredient-item.is-selected,
+.value-option.is-active,
+.text-control:hover,
+.text-control:focus-visible,
+.terminal-tab:hover:not(:disabled),
+.terminal-tab:focus-visible:not(:disabled),
+.terminal-tab.is-reversed:not(:disabled),
+.terminal-command:hover,
+.terminal-command:focus-visible,
+.terminal-command.is-reversed {
+  color: color-mix(
+    in srgb,
+    var(--phosphor) var(--reverse-text-tint),
+    var(--screen-deep)
+  ) !important;
+}
+
+/* The bloom copies receive a slightly stronger—but still capped—tint so the
+   bright reverse-video field bleeds gently into the dark glyphs. */
+.phosphor-bloom-pass .ingredient-item.is-selected,
+.phosphor-bloom-pass .ingredient-item.is-selected *,
+.phosphor-bloom-pass .value-option.is-active,
+.phosphor-bloom-pass .is-reversed,
+.phosphor-bloom-pass .is-reversed * {
+  color: color-mix(
+    in srgb,
+    var(--phosphor) var(--reverse-bloom-source-tint),
+    var(--screen-deep)
+  ) !important;
+}
