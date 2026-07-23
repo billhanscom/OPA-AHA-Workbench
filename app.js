@@ -457,10 +457,15 @@
     } catch (error) {}
   }
 
+  function updateDisplaySettingsToggle(open) {
+    els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
+    els.displaySettingsToggle.classList.toggle("is-open", open);
+  }
+
   function restoreDisplaySettingsVisibility() {
     const open = readStorage(DISPLAY_PANEL_STORAGE_KEY, "false") === "true";
     els.displaySettings.hidden = !open;
-    els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
+    updateDisplaySettingsToggle(open);
   }
 
   function toggleDisplaySettings(forceOpen) {
@@ -468,7 +473,7 @@
       ? forceOpen
       : els.displaySettings.hidden;
     els.displaySettings.hidden = !open;
-    els.displaySettingsToggle.setAttribute("aria-expanded", String(open));
+    updateDisplaySettingsToggle(open);
     writeStorage(DISPLAY_PANEL_STORAGE_KEY, String(open));
   }
 

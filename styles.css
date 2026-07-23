@@ -1836,3 +1836,180 @@ body {
     var(--screen-deep)
   ) !important;
 }
+
+/* v30: final header/control refinements ----------------------------------- */
+/* Restore the tighter logo leading used before the terminal-row experiment. */
+.ascii-logo {
+  line-height: var(--line) !important;
+}
+
+/* Keep the literal three-row header on one measured character grid. */
+.system-bar,
+.system-frame-line,
+.system-bar-row {
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0, "calt" 0 !important;
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+}
+.system-frame-line {
+  overflow: visible !important;
+}
+.system-bar-row {
+  grid-template-columns: 1ch 41ch 1ch 48ch 1ch 22ch 1ch 16ch 1ch !important;
+}
+
+/* CRT CONTROLS is reverse-video only while its panel is open. */
+.display-toggle.is-open,
+.display-toggle[aria-expanded="true"] {
+  background: var(--phosphor) !important;
+  color: color-mix(in srgb, var(--phosphor) var(--reverse-text-tint), var(--screen-deep)) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+.display-toggle.is-open:hover,
+.display-toggle.is-open:focus-visible,
+.display-toggle[aria-expanded="true"]:hover,
+.display-toggle[aria-expanded="true"]:focus-visible {
+  background: var(--phosphor) !important;
+  color: color-mix(in srgb, var(--phosphor) var(--reverse-text-tint), var(--screen-deep)) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Make the closed phosphor selector read as terminal UI, and replace the
+   browser-blue focus treatment with the active phosphor. */
+.display-control.phosphor-control {
+  position: relative;
+}
+.display-control select {
+  appearance: none;
+  -webkit-appearance: none;
+  color: var(--phosphor-bright) !important;
+  background-color: transparent !important;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--phosphor) 50%),
+    linear-gradient(135deg, var(--phosphor) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.15ch) 50%,
+    calc(100% - .65ch) 50%;
+  background-size: .55ch .55ch, .55ch .55ch;
+  background-repeat: no-repeat;
+  border: 1px solid var(--phosphor) !important;
+  border-radius: 0 !important;
+  padding: .1em 2.2ch .1em .5ch !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.display-control select:hover {
+  border-color: var(--phosphor-bright) !important;
+}
+.display-control select:focus,
+.display-control select:focus-visible {
+  border-color: var(--phosphor-bright) !important;
+  outline: 1px solid var(--phosphor) !important;
+  outline-offset: 1px;
+  box-shadow: 0 0 calc(var(--bloom-radius) * .35) rgb(var(--phosphor-rgb) / .35) !important;
+}
+.display-control select option {
+  color: var(--phosphor-bright);
+  background: var(--screen-deep);
+}
+
+/* Ensure the selector itself contributes to the tight composite bloom pass. */
+.phosphor-bloom-pass--tight .display-control select {
+  border-color: var(--phosphor) !important;
+  color: var(--phosphor-bright) !important;
+  opacity: 1 !important;
+}
+
+/* v31: canonical header spacing and logo row geometry --------------------- */
+/* Keep every header divider on the same literal 132-column character grid. */
+.system-bar,
+.system-frame-line,
+.system-bar-row {
+  width: 132ch !important;
+  font-family: "Source Code Pro", monospace !important;
+  font-size: inherit !important;
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0, "calt" 0 !important;
+  letter-spacing: 0 !important;
+  word-spacing: 0 !important;
+}
+
+.system-bar-row {
+  grid-template-columns: 1ch 41ch 1ch 48ch 1ch 22ch 1ch 16ch 1ch !important;
+}
+
+.system-cell {
+  padding: 0 !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+}
+
+.system-bar-row .text-control,
+.system-bar-row .value-option {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0 !important;
+}
+
+/* Exact middle-row spacing from the canonical text mockup. */
+.system-inventory .system-label {
+  margin-left: 2ch !important;
+  margin-right: 3ch !important;
+}
+.system-inventory #clearInventory,
+.system-inventory #saveInventory,
+.system-inventory #loadInventory {
+  margin-right: 2ch !important;
+}
+.system-inventory #viewInventory {
+  margin-right: 3ch !important;
+}
+
+.system-current .system-label {
+  flex: 0 0 auto !important;
+  margin-left: 2ch !important;
+  margin-right: 3ch !important;
+}
+.system-current .current-inventory-window {
+  display: block !important;
+  flex: 0 0 34ch !important;
+  width: 34ch !important;
+  max-width: 34ch !important;
+  margin-right: 2ch !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+
+.system-values .system-label {
+  margin-left: 2ch !important;
+  margin-right: 2ch !important;
+}
+.system-values .value-option + .value-option {
+  margin-left: 2ch !important;
+}
+.system-values .value-option:last-of-type {
+  margin-right: 2ch !important;
+}
+
+.system-display .display-toggle {
+  width: 12ch !important;
+  margin-left: 2ch !important;
+  margin-right: 2ch !important;
+  text-align: left !important;
+}
+
+/* Reproduce the vertical rhythm of the text layout. The logo's own blank
+   lines remain literal rows in the PRE; only one row separates it from nav. */
+.masthead {
+  margin-top: calc(var(--terminal-row) * 4) !important;
+  margin-bottom: var(--terminal-row) !important;
+  padding: 0 !important;
+}
+.ascii-logo {
+  line-height: var(--terminal-row) !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
