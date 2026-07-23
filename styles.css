@@ -2025,7 +2025,7 @@ body {
 .system-bar {
   position: relative !important;
   width: 132ch !important;
-  height: calc(var(--terminal-row) * 3) !important;
+  height: calc(var(--terminal-row) * 1) !important;
   margin: 0 !important;
   padding: 0 !important;
 }
@@ -2107,7 +2107,7 @@ body {
   position: relative !important;
   display: block !important;
   width: 132ch !important;
-  height: calc(var(--terminal-row) * 3) !important;
+  height: calc(var(--terminal-row) * 1) !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -2179,7 +2179,7 @@ body {
   position: relative !important;
   display: block !important;
   width: 132ch !important;
-  height: calc(var(--terminal-row) * 3) !important;
+  height: calc(var(--terminal-row) * 1) !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -2299,7 +2299,7 @@ body {
   --screen-width: 144ch;
   --content-width: 132ch;
   --content-side-gutter: 6ch;
-  --screen-top-gutter: calc(var(--terminal-row) * 3);
+  --screen-top-gutter: calc(var(--terminal-row) * 1);
 }
 
 html,
